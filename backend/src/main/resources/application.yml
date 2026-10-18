@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://ep-639ab1e87097.kaiki.ru:5432/spisok-vuzov_bd?sslmode=require
+    username: kaiki_c_94140e38c495ff4b7a9807c0
+    password: "Kk1!GsnbuogzsNSP4GY5KOJ5FZTFnvtQ"
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        globally_quoted_identifiers: true
+    naming:
+      physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
