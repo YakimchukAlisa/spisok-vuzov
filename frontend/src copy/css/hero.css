@@ -130,20 +130,24 @@
 
 .checkbox-label {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   color: var(--black);
   margin-bottom: 12px;
   cursor: pointer;
 }
-.checkbox-input { display: none; }
+
 .checkbox-custom {
-  width: 20px; height: 20px;
+  width: 20px; 
+  height: 20px;
   border: 1.5px solid var(--gray);
   border-radius: 4px;
   display: inline-block;
   position: relative;
+  flex-shrink: 0; /* Запрещаем квадратику сжиматься, если текст очень длинный */
+  margin-top: 2px; /* Небольшой сдвиг вниз для идеального выравнивания с текстом */
 }
+.checkbox-input { display: none; }
 .checkbox-input:checked + .checkbox-custom {
   background-color: var(--green);
   border-color: var(--green);
