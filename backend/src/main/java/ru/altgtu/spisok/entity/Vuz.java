@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "\"Vuz\"")
+@Table(name = "Vuz")
 @Data
 public class Vuz {
 
@@ -13,18 +13,28 @@ public class Vuz {
     @Column(name = "ID_Vuz")
     private Integer id;
 
-    @Column(name = "Name", nullable = false, length = 200)
+    @Column(name = "Name")
     private String name;
 
-    @Column(name = "Abbreviatura", nullable = false, length = 100)
+    @Column(name = "Abbreviatura")
     private String abbreviatura;
 
-    @Column(name = "Site", nullable = false, length = 100)
+    @Column(name = "Opisanie", columnDefinition = "TEXT")
+    private String opisanie;
+
+    @Column(name = "Adress", columnDefinition = "TEXT")
+    private String adress;
+
+    @Column(name = "Site")
     private String site;
 
-    @Column(name = "Email", nullable = false, length = 100)
+    @Column(name = "Email")
     private String email;
 
-    @Column(name = "Phone", nullable = false, length = 50)
+    @Column(name = "Phone")
     private String phone;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_Gorod")
+    private Gorod gorod;
 }

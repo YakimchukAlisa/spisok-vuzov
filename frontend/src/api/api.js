@@ -78,3 +78,8 @@ export async function getExams() {
   const response = await api.get('/exams/ege');
   return response.data;
 }
+
+export async function getVuzCards() {
+  const response = await api.get('/vuz/cards');
+  return response.data;
+}
