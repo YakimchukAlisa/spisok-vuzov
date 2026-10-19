@@ -19,6 +19,7 @@
   
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  color: var(--white);
 }
 
 /* Убираем стандартные стили кнопки браузера */
@@ -34,7 +35,7 @@
 /* --- ЗЕЛЕНЫЕ --- */
 .btn--green {
   background-color: var(--green);
-  color: var(--color-white);
+  color: var(--white);
 }
 .btn--green:hover {
   background-color: var(--green-dark);
@@ -143,3 +144,4 @@
 .toggle-input:checked + .toggle-switch::after {
   transform: translateX(19px); /* Сдвиг: ширина 40px - кружок 15px - отступы 6px = 19px */
 }
+
