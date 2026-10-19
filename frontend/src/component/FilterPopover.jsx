@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
-export default function FilterPopover({ title, onClose, onSave, options }) {
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(''); // Состояние для поиска внутри фильтра
+export default function FilterPopover({ title, onClose, onSave, options, initialSelected = [] }) {
+  // Передаем сохраненные элементы как начальное состояние
+  const [selectedItems, setSelectedItems] = useState(initialSelected);
+  const [searchTerm, setSearchTerm] = useState('');  // Состояние для поиска внутри фильтра
 
   const handleCheckboxChange = (itemName) => {
     if (selectedItems.includes(itemName)) {
