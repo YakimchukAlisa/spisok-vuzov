@@ -1,14 +1,18 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import VuzPage from './pages/VuzPage';
+import { useState } from 'react'
+import './css/main.css'
+import Header from './component/Header.jsx'
+import Footer from './component/Footer.jsx'
+import Hero from './component/Hero.jsx'
 
-export default function App() {
+function App() {
+
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/vuz/:id" element={<VuzPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
+    <div className="wrapper">
+      <Header />
+      <Hero />
+      <Footer />
+    </div>
+  )
 }
+
+export default App

@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400..800;1,400..800&display=swap');
+
+body {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+}
+
+.hero__title {
+  font-size: 64px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* 32 Bold — обычно для главных заголовков (H1) */
+.text-32b {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2; /* Auto в Figma, для веба лучше задать 1.2 или 1.3 */
+  margin: 0;
+}
+
+/* 36 Bold — если есть огромный заголовок на весь экран */
+.text-36b {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* 28 SemiBold — подзаголовки */
+.text-28sm {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* 24 Bold — заголовки карточек (например, название вуза) */
+.text-24b {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* 20 Regular — крупный обычный текст */
+.text-20r {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* 20 Bold — крупный акцентный текст */
+.text-20b {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* 14 Medium — кнопки, ссылки в меню */
+.text-14m {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* 14 Regular — основной текст (описания) */
+.text-14r {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* 14 Bold — мелкие акценты, жирный текст */
+.text-14b {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0;
+}
