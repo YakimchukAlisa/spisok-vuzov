@@ -4,7 +4,7 @@ function Footer() {
             <div className="footer__container">
                 <a href="/">
                     <img
-                        src="./logo.svg"
+                        src="/logo.svg"
                         alt="Список вузов"
                     />
                 </a>

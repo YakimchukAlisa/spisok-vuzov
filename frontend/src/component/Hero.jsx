@@ -1,46 +1,7 @@
-import { useState, useEffect } from 'react';
 import FilterButton from "./FilterButton.jsx";
-import { getGoroda, getNapravleniyaList, getExams } from "../api/api";
-
-// Функция для группировки массива строк по первой букве
-const groupByLetter = (array) => {
-    // Сортируем по алфавиту
-    const sorted = [...array].sort((a, b) => a.localeCompare(b));
-
-    // Группируем
-    const grouped = {};
-    sorted.forEach(item => {
-        const firstLetter = item.charAt(0).toUpperCase();
-        if (!grouped[firstLetter]) {
-            grouped[firstLetter] = [];
-        }
-        grouped[firstLetter].push(item);
-    });
-    return grouped;
-};
+import filterData from '../DATA/filters.json';
 
 function Hero() {
-    // Состояния для данных из БД
-    const [cities, setCities] = useState({});
-    const [specialties, setSpecialties] = useState({});
-    const [exams, setExams] = useState({});
-
-    // Загружаем данные при монтировании компонента
-   useEffect(() => {
-       getGoroda()
-           .then(data => setCities(groupByLetter(data))) // Группируем города
-           .catch(console.error);
-
-       getNapravleniyaList()
-           .then(data => setSpecialties(groupByLetter(data))) // Группируем специальности
-           .catch(console.error);
-
-       getExams()
-           .then(data => setExams(groupByLetter(data))) // Группируем экзамены
-           .catch(console.error);
-   }, []);
-
-
     return (
         <section className="hero">
             <div className="container hero__container">
@@ -63,17 +24,17 @@ function Hero() {
                         <FilterButton
                             text="Специальность"
                             iconSrc="/teaching.svg"
-                            options={specialties}
+                            options={filterData.specialties}
                         />
                         <FilterButton
                             text="ЕГЭ"
                             iconSrc="/list.svg"
-                            options={exams}
+                             options={{ "Все предметы": filterData.exams }} 
                         />
                         <FilterButton
                             text="Город"
                             iconSrc="/location.svg"
-                            options={cities}
+                            options={{ "Все города": filterData.cities }}
                         />
                         <label className="btn btn--gray-light btn--with-icon hero__toggle">
                             <input type="checkbox" className="toggle-input" />

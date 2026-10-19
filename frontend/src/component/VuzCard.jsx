@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 
 export default function VuzCard({ data, showCheckbox = false }) {
@@ -12,14 +13,14 @@ export default function VuzCard({ data, showCheckbox = false }) {
 
   return (
     <div className="vuz-card">
-      
+
       <div className="vuz-card__image-wrapper">
         <img src={imageUrl} alt={name} className="vuz-card__image" />
-        
+
         {showCheckbox && (
           <label className="vuz-card__checkbox-label">
-            <input 
-              type="checkbox" 
+            <input
+              type="checkbox"
               className="checkbox-input"
               checked={isChecked}
               onChange={() => setIsChecked(!isChecked)}
@@ -28,7 +29,7 @@ export default function VuzCard({ data, showCheckbox = false }) {
           </label>
         )}
 
-        <button 
+        <button
           className={`vuz-card__favorite ${isFavorite ? 'is-active' : ''}`}
           onClick={() => setIsFavorite(!isFavorite)}
         >
@@ -40,8 +41,8 @@ export default function VuzCard({ data, showCheckbox = false }) {
 
       <div className="vuz-card__content">
         <div className="vuz-card__title_and_subtitle">
-        <h2 className="text-28sm vuz-card__title">{name}</h2>
-        <p className="text-14r vuz-card__subtitle">{fullName}</p>
+          <h2 className="text-28sm vuz-card__title">{name}</h2>
+          <p className="text-14r vuz-card__subtitle">{fullName}</p>
         </div>
 
         <div className="vuz-card__stats">
@@ -59,9 +60,9 @@ export default function VuzCard({ data, showCheckbox = false }) {
           </div>
         </div>
 
-        <button className="btn btn--green">
+        <Link to={`/vuz/${data.id}`} className="btn btn--green vuz-card__more-btn">
           Подробнее
-        </button>
+        </Link>
       </div>
     </div>
   );
