@@ -1,0 +1,164 @@
+.vuz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* Расстояние между карточками */
+  margin-bottom: 100px;
+  margin-top: 100px;
+}
+
+.vuz-card {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 61px; /* Отступ из макета */
+  
+  width: 100%;
+  max-width: 1200px; /* Ширина из макета */
+  background: var(--white);
+  border: 1px solid var(--green);
+  border-radius: 20px;
+  
+}
+
+/* --- ЛЕВАЯ ЧАСТЬ (Картинка) --- */
+.vuz-card__image-wrapper {
+  position: relative;
+  width: 599px;
+  height: 380px;
+  flex-shrink: 0;
+  border-radius: 4px; /* Из макета */
+  overflow: hidden;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 0 10px 10px 0;
+}
+
+.vuz-card__image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Чекбокс поверх картинки */
+.vuz-card__checkbox-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.vuz-card__checkbox-custom {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background-color: var(--white);
+  border: 1px solid var(--black);
+  border-radius: 4px;
+  position: relative;
+}
+
+/* Когда чекбокс нажат */
+.checkbox-input:checked + .vuz-card__checkbox-custom {
+  background-color: var(--white);
+  border-color: var(--green);
+}
+
+.checkbox-input:checked + .vuz-card__checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 4px;
+  width: 6px;
+  height: 12px;
+  border: solid var(--green);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Кнопка Избранное (сердечко) */
+.vuz-card__favorite {
+  position: relative;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(169, 169, 169, 0.57);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.vuz-card__favorite:hover {
+  background-color: rgba(169, 169, 169, 0.8);
+}
+
+/* --- ПРАВАЯ ЧАСТЬ (Контент) --- */
+.vuz-card__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  flex-grow: 1;
+}
+
+.vuz-card__title_and_subtitle {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+}
+
+.vuz-card__title {
+  color: var(--black);
+  margin: 0;
+  align-self: flex-start; /* Прижимаем влево */
+}
+
+.vuz-card__subtitle {
+  color: var(--black);
+  margin: 0;
+  align-self: flex-start;
+}
+
+.vuz-card__stats {
+  display: flex;
+  gap: 118px;
+  justify-content: center;
+}
+
+.vuz-card__stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vuz-card__stat-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--green);
+  text-align: center;
+}
+
+.vuz-card__stat-main {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+  text-align: center;
+}
+
+.vuz-card__stat-sub {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--black);
+  text-align: center;
+}
