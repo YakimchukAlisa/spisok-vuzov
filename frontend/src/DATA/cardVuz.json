@@ -3,7 +3,8 @@
     "id": 1,
     "name": "АлтГТУ им. И. И. Ползунова",
     "fullName": "Алтайский государственный технический университет имени И. И. Ползунова",
-    "imageUrl": "public/img/altgtu.jpg",
+    "imageUrl": "/img/altgtu.jpg",
+    "logoUrl": "/altgtu.svg",
     "isFavorite": false,
     "budget": {
       "places": 1076,
@@ -13,13 +14,30 @@
       "places": 940,
       "minScore": 39,
       "minPrice": 80000
+    },
+    "address": "г. Барнаул, Алтайский край, пр-т Ленина, 46",
+    "features": [
+      "Общежитие",
+      "Военный учебный центр",
+      "Центр культурно-массовой работы"
+    ],
+    "contacts": {
+      "phone": "+7 (3852) 29-07-29",
+      "email": "politeh@altgtu.ru"
+    },
+    "socials": {
+      "website": "https://altgtu.ru/",
+      "vk": "https://vk.com/altgtu",
+      "telegram": "https://t.me/altgtu",
+      "max": null
     }
   },
   {
     "id": 2,
     "name": "СПбПУ Петра Великого",
     "fullName": "Санкт-Петербургский политехнический университет Петра Великого",
-    "imageUrl": "public/img/spbpu.jpg",
+    "imageUrl": "/img/spbpu.jpg",
+    "logoUrl": "/spbpu.svg", 
     "isFavorite": false,
     "budget": {
       "places": 5723,
@@ -29,13 +47,29 @@
       "places": 4235,
       "minScore": 48,
       "minPrice": 104000
+    },
+    "address": "г. Санкт-Петербург, ул. Политехническая, 29",
+    "features": [
+      "Общежитие",
+      "Военный учебный центр"
+    ],
+    "contacts": {
+      "phone": "+7 (812) 775-05-30",
+      "email": "office@spbstu.ru"
+    },
+    "socials": {
+      "website": "https://spbstu.ru/",
+      "vk": "https://vk.com/spbstu",
+      "telegram": "https://t.me/spbstu",
+      "max": null
     }
   },
   {
     "id": 3,
     "name": "СПбГУ",
     "fullName": "Санкт-Петербургский государственный университет",
-    "imageUrl": "public/img/spbgu.jpg",
+    "imageUrl": "/img/spbgu.jpg",
+     "logoUrl": "/spbgu.svg",
     "isFavorite": false,
     "budget": {
       "places": 4455,
@@ -45,13 +79,29 @@
       "places": 4332,
       "minScore": 36,
       "minPrice": 265100
+    },
+    "address": "г. Санкт-Петербург, Университетская наб., 7-9",
+    "features": [
+      "Общежитие",
+      "Военный учебный центр"
+    ],
+    "contacts": {
+      "phone": "+7 (812) 328-20-00",
+      "email": "spbu@spbu.ru"
+    },
+    "socials": {
+      "website": "https://spbu.ru/",
+      "vk": "https://vk.com/spb_university",
+      "telegram": null,
+      "max": "https://max.ru/spbu"
     }
   },
   {
     "id": 4,
     "name": "УрФУ им. Б. Н. Ельцина",
     "fullName": "Уральский федеральный университет имени Б. Н. Ельцина",
-    "imageUrl": "public/img/urfu.jpg",
+    "imageUrl": "/img/urfu.jpg",
+     "logoUrl": "/urfu.svg",
     "isFavorite": false,
     "budget": {
       "places": 9537,
@@ -61,6 +111,22 @@
       "places": 7979,
       "minScore": 40,
       "minPrice": 130000
+    },
+    "address": "г. Екатеринбург, ул. Мира, 19",
+    "features": [
+      "Общежитие",
+      "Военный учебный центр",
+      "Центр культурно-массовой работы"
+    ],
+    "contacts": {
+      "phone": "+7 (343) 375-44-44",
+      "email": "info@urfu.ru"
+    },
+    "socials": {
+      "website": "https://urfu.ru/",
+      "vk": "https://vk.com/urfu",
+      "telegram": "https://t.me/urfu_ru",
+      "max": null
     }
   },
   {
@@ -68,6 +134,7 @@
     "name": "МГУ им. М. В. Ломоносова",
     "fullName": "Московский государственный университет имени М. В. Ломоносова",
     "imageUrl": "/img/mgu.jpg",
+    "logoUrl": "/mgu.svg",
     "isFavorite": false,
     "budget": {
       "places": 6565,
@@ -77,13 +144,29 @@
       "places": 6565,
       "minScore": 46,
       "minPrice": 361530
+    },
+    "address": "г. Москва, ул. Ленинские Горы, 1",
+    "features": [
+      "Общежитие",
+      "Военный учебный центр"
+    ],
+    "contacts": {
+      "phone": "+7 (495) 939-10-00",
+      "email": "info@rector.msu.ru"
+    },
+    "socials": {
+      "website": "https://www.msu.ru/",
+      "vk": "https://vk.com/msunews",
+      "telegram": null,
+      "max": null
     }
   },
   {
     "id": 6,
     "name": "ТГУ",
     "fullName": "Национальный исследовательский Томский государственный университет",
-    "imageUrl": "public/img/tgu.jpg",
+    "imageUrl": "/img/tgu.jpg",
+     "logoUrl": "/tgu.svg",
     "isFavorite": false,
     "budget": {
       "places": 3930,
@@ -93,6 +176,22 @@
       "places": 2886,
       "minScore": 35,
       "minPrice": 62000
+    },
+    "address": "г. Томск, пр-т Ленина, 36",
+    "features": [
+      "Общежитие",
+      "Военный учебный центр",
+      "Центр культурно-массовой работы"
+    ],
+    "contacts": {
+      "phone": "+7 (3822) 52-98-52",
+      "email": "rector@tsu.ru"
+    },
+    "socials": {
+      "website": "https://www.tsu.ru/",
+      "vk": "https://vk.com/tsu_official",
+      "telegram": "https://t.me/tsu_official",
+      "max": "https://max.ru/tsu"
     }
   }
 ]
