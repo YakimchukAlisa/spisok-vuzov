@@ -57,6 +57,7 @@ export default function FilterButton({ text, iconSrc, options }) {
           onClose={() => setIsOpen(false)} 
           onSave={handleSave} 
           options={options} 
+          initialSelected={savedFilters}
         />
       )}
     </div>
