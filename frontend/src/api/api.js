@@ -67,6 +67,11 @@ export async function getGoroda() {
   return response.data;
 }
 
+export async function getFakultety(vuzId) {
+  const response = await api.get(`/vuz/${vuzId}/fakultety`);
+  return response.data;
+}
+
 // Получить список всех направлений (специальностей)
 export async function getNapravleniyaList() {
   const response = await api.get('/napravleniya');
