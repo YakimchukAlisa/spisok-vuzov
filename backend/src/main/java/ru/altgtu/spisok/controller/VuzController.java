@@ -29,9 +29,12 @@ public class VuzController {
 
     @GetMapping("/{id}")
     public VuzDto getById(@PathVariable Integer id) {
-        Vuz vuz = vuzRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Вуз не найден: " + id));
-        return toDto(vuz);
+        // Используем новый запрос
+        VuzDto vuz = vuzRepository.findVuzDetailsById(id);
+        if (vuz == null) {
+            throw new RuntimeException("Вуз не найден: " + id);
+        }
+        return vuz;
     }
 
     private VuzDto toDto(Vuz vuz) {
@@ -44,13 +47,12 @@ public class VuzController {
         dto.setSite(vuz.getSite());
         dto.setEmail(vuz.getEmail());
         dto.setPhone(vuz.getPhone());
+        dto.setVkUrl(vuz.getVkUrl());
+        dto.setTelegramUrl(vuz.getTelegramUrl());
+        dto.setMaxUrl(vuz.getMaxUrl());
+        dto.setImageUrl(vuz.getImageUrl());
+        dto.setGorod(vuz.getGorod().getName());
 
-        if (vuz.getGorod() != null) {
-            dto.setGorod(vuz.getGorod().getName());
-            if (vuz.getGorod().getRegion() != null) {
-                dto.setRegion(vuz.getGorod().getRegion().getName());
-            }
-        }
         return dto;
     }
 
@@ -75,10 +77,6 @@ public class VuzController {
     @GetMapping("/cards")
     public List<VuzCardDto> getVuzCards() {
         List<VuzCardDto> cards = vuzRepository.findAllVuzCards();
-        // Добавляем картинки-заглушки (пока нет реальных URL в БД)
-        cards.forEach(card -> {
-            card.setImageUrl("/img/vuz/vuz-" + card.getId() + ".jpg");
-        });
         return cards;
     }
 }

@@ -1,16 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import vuzData from './DATA/cardVuz.json';
 import VuzDetailsHero from './component/VuzDetailsHero';
+import { getVuzById, getVozmozhnosti } from './api/api'; // импортируем обе функции
 
 export default function VuzPage() {
-  // Получаем ID из адресной строки (например, /vuz/1)
   const { id } = useParams();
+  const [vuz, setVuz] = useState(null);
+  const [features, setFeatures] = useState([]); // Стейт для возможностей
+  const [loading, setLoading] = useState(true);
 
-  // Ищем нужный вуз в нашем JSON
-  const vuz = vuzData.find((item) => item.id === Number(id));
+  useEffect(() => {
+    // Запрашиваем вуз и возможности параллельно
+    Promise.all([
+      getVuzById(id),
+      getVozmozhnosti(id)
+    ])
+      .then(([vuzData, featuresData]) => {
+        setVuz(vuzData);
+        setFeatures(featuresData || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Ошибка загрузки вуза:", err);
+        setLoading(false);
+      });
+  }, [id]);
 
-  // Если вуза с таким ID нет — показываем сообщение об ошибке
+  if (loading) {
+    return <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>Загрузка...</div>;
+  }
+
   if (!vuz) {
     return (
       <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>
@@ -24,10 +43,9 @@ export default function VuzPage() {
 
   return (
     <div className="wrapper">
-      {/* Передаем найденные данные в наш Hero-компонент */}
-      <VuzDetailsHero data={vuz} />
+      {/* Передаем и данные вуза, и массив возможностей */}
+      <VuzDetailsHero data={vuz} features={features} />
 
-      {/* Здесь позже будут факультеты, описание и т.д. */}
       <div className="container" style={{ padding: '40px 20px' }}>
         <h2 className="text-32b">Факультеты (в разработке)</h2>
       </div>

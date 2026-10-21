@@ -34,6 +34,21 @@ public class Vuz {
     @Column(name = "Phone")
     private String phone;
 
+    @Column(name = "VK_Url")
+    private String vkUrl;
+
+    @Column(name = "Telegram_Url")
+    private String telegramUrl;
+
+    @Column(name = "Max_Url")
+    private String maxUrl;
+
+    @Column(name = "Image_Url")
+    private String imageUrl;
+
+    @Column(name = "Logo_Url")
+    private String logoUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_Gorod")
     private Gorod gorod;

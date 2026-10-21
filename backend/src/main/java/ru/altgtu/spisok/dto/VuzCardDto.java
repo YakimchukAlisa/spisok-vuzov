@@ -11,22 +11,21 @@ public class VuzCardDto {
     private Integer paidMinScore;
     private Integer paidMinPrice;
 
-    // Пустой конструктор (нужен для Jackson при отправке JSON)
-    public VuzCardDto() {
-    }
-
-    // Конструктор для Hibernate (ровно 8 аргументов, как в SQL-запросе)
-    public VuzCardDto(Integer id, String name, String fullName, Integer budgetPlaces,
-                      Integer budgetMinScore, Integer paidPlaces, Integer paidMinScore, Integer paidMinPrice) {
+    // Единственный конструктор — 9 параметров, порядок как в SELECT
+    public VuzCardDto(Integer id, String name, String fullName, String imageUrl,
+                      Integer budgetPlaces, Integer budgetMinScore,
+                      Integer paidPlaces, Integer paidMinScore, Integer paidMinPrice) {
         this.id = id;
         this.name = name;
         this.fullName = fullName;
+        this.imageUrl = imageUrl;
         this.budgetPlaces = budgetPlaces;
         this.budgetMinScore = budgetMinScore;
         this.paidPlaces = paidPlaces;
         this.paidMinScore = paidMinScore;
         this.paidMinPrice = paidMinPrice;
     }
+
 
     // --- Геттеры и сеттеры (без Lombok) ---
     public Integer getId() { return id; }
