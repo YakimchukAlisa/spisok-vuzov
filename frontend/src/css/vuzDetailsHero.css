@@ -185,3 +185,106 @@
 .vuz-hero__contact-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+/* =========================================
+   МОБИЛЬНАЯ ВЕРСИЯ (Адаптив для Hero-блока ВУЗа)
+   ========================================= */
+@media (max-width: 768px) {
+  
+  .vuz-hero {
+    min-height: 630px; /* Высота из мобильного макета */
+    padding: 32px 0; /* Отступы сверху и снизу */
+  }
+
+  .vuz-hero__container {
+    gap: 32px; /* Уменьшаем расстояние между блоками (было 100px) */
+    padding: 0 20px; /* Отступы по бокам */
+  }
+
+  /* --- ВЕРХНЯЯ ЧАСТЬ --- */
+  .vuz-hero__top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .vuz-hero__title-block {
+    align-items: flex-start; /* Прижимаем к верху */
+    gap: 15px;
+  }
+
+  .vuz-hero__logo {
+    width: 40px; /* Уменьшаем логотип */
+    height: 52px;
+  }
+
+  .vuz-hero__name {
+    font-size: 20px; /* Размер шрифта из мобильного макета */
+    line-height: 24px;
+  }
+
+  .vuz-hero__address {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* --- СТАТИСТИКА --- */
+  .vuz-hero__stats {
+    flex-wrap: wrap; /* Разрешаем перенос, если не влезут в один ряд */
+    gap: 16px;
+    justify-content: flex-start; /* Прижимаем влево */
+  }
+
+  .vuz-hero__stat-item {
+    align-items: flex-start; /* Выравниваем текст по левому краю */
+    text-align: left;
+  }
+
+  /* Уменьшаем шрифты для статистики на мобилке */
+  .vuz-hero__stat-value {
+    font-size: 24px; 
+  }
+
+  .vuz-hero__stat-label {
+    font-size: 14px;
+  }
+
+  /* --- НИЖНЯЯ ЧАСТЬ --- */
+  .vuz-hero__bottom {
+    align-items: flex-start; /* Прижимаем всё влево */
+    gap: 32px;
+  }
+
+  /* Блок с удобствами (галочки) */
+  .vuz-hero__features {
+    align-items: flex-start; /* Выравниваем по левому краю */
+    gap: 16px;
+  }
+
+  /* Уменьшаем размер шрифта в галочках, как в макете (Inter20B) */
+  .vuz-hero__feature {
+    font-size: 20px;
+    font-weight: 700;
+    align-items: flex-start; /* Чтобы галочка была сверху, если текст в 2 строки */
+  }
+  
+  .vuz-hero__feature img {
+    margin-top: 2px; /* Чуть опускаем галочку для ровности */
+  }
+
+  /* Контакты */
+  .vuz-hero__contacts {
+    align-items: flex-start; /* Прижимаем влево */
+    gap: 12px;
+  }
+  
+  /* Убираем серый фон у кнопок контактов, чтобы они выглядели как обычный текст */
+  .vuz-hero__contact-btn {
+    padding: 0; 
+    font-size: 14px;
+  }
+  
+  .vuz-hero__contact-btn:hover {
+    background-color: transparent;
+  }
+}

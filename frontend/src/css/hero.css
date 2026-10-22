@@ -130,25 +130,12 @@
 
 .checkbox-label {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   color: var(--black);
   margin-bottom: 12px;
   cursor: pointer;
-  line-height: 1.4;
 }
-
-.checkbox-custom {
-  width: 20px;
-  height: 20px;
-  border: 1.5px solid var(--gray);
-  border-radius: 4px;
-  display: inline-block;
-  position: relative;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
 .checkbox-input { display: none; }
 .checkbox-custom {
   width: 20px; height: 20px;

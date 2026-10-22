@@ -15,7 +15,7 @@ body {
 .text-32b {
   font-size: 32px;
   font-weight: 700;
-  line-height: 1.2; /* Auto в Figma, для веба лучше задать 1.2 или 1.3 */
+  line-height: 1.2; 
   margin: 0;
 }
 
