@@ -162,3 +162,70 @@
   color: var(--black);
   text-align: center;
 }
+
+/* =========================================
+   МОБИЛЬНАЯ ВЕРСИЯ (Адаптив для карточки вуза)
+   ========================================= */
+@media (max-width: 768px) {
+  
+  .vuz-list {
+    margin-top: 40px; /* Уменьшаем отступы сверху и снизу */
+    margin-bottom: 40px;
+    padding: 20px;
+  }
+
+  .vuz-card {
+    flex-direction: column; /* Перестраиваем карточку в колонку */
+    padding: 16px;
+    gap: 32px; /* Отступ между картинкой и текстом (из макета) */
+    align-items: stretch; /* Растягиваем элементы на всю ширину */
+  }
+
+  /* 1. КАРТИНКА */
+  .vuz-card__image-wrapper {
+    width: 100%;
+    height: 240px; /* Высота из мобильного макета */
+    padding: 0 10px 10px 0;
+  }
+
+  /* 2. КОНТЕНТ (Текст и кнопка) */
+  .vuz-card__content {
+    align-items: flex-start; /* Прижимаем всё влево */
+    gap: 32px; /* Отступ между текстом и кнопкой */
+  }
+
+  .vuz-card__title_and_subtitle {
+    gap: 4px; /* Уменьшаем расстояние между заголовком и подзаголовком */
+  }
+
+  /* Уменьшаем шрифт заголовка на мобилке (в макете 24px) */
+  .vuz-card__title {
+    font-size: 24px; 
+    line-height: 1.2;
+  }
+
+  /* 3. СТАТИСТИКА */
+  .vuz-card__stats {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 100px;
+  }
+
+  /* Выравниваем текст в блоках статистики по левому краю */
+  .vuz-card__stat-block {
+    align-items: flex-start;
+  }
+
+  .vuz-card__stat-label,
+  .vuz-card__stat-main,
+  .vuz-card__stat-sub {
+    text-align: left;
+  }
+
+  /* 4. КНОПКА */
+  .vuz-card__more-btn {
+    width: 100%; /* Кнопка на всю ширину */
+    justify-content: center;
+    margin-top: 0;
+  }
+}
