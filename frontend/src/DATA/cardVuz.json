@@ -30,7 +30,33 @@
       "vk": "https://vk.com/altgtu",
       "telegram": "https://t.me/altgtu",
       "max": null
-    }
+    },
+
+    "faculties": [
+      {
+        "id": 1,
+        "shortName": "ФИТ",
+        "fullName": "Факультет Информационных технологий",
+        "imageUrl": "/fit.svg",
+        "workPlaces": [
+          "Профильные компании (разработка, внедрение, сопровождение IT-продуктов)",
+          "Любые современные предприятия, имеющие в структуре IT-отдел",
+          "Создание собственного бизнеса в сфере IT-технологий"
+        ],
+        "bachelor": {
+          "directions": 6,
+          "budgetPlaces": 303,
+          "paidPlaces": 195,
+          "minPrice": 160000
+        },
+        "master": {
+          "directions": 4,
+          "budgetPlaces": 51,
+          "paidPlaces": 60,
+          "minPrice": 170000
+        }
+      }
+    ]
   },
   {
     "id": 2,
