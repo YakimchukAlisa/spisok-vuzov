@@ -1,17 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import vuzData from './DATA/cardVuz.json';
 import VuzDetailsHero from './component/VuzDetailsHero';
-import FacultyCard from './component/FacultyCard'; // <--- ДОБАВИЛИ ИМПОРТ
+import FacultyCard from './component/FacultyCard'; // Импортируем карточку факультета
+import { getVuzById, getVozmozhnosti, getFakultety } from './api/api'; //Импортируем API
 
 export default function VuzPage() {
-  // Получаем ID из адресной строки (например, /vuz/1)
   const { id } = useParams();
+  const [vuz, setVuz] = useState(null);
+  const [features, setFeatures] = useState([]);
+  const [fakultety, setFakultety] = useState([]); // Стейт для факультетов
+  const [loading, setLoading] = useState(true);
 
-  // Ищем нужный вуз в нашем JSON
-  const vuz = vuzData.find((item) => item.id === Number(id));
+  useEffect(() => {
+    // Запрашиваем вуз, возможности и факультеты параллельно
+    Promise.all([
+      getVuzById(id),
+      getVozmozhnosti(id),
+      getFakultety(id) //Добавляем запрос факультетов
+    ])
+      .then(([vuzData, featuresData, fakultetyData]) => {
+        setVuz(vuzData);
+        setFeatures(featuresData || []);
+        setFakultety(fakultetyData || []); //Сохраняем факультеты
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Ошибка загрузки данных:", err);
+        setLoading(false);
+      });
+  }, [id]);
 
-  // Если вуза с таким ID нет — показываем сообщение об ошибке
+  if (loading) {
+    return <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>Загрузка...</div>;
+  }
+
   if (!vuz) {
     return (
       <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>
@@ -25,25 +47,21 @@ export default function VuzPage() {
 
   return (
     <div className="wrapper">
-      {/* Передаем найденные данные в наш Hero-компонент */}
-      <VuzDetailsHero data={vuz} />
+      <VuzDetailsHero data={vuz} features={features} />
 
-      {/* Блок с факультетами */}
-      <div className="container" style={{ padding: '40px 20px', gap: '32px' }}>
-        <h2 className="text-32b">Факультеты</h2>
-        
-        {/* Проверяем, есть ли у вуза массив faculties и не пустой ли он */}
-        {vuz.faculties && vuz.faculties.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {vuz.faculties.map((faculty) => (
-              <FacultyCard key={faculty.id} data={faculty} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-14r" style={{ color: 'var(--gray)' }}>
-            Информация о факультетах для этого вуза пока не добавлена.
-          </p>
-        )}
+      <div className="container" style={{ padding: '40px 20px', marginBottom: '60px' }}>
+        <h2 className="text-32b" style={{ marginBottom: '24px' }}>Факультеты</h2>
+
+        {/* Рендерим список факультетов */}
+        <div className="fakultety-list">
+          {fakultety.length > 0 ? (
+            fakultety.map((fakultet) => (
+              <FacultyCard key={fakultet.id} data={fakultet} />
+            ))
+          ) : (
+            <p className="text-14r">У этого вуза пока нет добавленных факультетов.</p>
+          )}
+        </div>
       </div>
     </div>
   );

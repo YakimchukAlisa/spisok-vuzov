@@ -88,3 +88,4 @@ export async function getVuzCards() {
   const response = await api.get('/vuz/cards');
   return response.data;
 }
+

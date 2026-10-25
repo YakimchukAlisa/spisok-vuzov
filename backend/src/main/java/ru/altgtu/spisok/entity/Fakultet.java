@@ -19,6 +19,9 @@ public class Fakultet {
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "Logo_Url")
+    private String logoUrl;
+
     // Связь с вузом
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_Vuz")

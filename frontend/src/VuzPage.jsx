@@ -1,27 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import VuzDetailsHero from './component/VuzDetailsHero';
-import { getVuzById, getVozmozhnosti } from './api/api'; // импортируем обе функции
+import FacultyCard from './component/FacultyCard';
+import { getVuzById, getVozmozhnosti, getFakultety } from './api/api';
 
 export default function VuzPage() {
   const { id } = useParams();
   const [vuz, setVuz] = useState(null);
-  const [features, setFeatures] = useState([]); // Стейт для возможностей
+  const [features, setFeatures] = useState([]);
+  const [fakultety, setFakultety] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Запрашиваем вуз и возможности параллельно
+    // Запрашиваем вуз, возможности и факультеты параллельно
     Promise.all([
       getVuzById(id),
-      getVozmozhnosti(id)
+      getVozmozhnosti(id),
+      getFakultety(id)
     ])
-      .then(([vuzData, featuresData]) => {
+      .then(([vuzData, featuresData, fakultetyData]) => {
         setVuz(vuzData);
         setFeatures(featuresData || []);
+        setFakultety(fakultetyData || []);
         setLoading(false);
       })
       .catch(err => {
-        console.error("Ошибка загрузки вуза:", err);
+        console.error("Ошибка загрузки данных:", err);
         setLoading(false);
       });
   }, [id]);
@@ -43,11 +47,20 @@ export default function VuzPage() {
 
   return (
     <div className="wrapper">
-      {/* Передаем и данные вуза, и массив возможностей */}
       <VuzDetailsHero data={vuz} features={features} />
 
-      <div className="container" style={{ padding: '40px 20px' }}>
-        <h2 className="text-32b">Факультеты (в разработке)</h2>
+      <div className="container" style={{ padding: '40px 20px', marginBottom: '60px' }}>
+        <h2 className="text-32b" style={{ marginBottom: '24px' }}>Факультеты</h2>
+
+        <div className="fakultety-list">
+          {fakultety.length > 0 ? (
+            fakultety.map((fakultet) => (
+              <FacultyCard key={fakultet.id} data={fakultet} />
+            ))
+          ) : (
+            <p className="text-14r">У этого вуза пока нет добавленных факультетов.</p>
+          )}
+        </div>
       </div>
     </div>
   );
