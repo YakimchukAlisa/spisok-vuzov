@@ -1,76 +1,83 @@
-import React from 'react';
+import { Link, useParams } from 'react-router-dom';
+import React, { useState } from 'react';
 
 export default function FacultyCard({ data }) {
+    const [isFavorite, setIsFavorite] = useState(false);
+    const { id: vuzId } = useParams(); 
+
     if (!data) return null;
 
-    // Защита от падения (если бэкенд ещё не отдал статистику)
-    const bachelor = data.bachelor || { directions: 0, budgetPlaces: 0, paidPlaces: 0, minPrice: 0 };
-    const master = data.master || { directions: 0, budgetPlaces: 0, paidPlaces: 0, minPrice: 0 };
-
-    // Берем названия и логотип (поддерживаем и старые, и новые поля на всякий случай)
-    const name = data.shortName || data.name || 'Без названия';
-    const logo = data.imageUrl || data.logoUrl;
-    const description = data.fullName || data.description || 'Описание пока отсутствует.';
-
     const formatPrice = (price) => {
-        if (!price) return '0';
         return new Intl.NumberFormat('ru-RU').format(price);
     };
 
     return (
         <div className="faculty-card">
-
-            {/* ЛЕВАЯ ЧАСТЬ: Информация */}
+            {/* ЛЕВАЯ ЧАСТЬ */}
             <div className="faculty-card__main">
-
-                {/* Шапка факультета */}
                 <div className="faculty-card__header">
-                    {logo && (
-                        <img src={logo} alt={name} className="faculty-card__logo" />
+                    {data.imageUrl && (
+                        <img src={data.imageUrl} alt={data.shortName} className="faculty-card__logo" />
                     )}
                     <div className="faculty-card__title-block">
-                        {/* Используем name вместо shortName */}
-                        <h3 className="faculty-card__short-name">{name}</h3>
+                        <h3 className="faculty-card__short-name">{data.shortName}</h3>
+                        <p className="faculty-card__full-name">{data.fullName}</p>
                     </div>
                 </div>
 
-                {/* ОПИСАНИЕ ВМЕСТО WORKPLACES */}
-              <div className="faculty-card__work">
-                  <span className="faculty-card__work-title">Где работать?</span>
-                  <p className="text-14r" style={{ marginTop: '8px' }}>
-                      {description}
-                  </p>
-              </div>
+                <div className="faculty-card__work">
+                    <span className="faculty-card__work-title">Где работать?</span>
+                    <ul className="faculty-card__work-list">
+                        {data.workPlaces?.map((place, index) => (
+                            <li key={index}>- {place}</li>
+                        ))}
+                    </ul>
+                </div>
             </div>
 
             {/* ПРАВАЯ ЧАСТЬ: Статистика */}
             <div className="faculty-card__stats-wrapper">
                 <div className="faculty-card__divider"></div>
                 <div className="faculty-card__stats">
-                    {/* Бакалавриат */}
                     <div className="faculty-card__stat-group">
                         <span className="faculty-card__stat-title text-14m">Бакалавриат</span>
-                        <span className="text-14b">{bachelor.directions} <span className="text-14r">направлений</span></span>
-                        <span className="text-14b">{bachelor.budgetPlaces} <span className="text-14r">бюджетных мест</span></span>
-                        <span className="text-14b">{bachelor.paidPlaces} <span className="text-14r">платных мест</span></span>
-                        <span className="text-14r">от <span className="text-14b">{formatPrice(bachelor.minPrice)}</span> ₽</span>
+                        <span className="text-14b">{data.bachelor.directions} <span className="text-14r">направлений</span></span>
+                        <span className="text-14b">{data.bachelor.budgetPlaces} <span className="text-14r">бюджетных мест</span></span>
+                        <span className="text-14b">{data.bachelor.paidPlaces} <span className="text-14r">платных мест</span></span>
+                        <span className="text-14r">от <span className="text-14b">{formatPrice(data.bachelor.minPrice)}</span> ₽</span>
                     </div>
-
-                    {/* Магистратура */}
                     <div className="faculty-card__stat-group">
                         <span className="faculty-card__stat-title text-14m">Магистратура</span>
-                        <span className="text-14b">{master.directions} <span className="text-14r">направлений</span></span>
-                        <span className="text-14b">{master.budgetPlaces} <span className="text-14r">бюджетных мест</span></span>
-                        <span className="text-14b">{master.paidPlaces} <span className="text-14r">платных мест</span></span>
-                        <span className="text-14r">от <span className="text-14b">{formatPrice(master.minPrice)}</span> ₽</span>
+                        <span className="text-14b">{data.master.directions} <span className="text-14r">направлений</span></span>
+                        <span className="text-14b">{data.master.budgetPlaces} <span className="text-14r">бюджетных мест</span></span>
+                        <span className="text-14b">{data.master.paidPlaces} <span className="text-14r">платных мест</span></span>
+                        <span className="text-14r">от <span className="text-14b">{formatPrice(data.master.minPrice)}</span> ₽</span>
                     </div>
                 </div>
             </div>
 
-            {/* КНОПКА: Теперь она идет в самом конце */}
-            <button className="btn btn--green faculty-card__btn">
-                Подробнее
-            </button>
+            {/* БЛОК С КНОПКАМИ */}
+            <div className="faculty-card__actions">
+                {/* Кнопка Подробнее */}
+                <Link 
+                    to={`/vuz/${vuzId}/faculty/${data.id}`} 
+                    className="btn btn--green faculty-card__btn"
+                >
+                    Подробнее
+                </Link>
+                {/* Кнопка В избранное (круглая) */}
+                <button
+                    className={`faculty-card__favorite ${isFavorite ? 'is-active' : ''}`}
+                    onClick={() => setIsFavorite(!isFavorite)}
+                    title="В избранное"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill={isFavorite ? "var(--green)" : "none"} stroke="var(--green)" strokeWidth="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </button>
+
+
+            </div>
 
         </div>
     );
