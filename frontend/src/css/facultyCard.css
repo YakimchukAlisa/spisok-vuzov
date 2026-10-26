@@ -125,10 +125,51 @@
   margin-bottom: 5px;
 }
 
-/* --- КНОПКА --- */
-.faculty-card__btn {
+/* =========================================
+   БЛОК С КНОПКАМИ
+   ========================================= */
+.faculty-card__actions {
   grid-column: 1;
-  grid-row: 2; /* Встает под текстом */
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+ justify-content: space-between;
+  margin-top: 12px;
+}
+
+/* Круглая кнопка "В избранное" */
+.faculty-card__favorite {
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--green);
+  border-radius: 50%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0; /* Чтобы кнопка не сжималась */
+}
+
+.faculty-card__favorite:hover {
+  background-color: rgba(16, 173, 74, 0.1); /* Легкий зеленый фон при наведении */
+}
+
+.faculty-card__favorite svg {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.2s;
+}
+
+.faculty-card__favorite:hover svg {
+  transform: scale(1.1);
+}
+
+/* Кнопка "Подробнее" */
+.faculty-card__btn {
   width: fit-content;
 }
 
@@ -188,10 +229,18 @@
     width: 100%;
   }
 
+  /* Блок с кнопками на мобилке */
+  .faculty-card__actions {
+    width: 100%;
+    flex-direction: row; /* Оставляем в ряд */
+    justify-content: space-between; /* Сердечко слева, кнопка справа */
+    gap: 12px;
+    margin-top: 0;
+  }
+
   /* Кнопка "Подробнее" на мобилке */
   .faculty-card__btn {
-    width: 100%;
+    flex-grow: 1; /* Кнопка занимает всё оставшееся место */
     justify-content: center;
-    margin-top: 0; 
   }
 }
