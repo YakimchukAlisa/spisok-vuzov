@@ -14,4 +14,7 @@ public interface IspitaniaRepository extends JpaRepository<Ispitania, Integer> {
     // Находим все "наборы испытаний" для конкретного Post_info
     @Query("SELECT i FROM Ispitania i WHERE i.postInfo.id = :postInfoId")
     List<Ispitania> findByPostInfoId(@Param("postInfoId") Integer postInfoId);
+
+    @Query("SELECT i FROM Ispitania i WHERE i.postInfo.profile.id = :profileId")
+    List<Ispitania> findByProfileId(@Param("profileId") Integer profileId);
 }

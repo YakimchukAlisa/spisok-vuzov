@@ -7,7 +7,14 @@ export default function DirectionCard({ data, facultyLogo }) {
 
     if (!data) return null;
 
+    const budgetPlaces = data.budgetPlaces || 0;
+    const budgetMinScore = data.budgetMinScore || 0;
+    const paidPlaces = data.paidPlaces || 0;
+    const paidMinScore = data.paidMinScore || 0;
+    const paidMinPrice = data.paidMinPrice || 0;
+
     const formatPrice = (price) => {
+        if (!price) return '0';
         return new Intl.NumberFormat('ru-RU').format(price);
     };
 
@@ -21,17 +28,25 @@ export default function DirectionCard({ data, facultyLogo }) {
                         <img src={facultyLogo} alt="Логотип" className="direction-card__logo" />
                     )}
                     <div className="direction-card__title-block">
-                        <h3 className="direction-card__title">{data.name}</h3>
-                        <p className="direction-card__code">{data.code}</p>
+                        <h3 className="direction-card__title">
+                            {data.profileName || data.name}
+                        </h3>
+
+                        {/* КОД и НАЗВАНИЕ НАПРАВЛЕНИЯ мелким шрифтом */}
+                        <p className="direction-card__code">
+                            {data.kod} {data.napravlenieName || data.name}
+                        </p>
                     </div>
                 </div>
 
-                {data.description && (
+                {/* Описание (если есть) */}
+                {data.opisanie && (
                     <div className="direction-card__description">
-                        <p className="text-14r">{data.description}</p>
+                        <p className="text-14r">{data.opisanie}</p>
                     </div>
                 )}
 
+                {/* 4. Экзамены */}
                 {data.exams && data.exams.length > 0 && (
                     <div className="direction-card__exams">
                         {data.exams.map((exam, idx) => (
@@ -50,14 +65,14 @@ export default function DirectionCard({ data, facultyLogo }) {
                 <div className="direction-card__stats">
                     <div className="direction-card__stat-group">
                         <span className="text-14m" style={{ color: 'var(--green)' }}>Бюджет</span>
-                        <span className="text-14r"><span className="text-14b"> {data.budget.places}</span> мест</span>
-                        <span className="text-14r">от <span className="text-14b"> {data.budget.minScore}</span> баллов</span>
+                        <span className="text-14r"><span className="text-14b"> {budgetPlaces}</span> мест</span>
+                        <span className="text-14r">от <span className="text-14b"> {budgetMinScore}</span> баллов</span>
                     </div>
                     <div className="direction-card__stat-group">
                         <span className="text-14m" style={{ color: 'var(--green)' }}>Платно</span>
-                        <span className="text-14r"><span className="text-14b"> {data.paid.places}</span> мест</span>
-                        <span className="text-14r">от <span className="text-14b"> {data.paid.minScore}</span> баллов</span>
-                        <span className="text-14r">от <span className="text-14b"> {formatPrice(data.paid.minPrice)}</span> ₽</span>
+                        <span className="text-14r"><span className="text-14b"> {paidPlaces}</span> мест</span>
+                        <span className="text-14r">от <span className="text-14b"> {paidMinScore}</span> баллов</span>
+                        <span className="text-14r">от <span className="text-14b"> {formatPrice(paidMinPrice)}</span> ₽</span>
                     </div>
                 </div>
             </div>

@@ -8,8 +8,10 @@ import ru.altgtu.spisok.dto.ProfileDto;
 import ru.altgtu.spisok.dto.TrebExamDto;
 import ru.altgtu.spisok.entity.*;
 import ru.altgtu.spisok.repository.*;
-import ru.altgtu.spisok.repository.NapravlenieRepository;
+
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -19,17 +21,64 @@ public class NapravlenieController {
 
     private final NapravlenieRepository napravlenieRepository;
     private final ProfileRepository profileRepository;
-
     private final IspitaniaRepository ispitaniaRepository;
     private final TrebExamRepository trebExamRepository;
+    private final PostInfoRepository postInfoRepository;
 
-
-    // 1. Получить все направления для конкретного вуза
+    // 1. Получить все направления для конкретного вуза (СО СТАТИСТИКОЙ)
+    //    ВСЕГО 3 запроса к БД (вместо сотен)
     @GetMapping("/vuz/{vuzId}/napravleniya")
     public List<NapravlenieDto> getNapravleniyaByVuz(@PathVariable Integer vuzId) {
-        return napravlenieRepository.findByVuzId(vuzId).stream()
-                .map(this::toNapravlenieDto)
-                .toList();
+        // 1. Направления с общей статистикой
+        List<NapravlenieRepository.NapravlenieStatsProjection> napravleniya =
+                napravlenieRepository.findNapravleniyaWithStatsByVuzId(vuzId);
+
+        // 2. Экзамены (ЕГЭ) — один запрос, группируем по ID направления
+        Map<Integer, List<String>> examsByNapravlenie = napravlenieRepository.findExamsByVuzId(vuzId).stream()
+                .collect(Collectors.groupingBy(
+                        NapravlenieRepository.NapravlenieExamProjection::getNapravlenieId,
+                        Collectors.mapping(NapravlenieRepository.NapravlenieExamProjection::getExamName, Collectors.toList())
+                ));
+
+        // 3. Профили со статистикой — один запрос, группируем по ID направления
+        Map<Integer, List<NapravlenieDto.ProfileStats>> profilesByNapravlenie =
+                napravlenieRepository.findProfileStatsByVuzId(vuzId).stream()
+                        .collect(Collectors.groupingBy(
+                                NapravlenieRepository.ProfileStatsForVuzProjection::getNapravlenieId,
+                                Collectors.mapping(this::toProfileStats, Collectors.toList())
+                        ));
+
+        // 4. Собираем DTO из мап без дополнительных запросов
+        return napravleniya.stream()
+                .map(p -> {
+                    NapravlenieDto dto = new NapravlenieDto();
+                    dto.setId(p.getId());
+                    dto.setKod(p.getKod());
+                    dto.setName(p.getName());
+                    dto.setOpisanie(p.getOpisanie());
+                    dto.setFakultetId(p.getFakultetId());
+                    dto.setFakultet(p.getFakultet());
+                    dto.setUroven(p.getUroven());
+                    dto.setExams(examsByNapravlenie.getOrDefault(p.getId(), List.of()));
+                    dto.setProfiles(profilesByNapravlenie.getOrDefault(p.getId(), List.of()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    // Преобразование проекции профиля в DTO
+    private NapravlenieDto.ProfileStats toProfileStats(NapravlenieRepository.ProfileStatsForVuzProjection proj) {
+        NapravlenieDto.ProfileStats ps = new NapravlenieDto.ProfileStats();
+        ps.setId(proj.getProfileId());
+        ps.setName(proj.getProfileName());
+        ps.setForma(proj.getForma());
+        ps.setSrokObuchMes(proj.getSrokObuchMes() != null ? proj.getSrokObuchMes() : 0);
+        ps.setBudgetPlaces(proj.getBudgetPlaces());
+        ps.setBudgetMinScore(proj.getBudgetMinScore());
+        ps.setPaidPlaces(proj.getPaidPlaces());
+        ps.setPaidMinScore(proj.getPaidMinScore());
+        ps.setPaidMinPrice(proj.getPaidMinPrice());
+        return ps;
     }
 
     // 2. Получить все профили для конкретного направления
@@ -38,19 +87,6 @@ public class NapravlenieController {
         return profileRepository.findByNapravlenieId(id).stream()
                 .map(this::toProfileDto)
                 .toList();
-    }
-
-    // --- Преобразования Entity -> DTO ---
-
-    private NapravlenieDto toNapravlenieDto(Napravlenie n) {
-        NapravlenieDto dto = new NapravlenieDto();
-        dto.setId(n.getId());
-        dto.setKod(n.getKod());
-        dto.setName(n.getName());
-        if (n.getFakultet() != null) {
-            dto.setFakultet(n.getFakultet().getName());
-        }
-        return dto;
     }
 
     private ProfileDto toProfileDto(Profile p) {
@@ -67,8 +103,6 @@ public class NapravlenieController {
         return dto;
     }
 
-    private final PostInfoRepository postInfoRepository;
-
     // Эндпоинт: получить информацию о поступлении для профиля
     @GetMapping("/profil/{id}/post_info")
     public List<PostInfoDto> getPostInfo(@PathVariable Integer id) {
@@ -77,7 +111,6 @@ public class NapravlenieController {
                 .toList();
     }
 
-    // Преобразование
     private PostInfoDto toPostInfoDto(PostInfo pi) {
         PostInfoDto dto = new PostInfoDto();
         dto.setId(pi.getId());
@@ -91,7 +124,7 @@ public class NapravlenieController {
         return dto;
     }
 
-    // Эндпоинт: получить предметы для конкретного Post_info (без СЭ-предметов)
+    // Эндпоинт: получить предметы для конкретного Post_info
     @GetMapping("/post_info/{id}/exams")
     public List<TrebExamDto> getExamsForPostInfo(@PathVariable Integer id) {
         List<Ispitania> ispitaniaList = ispitaniaRepository.findByPostInfoId(id);
@@ -105,13 +138,9 @@ public class NapravlenieController {
 
     @GetMapping("/exams/ege")
     public List<String> getUniqueEgeExams() {
-        // Достаем все требования из базы
         return trebExamRepository.findAll().stream()
-                // Оставляем только ЕГЭшные
                 .filter(te -> te.getFormaSdachi() != null && te.getFormaSdachi().contains("ЕГЭ"))
-                // Берем только название предмета
                 .map(te -> te.getExam().getName())
-                // Убираем дубликаты (Русский язык может быть 100 раз)
                 .distinct()
                 .toList();
     }
@@ -130,7 +159,7 @@ public class NapravlenieController {
     public List<String> getAllNapravleniya() {
         return napravlenieRepository.findAll().stream()
                 .map(Napravlenie::getName)
-                .distinct() // Убираем дубли, если одно название есть на бакалавриате и магистратуре
+                .distinct()
                 .toList();
     }
 }

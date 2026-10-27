@@ -5,9 +5,10 @@ export default function VuzCard({ data, showCheckbox = false }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
 
-  const { name, fullName, imageUrl, budget, paid } = data;
+  const { id, name, fullName, imageUrl, budgetPlaces, budgetMinScore, paidPlaces, paidMinScore, paidMinPrice } = data;
 
   const formatPrice = (price) => {
+    if (!price) return '0';
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
   };
 
@@ -15,7 +16,12 @@ export default function VuzCard({ data, showCheckbox = false }) {
     <div className="vuz-card">
 
       <div className="vuz-card__image-wrapper">
-        <img src={imageUrl} alt={name} className="vuz-card__image" />
+        <img
+          src={imageUrl || '/img/vuz/placeholder.jpg'}
+          alt={name}
+          className="vuz-card__image"
+          onError={(e) => { e.currentTarget.src = '/img/vuz/placeholder.jpg'; }}
+        />
 
         {showCheckbox && (
           <label className="vuz-card__checkbox-label">
@@ -48,19 +54,19 @@ export default function VuzCard({ data, showCheckbox = false }) {
         <div className="vuz-card__stats">
           <div className="vuz-card__stat-block">
             <span className="vuz-card__stat-label">Бюджет</span>
-            <span className="vuz-card__stat-main">{budget.places} мест</span>
-            <span className="vuz-card__stat-sub">от {budget.minScore} баллов</span>
+            <span className="vuz-card__stat-main">{budgetPlaces || 0} мест</span>
+            <span className="vuz-card__stat-sub">от {budgetMinScore || 0} баллов</span>
           </div>
 
           <div className="vuz-card__stat-block">
             <span className="vuz-card__stat-label">Платно</span>
-            <span className="vuz-card__stat-main">{paid.places} мест</span>
-            <span className="vuz-card__stat-sub">от {paid.minScore} баллов</span>
-            <span className="vuz-card__stat-sub">от {formatPrice(paid.minPrice)}</span>
+            <span className="vuz-card__stat-main">{paidPlaces || 0} мест</span>
+            <span className="vuz-card__stat-sub">от {paidMinScore || 0} баллов</span>
+            <span className="vuz-card__stat-sub">от {formatPrice(paidMinPrice)}</span>
           </div>
         </div>
 
-        <Link to={`/vuz/${data.id}`} className="btn btn--green vuz-card__more-btn">
+        <Link to={`/vuz/${id}`} className="btn btn--green vuz-card__more-btn">
           Подробнее
         </Link>
       </div>

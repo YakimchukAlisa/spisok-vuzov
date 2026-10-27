@@ -9,5 +9,5 @@ public class PostInfoDto {
     private Integer kolMest;
     private Integer stoimost;
     private Integer prohodnoi;
-    private Short god;
+    private Integer god;
 }

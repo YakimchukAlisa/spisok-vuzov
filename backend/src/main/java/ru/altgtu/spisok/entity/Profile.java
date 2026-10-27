@@ -17,7 +17,7 @@ public class Profile {
     private String name;
 
     @Column(name = "Srok_obuch_mes")
-    private Short srokObuchMes;
+    private Integer srokObuchMes;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_Napravlenie")

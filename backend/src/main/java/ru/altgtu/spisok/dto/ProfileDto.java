@@ -8,5 +8,5 @@ public class ProfileDto {
     private String name;
     private String forma;       // Название формы обучения
     private String uroven;      // Название уровня образования
-    private Short srokObuchMes; // Срок в месяцах
+    private Integer srokObuchMes; // Срок в месяцах
 }

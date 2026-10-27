@@ -23,7 +23,7 @@ public class PostInfo {
     private Integer prohodnoi; // Проходной балл
 
     @Column(name = "God", nullable = false)
-    private Short god; // Год приёма
+    private Integer god; // Год приёма
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_Profile")
