@@ -1,0 +1,30 @@
+/* =========================================
+   БЛОК ПОПУЛЯРНЫХ ЭЛЕМЕНТОВ
+   ========================================= */
+.popular-block {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
+
+.popular-block__title {
+  margin-bottom: 32px;
+}
+
+/* Обертка для кнопки "Загрузить еще" */
+.popular-block__more-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+/* Стиль для кнопки "Загрузить еще" (используем контурную зеленую) */
+.popular-block__btn-more {
+  width: auto;
+  padding: 12px 32px;
+  font-size: 16px;
+}

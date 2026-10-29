@@ -1,0 +1,132 @@
+/* =========================================
+   БЛОК "ТЕСТ НА ПРОФОРИЕНТАЦИЮ"
+   ========================================= */
+.career-test {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 52px;
+  padding: 52px;
+  width: 100%;
+  max-width: 1200px;
+  background-color: var(--green-light-1);
+  border-radius: 20px;
+  margin: 60px auto;
+}
+
+/* Картинка */
+.career-test__image-wrapper {
+  flex-shrink: 0;
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.career-test__image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Контент */
+.career-test__content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  max-width: 479px;
+}
+
+.career-test__text {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.career-test__title {
+  font-family: 'Inter', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 39px;
+  color: var(--black);
+  margin: 0;
+}
+
+.career-test__subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 34px;
+  color: var(--black);
+  margin: 0;
+}
+
+/* Список пунктов */
+.career-test__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.career-test__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  line-height: 24px;
+  color: var(--black);
+}
+
+.career-test__icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.career-test__time {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 24px;
+  color: var(--black);
+  margin: 0;
+}
+
+/* Кнопка */
+.career-test__btn {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+
+/* =========================================
+   МОБИЛЬНАЯ ВЕРСИЯ
+   ========================================= */
+@media (max-width: 1024px) {
+  .career-test {
+    flex-direction: column; /* Ставим картинку сверху, контент снизу */
+    padding: 32px 20px;
+    gap: 32px;
+    margin: 40px auto;
+  }
+  
+  .career-test__title {
+    font-size: 24px;
+    line-height: 29px;
+  }
+  
+  .career-test__subtitle {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .career-test__content {
+    max-width: 100%;
+  }
+}

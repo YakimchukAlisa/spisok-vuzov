@@ -1,0 +1,14 @@
+.similar-directions {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.similar-directions__title {
+  margin: 0;
+}
+
+.similar-directions__subtitle {
+  color: var(--gray-dark);
+  margin-top: 12px; /* Отступ от заголовка */
+}

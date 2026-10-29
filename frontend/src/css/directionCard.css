@@ -198,6 +198,7 @@
     width: 100%;
     flex-direction: row;
     justify-content: space-between;
+    gap: 16px;
     margin-top: 0;
   }
 

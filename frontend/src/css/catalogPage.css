@@ -1,0 +1,80 @@
+.title-and-catalog {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+/* Поиск (пока просто заглушка) */
+.catalog-search {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+/* =========================================
+   БЛОК ПОИСКА И ФИЛЬТРА НА СТРАНИЦЕ КАТАЛОГА
+   ========================================= */
+.catalog-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+/* Настраиваем поле, чтобы оно занимало всё свободное место */
+.catalog-controls .field {
+  max-width: 100%; 
+}
+
+/* Фиксируем размеры кнопки фильтра */
+.catalog-filter-btn {
+  flex-shrink: 0; /* Запрещаем кнопке сжиматься */
+  height: 40px; /* Высота как у поля ввода */
+}
+
+/* Иконка внутри кнопки (если нужно чуть уменьшить) */
+.catalog-filter-btn img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* =========================================
+   АДАПТИВ
+   ========================================= */
+@media (max-width: 1024px) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 колонки на планшетах */
+  }
+}
+
+@media (max-width: 768px) {
+  .catalog-grid {
+    grid-template-columns: 1fr; /* 1 колонка на телефонах */
+  }
+  
+  .catalog-controls {
+    flex-direction: row; /* На мобилке кнопка встанет под поиском */
+    align-items: stretch;
+    gap: 12px;
+  }
+
+   .catalog-filter-btn {
+    width: 90px !important;
+    padding: 0 !important;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .catalog-filter-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

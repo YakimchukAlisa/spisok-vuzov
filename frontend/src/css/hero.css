@@ -130,19 +130,31 @@
 
 .checkbox-label {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* <--- ВАЖНО: меняем center на flex-start */
   gap: 12px;
   color: var(--black);
   margin-bottom: 12px;
   cursor: pointer;
 }
-.checkbox-input { display: none; }
+
+.checkbox-input { 
+  display: none; 
+}
+
 .checkbox-custom {
-  width: 20px; height: 20px;
+  width: 20px; 
+  height: 20px;
+  
+  min-width: 20px; 
+  min-height: 20px;
+  flex-shrink: 0; 
+  
   border: 1.5px solid var(--gray);
   border-radius: 4px;
   display: inline-block;
   position: relative;
+  
+  margin-top: 2px; 
 }
 .checkbox-input:checked + .checkbox-custom {
   background-color: var(--green);
