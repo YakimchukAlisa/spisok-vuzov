@@ -1,44 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import vuzData from './DATA/cardVuz.json';
 import DirectionCard from './component/DirectionCard';
 import VuzDetailsHero from './component/VuzDetailsHero';
-import { getVuzById, getNapravleniya, getFakultety } from './api/api';
+
 
 export default function FacultyPage() {
+  // 1. Получаем ОБА ID из адресной строки
   const { vuzId, facultyId } = useParams();
+
+  // Состояние для переключения вкладок
   const [activeTab, setActiveTab] = useState('bachelor');
 
-  const [vuz, setVuz] = useState(null);
-  const [allDirections, setAllDirections] = useState([]);
-  const [fakultety, setFakultety] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // 2. Ищем нужный вуз по ID
+  const vuz = vuzData.find((v) => v.id === Number(vuzId));
 
-  useEffect(() => {
-    Promise.all([
-      getVuzById(vuzId),
-      getNapravleniya(vuzId),
-      getFakultety(vuzId)
-    ])
-      .then(([vuzData, napravleniyaData, fakultetyData]) => {
-        setVuz(vuzData);
-        setAllDirections(napravleniyaData || []);
-        setFakultety(fakultetyData || []);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Ошибка загрузки:", err);
-        setLoading(false);
-      });
-  }, [vuzId]);
+  // 3. Ищем нужный факультет ВНУТРИ этого вуза
+  const faculty = vuz?.faculties?.find((f) => f.id === Number(facultyId));
 
-  if (loading) {
-    return <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>Загрузка...</div>;
-  }
-
-  if (!vuz) {
+  // Если вуз или факультет не найдены — показываем ошибку
+  if (!vuz || !faculty) {
     return (
       <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>
-        <h1 className="text-32b">Вуз не найден 😢</h1>
+        <h1 className="text-32b">Факультет не найден 😢</h1>
         <Link to="/" className="btn btn--green" style={{ marginTop: '20px' }}>
           Вернуться на главную
         </Link>
@@ -46,29 +30,16 @@ export default function FacultyPage() {
     );
   }
 
-  const currentFaculty = fakultety.find(f => String(f.id) === String(facultyId));
-
-  const logoForCard = currentFaculty?.imageUrl || vuz.logoUrl;
-
-  // Фильтрация направлений
-  const displayedDirections = allDirections.filter(dir => {
-    const isRightFaculty = String(dir.fakultetId) === String(facultyId);
-
-    const isRightLevel = activeTab === 'bachelor'
-      ? (dir.uroven === 'Бакалавриат' || dir.uroven === 'Специалитет')
-      : dir.uroven === 'Магистратура';
-
-    return isRightFaculty && isRightLevel;
-  });
+  // 4. Получаем список направлений для активной вкладки (bachelor или master)
+  const directions = faculty[activeTab]?.directionsList || [];
 
   return (
     <div className="wrapper">
       <VuzDetailsHero data={vuz} />
-
       <div className="container" style={{ padding: '40px 20px' }}>
-        <div className="containerDirections">
-          {/* Вкладки */}
-          <div style={{ display: 'flex', gap: '40px', marginBottom: '24px' }}>
+        <div className="containerDirections" >
+          {/* Вкладки (Бакалавриат / Магистратура) */}
+          <div style={{ display: 'flex', gap: '40px' }}>
             <button
               onClick={() => setActiveTab('bachelor')}
               style={{
@@ -96,32 +67,15 @@ export default function FacultyPage() {
             </button>
           </div>
 
-          {/* Список карточек */}
+          {/* Список карточек направлений */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {displayedDirections.length > 0 ? (
-              displayedDirections.map((dir) => {
-                const fullTimeProfiles = dir.profiles
-                  ? dir.profiles.filter(p => p.forma === 'Очная')
-                  : [];
-
-                if (fullTimeProfiles.length === 0) return null;
-
-                return fullTimeProfiles.map((profile) => (
-                  <DirectionCard
-                    key={profile.id}
-                    data={{
-                      ...profile,
-                      kod: dir.kod,
-                      napravlenieName: dir.name,
-                      exams: dir.exams
-                    }}
-                    facultyLogo={logoForCard}
-                  />
-                ));
-              })
+            {directions.length > 0 ? (
+              directions.map((dir) => (
+                <DirectionCard key={dir.id} data={dir} facultyLogo={faculty.imageUrl} />
+              ))
             ) : (
               <p className="text-14r" style={{ color: 'var(--gray)' }}>
-                Направления для этой вкладки пока не добавлены (или произошла ошибка при загрузке).
+                Направления пока не добавлены.
               </p>
             )}
           </div>
