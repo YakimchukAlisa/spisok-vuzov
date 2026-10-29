@@ -1,40 +1,19 @@
-import React, { useState, useEffect } from 'react';
 import FilterButton from "./FilterButton.jsx";
-import { getGoroda, getNapravleniyaList, getExams } from "../api/api";
+import filterData from '../DATA/filters.json';
 
-// Функция для группировки по первой букве
-const groupByLetter = (array) => {
-    if (!array || !Array.isArray(array)) return {};
-    const sorted = [...array].sort((a, b) => a.localeCompare(b, 'ru'));
-    const grouped = {};
-    sorted.forEach(item => {
-        const firstLetter = item.charAt(0).toUpperCase();
-        if (!grouped[firstLetter]) grouped[firstLetter] = [];
-        grouped[firstLetter].push(item);
-    });
-    return grouped;
-};
-
-function Hero() {
-    const [cities, setCities] = useState({});
-    const [specialties, setSpecialties] = useState({});
-    const [exams, setExams] = useState({});
-
-    useEffect(() => {
-        // Загружаем данные для фильтров из БД
-        getGoroda()
-            .then(data => setCities(groupByLetter(data)))
-            .catch(console.error);
-
-        getNapravleniyaList()
-            .then(data => setSpecialties(groupByLetter(data)))
-            .catch(console.error);
-
-        getExams()
-            .then(data => setExams(groupByLetter(data)))
-            .catch(console.error);
-    }, []);
-
+function Hero({
+    searchQuery,
+    setSearchQuery,
+    selectedSpecialties,
+    setSelectedSpecialties,
+    selectedExams,
+    setSelectedExams,
+    selectedCities,
+    setSelectedCities,
+    hasDormitory, setHasDormitory,
+    hasMilitary, setHasMilitary,
+    dynamicSpecialties
+}) {
     return (
         <section className="hero">
             <div className="container hero__container">
@@ -44,39 +23,68 @@ function Hero() {
                 </h1>
 
                 <div className="hero__filters-and-search">
+
+                    {/* Поле поиска */}
                     <div className="field">
                         <input
                             type="text"
                             className="field__input"
                             placeholder=" "
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                         />
                         <label className="field__label">Введите название ВУЗа</label>
                         <img src="/search.svg" alt="Поиск" className="field__icon" />
                     </div>
+
                     <div className="hero__filters">
+                        {/* Фильтр Специальности */}
                         <FilterButton
                             text="Специальность"
                             iconSrc="/teaching.svg"
-                            options={specialties}
+                            options={dynamicSpecialties} // <--- 2. ЗАМЕНИЛИ НА ДИНАМИЧЕСКИЕ
+                            selectedValues={selectedSpecialties}
+                            onChange={setSelectedSpecialties}
                         />
+
+                        {/* Фильтр Предметы ЕГЭ */}
                         <FilterButton
                             text="ЕГЭ"
                             iconSrc="/list.svg"
-                            options={exams}
+                            options={{ "Все предметы": filterData.exams }}
+                            selectedValues={selectedExams}
+                            onChange={setSelectedExams}
                         />
+
+                        {/* Фильтр Города */}
                         <FilterButton
                             text="Город"
                             iconSrc="/location.svg"
-                            options={cities}
+                            options={{ "Все города": filterData.cities }}
+                            selectedValues={selectedCities}
+                            onChange={setSelectedCities}
                         />
-                        <label className="btn btn--gray-light btn--with-icon hero__toggle">
-                            <input type="checkbox" className="toggle-input" />
+
+                        {/* Тумблер Общежитие */}
+                        <label className={`btn btn--with-icon ${hasDormitory ? 'btn--gray-dark' : 'btn--gray-light'}`} style={{ cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                className="toggle-input"
+                                checked={hasDormitory}
+                                onChange={(e) => setHasDormitory(e.target.checked)}
+                            />
                             <span className="toggle-switch"></span>
                             Общежитие
                         </label>
 
-                        <label className="btn btn--gray-light btn--with-icon hero__toggle">
-                            <input type="checkbox" className="toggle-input" />
+                        {/* Тумблер ВУЦ */}
+                        <label className={`btn btn--with-icon ${hasMilitary ? 'btn--gray-dark' : 'btn--gray-light'}`} style={{ cursor: 'pointer' }}>
+                            <input
+                                type="checkbox"
+                                className="toggle-input"
+                                checked={hasMilitary}
+                                onChange={(e) => setHasMilitary(e.target.checked)}
+                            />
                             <span className="toggle-switch"></span>
                             ВУЦ
                         </label>

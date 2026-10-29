@@ -1,17 +1,18 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function Header() {
   return (
     <header className="header">
       <div className="header__container">
-        
+
         <div className="header__left">
           <button className="header__burger btn btn--green btn--icon" title="Меню">
-            <img src="/menu.svg" alt="Список вузов"/>
+            <img src="/menu.svg" alt="Список вузов" />
           </button>
 
           <a href="/" className="header__logo">
-            <img src="/logo.svg" alt="Список вузов"/>
+            <img src="/logo.svg" alt="Список вузов" />
           </a>
         </div>
 
@@ -21,10 +22,10 @@ function Header() {
               <a href="/" className="header__nav-link text-14m">Вузы России</a>
             </li>
             <li>
-              <a href="/professions" className="header__nav-link text-14m">Профессии</a>
+              <Link to="/professions" className="header__nav-link text-14m">Профессии</Link>
             </li>
             <li>
-              <a href="/specialties" className="header__nav-link text-14m">Специальности</a>
+              <Link to="/specialties" className="header__nav-link text-14m">Специальности</Link>
             </li>
             <li>
               <a href="/ratings" className="header__nav-link text-14m">Рейтинги</a>

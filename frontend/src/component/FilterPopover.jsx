@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Добавили useEffect
 
 export default function FilterPopover({ title, onClose, onSave, options, initialSelected = [] }) {
-  // Передаем сохраненные элементы как начальное состояние
   const [selectedItems, setSelectedItems] = useState(initialSelected);
-  const [searchTerm, setSearchTerm] = useState('');  // Состояние для поиска внутри фильтра
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Синхронизируем локальное состояние, если initialSelected изменился извне (например, сбросили фильтр)
+  useEffect(() => {
+    setSelectedItems(initialSelected);
+  }, [initialSelected]);
 
   const handleCheckboxChange = (itemName) => {
     if (selectedItems.includes(itemName)) {
@@ -16,7 +20,7 @@ export default function FilterPopover({ title, onClose, onSave, options, initial
   return (
     <div className="filter-popover">
 
-      {/* Шапка с заголовком и крестиком закрытия */}
+      {/* Шапка */}
       <div className="popover-header">
         <h3 className="popover-title text-20b">{title}</h3>
         <button className="popover-close-btn" onClick={onClose}>
@@ -27,14 +31,14 @@ export default function FilterPopover({ title, onClose, onSave, options, initial
         </button>
       </div>
 
-      {/* Поле поиска */}
+      {/* Поиск */}
       <div className="field">
         <input
           type="text"
           className="field__input"
           placeholder=" "
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)} // Обновляем поисковый запрос
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
         <label className="field__label">Введите {title.toLowerCase()}...</label>
         <svg className="field__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -43,27 +47,25 @@ export default function FilterPopover({ title, onClose, onSave, options, initial
         </svg>
       </div>
 
-      {/* Скроллируемый список чекбоксов (динамический) */}
+      {/* Список чекбоксов */}
       <div className="popover-list">
-        {/* Перебираем группы (А, Б, В...) из переданного JSON */}
         {Object.entries(options).map(([groupName, items]) => {
-          
-          // Фильтруем элементы внутри группы по поиску (если поиск пустой, покажет всё)
+          // Проверка, что items — это массив (защита от ошибок)
+          if (!Array.isArray(items)) return null;
+
           const filteredItems = items.filter(item => 
             item.toLowerCase().includes(searchTerm.toLowerCase())
           );
 
-          // Если в группе ничего не найдено по поиску — не рендерим заголовок группы
           if (filteredItems.length === 0) return null;
 
           return (
             <div key={groupName} className="popover-group">
-              {/* Буква группы. Скрываем для "Все предметы" и "Все города" */}
+              {/* Буква группы (кроме служебных заголовков) */}
               {groupName !== "Все предметы" && groupName !== "Все города" && (
                 <span className="popover-group-letter">{groupName}</span>
               )}
               
-              {/* Перебираем отфильтрованные элементы */}
               {filteredItems.map((item, idx) => (
                 <label key={idx} className="checkbox-label">
                   <input
@@ -80,9 +82,9 @@ export default function FilterPopover({ title, onClose, onSave, options, initial
           );
         })}
 
-        {/* Если поиск ничего не дал во всех группах */}
+        {/* Проверка, если ничего не найдено */}
         {Object.values(options).flat().filter(item => 
-          item.toLowerCase().includes(searchTerm.toLowerCase())
+          typeof item === 'string' && item.toLowerCase().includes(searchTerm.toLowerCase())
         ).length === 0 && (
           <p className="text-14r" style={{ color: 'var(--gray)', textAlign: 'center', marginTop: '20px' }}>
             Ничего не найдено

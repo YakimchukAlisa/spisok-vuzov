@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import FilterPopover from './FilterPopover'; 
 
-export default function FilterButton({ text, iconSrc, options }) {
+// Добавили selectedValues и onChange в пропсы
+export default function FilterButton({ text, iconSrc, options, selectedValues = [], onChange }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [savedFilters, setSavedFilters] = useState([]);
   const wrapperRef = useRef(null);
 
   // Закрытие по клику вне окна
@@ -18,34 +18,35 @@ export default function FilterButton({ text, iconSrc, options }) {
   }, []);
 
   const handleSave = (selectedItems) => {
-    setSavedFilters(selectedItems);
+    onChange(selectedItems); // Передаем выбранные элементы наверх в App.jsx
     setIsOpen(false);
   };
 
   const handleReset = (e) => {
     e.stopPropagation(); // Останавливаем всплытие, чтобы не открывался попап
-    setSavedFilters([]); // Очищаем фильтры
-    setIsOpen(false);    // На всякий случай закрываем попап, если он был открыт
+    onChange([]); // Очищаем фильтры наверху в App.jsx
+    setIsOpen(false); // Закрываем попап
   };
 
   return (
     <div className="filter-wrapper" ref={wrapperRef}>
       
       <button 
-        className={`btn btn--with-icon ${savedFilters.length > 0 ? 'btn--gray-dark' : 'btn--gray-light'}`}
+        // Если есть выбранные элементы, кнопка становится темной
+        className={`btn btn--with-icon ${selectedValues.length > 0 ? 'btn--gray-dark' : 'btn--gray-light'}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         {iconSrc && <img src={iconSrc} alt={text} className="btn__icon-left" />}
-        <span>{text} {savedFilters.length > 0 ? `(${savedFilters.length})` : ''}</span>
+        <span>{text} {selectedValues.length > 0 ? `(${selectedValues.length})` : ''}</span>
         
         {/* Место под крестик */}
         <div className="btn__icon-right">
-          {savedFilters.length > 0 && (
+          {selectedValues.length > 0 && (
              <img 
                src="/close.svg" 
                alt="Сбросить фильтр" 
                onClick={handleReset} 
-               style={{ cursor: 'pointer' }} // Добавляем курсор-ручку для удобства
+               style={{ cursor: 'pointer' }}
              />
           )}
         </div>
@@ -57,7 +58,7 @@ export default function FilterButton({ text, iconSrc, options }) {
           onClose={() => setIsOpen(false)} 
           onSave={handleSave} 
           options={options} 
-          initialSelected={savedFilters}
+          initialSelected={selectedValues} // Передаем текущие выбранные значения в попап
         />
       )}
     </div>
