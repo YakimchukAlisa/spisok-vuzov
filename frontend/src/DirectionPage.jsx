@@ -45,7 +45,7 @@ export default function DirectionPage() {
                             {direction.name}
                         </h1>
                         <p className="direction-header__code text-20r" style={{ color: 'var(--black)', marginTop: '4px' }}>
-                            {direction.code}
+                            {direction.code} {direction.code_name}
                         </p>
                     </div>
                 </div>

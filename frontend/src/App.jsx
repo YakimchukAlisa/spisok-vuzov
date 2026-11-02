@@ -10,7 +10,12 @@ import VuzPage from './VuzPage.jsx';
 import FacultyPage from "./FacultyPage.jsx";
 import DirectionPage from './DirectionPage';
 import CatalogPage from './CatalogPage';
-
+import SpherePage from './SpherePage';
+import GlobalSpecialtyPage from './GlobalSpecialtyPage';
+import ProfessionPage from './ProfessionPage';
+import RatingsPage from './RatingsPage';
+import AuthPage from './AuthPage';
+import ProfilePage from './ProfilePage';
 
 function App() {
   // Состояния для поиска и фильтров
@@ -145,6 +150,14 @@ function App() {
             <Route path="/vuz/:vuzId/faculty/:facultyId/direction/:directionId" element={<DirectionPage />} />
             <Route path="/professions" element={<CatalogPage />} />
             <Route path="/specialties" element={<CatalogPage />} />
+            <Route path="/sphere/:sphereId" element={<SpherePage />} />
+            <Route path="/specialty/:id" element={<GlobalSpecialtyPage />} />
+            <Route path="/profession/:id" element={<ProfessionPage />} />
+            <Route path="/ratings" element={<RatingsPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+
+
           </Routes>
         </main>
 

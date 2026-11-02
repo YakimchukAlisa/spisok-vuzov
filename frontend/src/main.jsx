@@ -1,9 +1,13 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client'; // <--- ОБЯЗАТЕЛЬНО
+import App from './App.jsx';
+import { FavoritesProvider } from './component/FavoritesContext.jsx'; // <--- Ваш контекст
+import './css/main.css'; // <--- Ваши глобальные стили
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <FavoritesProvider>
+      <App />
+    </FavoritesProvider>
+  </React.StrictMode>
+);
