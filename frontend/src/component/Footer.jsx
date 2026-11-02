@@ -22,7 +22,7 @@ function Footer() {
                             <Link to="/specialties" className="footer__nav-link text-14m">Специальности</Link>
                         </li>
                         <li>
-                            <a href="/ratings" className="footer__nav-link text-14m">Рейтинги</a>
+                            <Link to="/ratings" className="footer__nav-link text-14m">Рейтинги</Link>
                         </li>
                     </ul>
                 </nav>

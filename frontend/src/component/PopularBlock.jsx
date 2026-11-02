@@ -25,7 +25,7 @@ export default function PopularBlock({ items, title, type }) {
       
       <div className="professions-block__list">
         {visibleItems.map((item) => (
-          <ProfessionCard key={item.id} data={item} />
+          <ProfessionCard key={item.id} data={item} type={type} isGlobal={true} />
         ))}
       </div>
 

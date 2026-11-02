@@ -4,9 +4,9 @@ import './../css/directionCard.css';
 
 export default function DirectionCard({ data, facultyLogo }) {
     const [isFavorite, setIsFavorite] = useState(false);
-    
+
     // Получаем ID вуза и факультета из текущего URL
-    const { vuzId, facultyId } = useParams(); 
+    const { vuzId, facultyId } = useParams();
 
     if (!data) return null;
 
@@ -25,7 +25,9 @@ export default function DirectionCard({ data, facultyLogo }) {
                     )}
                     <div className="direction-card__title-block">
                         <h3 className="direction-card__title">{data.name}</h3>
-                        <p className="direction-card__code">{data.code}</p>
+                        <p className="direction-card__code">
+                            {data.code} {data.code_name}
+                        </p>
                     </div>
                 </div>
 
@@ -51,7 +53,7 @@ export default function DirectionCard({ data, facultyLogo }) {
             <div className="direction-card__stats-wrapper">
                 <div className="direction-card__divider"></div>
                 <div className="direction-card__stats">
-                    
+
                     {/* Бюджет (берем из fullTime) */}
                     <div className="direction-card__stat-group">
                         <span className="text-14m" style={{ color: 'var(--green)' }}>Бюджет</span>

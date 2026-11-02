@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function Header() {
+
   return (
     <header className="header">
       <div className="header__container">
@@ -28,15 +29,15 @@ function Header() {
               <Link to="/specialties" className="header__nav-link text-14m">Специальности</Link>
             </li>
             <li>
-              <a href="/ratings" className="header__nav-link text-14m">Рейтинги</a>
+              <Link to="/ratings" className="header__nav-link text-14m">Рейтинги</Link>
             </li>
           </ul>
         </nav>
 
         <div className="header__btn">
-          <button className="btn btn--green btn--icon" title="Профиль">
+          <Link to="/auth" className="btn btn--green btn--icon" title="Профиль">
             <img src="/person.svg" alt="Профиль" width="24" height="24" />
-          </button>
+          </Link>
           <button className="btn btn--green btn--icon" title="Избранное">
             <img src="/favorite.svg" alt="Избранное" width="24" height="24" />
           </button>

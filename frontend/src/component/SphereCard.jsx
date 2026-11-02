@@ -6,7 +6,7 @@ export default function SphereCard({ sphere, count, type }) {
   // type — это 'profession' или 'specialty' (чтобы понять, куда вести ссылку)
   
   return (
-    <Link to={`/sphere/${sphere.id}?type=${type}`} className="sphere-card">
+   <Link to={`/sphere/${sphere.id}?type=${type}`} className="sphere-card">
       
       <div className="sphere-card__info">
         <h3 className="sphere-card__title">{sphere.name}</h3>
