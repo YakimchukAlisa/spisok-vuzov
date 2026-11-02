@@ -1,0 +1,216 @@
+/* =========================================
+   СТРАНИЦА РЕЙТИНГОВ
+   ========================================= */
+.rating-section {
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================
+   ОБЕРТКА ДЛЯ ТАБЛИЦ (СКРОЛЛ)
+   ========================================= */
+.rating-table-wrapper {
+  width: 100%;
+  overflow-x: auto; /* Включаем горизонтальный скролл */
+  -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+  
+  /* Стилизация скроллбара */
+  scrollbar-width: thin; 
+  scrollbar-color: var(--green) transparent;
+}
+
+.rating-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+.rating-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+.rating-table-wrapper::-webkit-scrollbar-thumb {
+  background-color: var(--green-light);
+  border-radius: 10px;
+}
+
+/* =========================================
+   ТАБЛИЦЫ (RAEX и Минобрнауки)
+   ========================================= */
+.rating-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--green);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Шапка таблицы */
+.rating-table__header {
+  display: flex;
+  background-color: #CFEFDB; 
+  border-bottom: 1px solid var(--green);
+}
+
+/* Строки таблицы */
+.rating-table__row {
+  display: flex;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--green);
+}
+
+.rating-table__row:last-child {
+  border-bottom: none;
+}
+
+/* Ячейки таблицы */
+.rating-table__cell {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--black);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Отступы внутри ячейки */
+  padding: 20px; 
+  
+  /* Вертикальная граница справа */
+  border-right: 1px solid var(--green);
+}
+
+/* Убираем границу у последней ячейки в строке */
+.rating-table__cell:last-child {
+  border-right: none;
+}
+
+.rating-table__header .rating-table__cell {
+  font-weight: 600;
+}
+
+/* =========================================
+   МЕДИА-РЕЙТИНГ (Вкладки)
+   ========================================= */
+.media-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: -1px; 
+  position: relative;
+  z-index: 2;
+}
+
+.media-tab {
+  padding: 12px 24px;
+  background-color: var(--green-light-1);
+  border: 1px solid var(--green);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--black);
+  transition: background-color 0.2s;
+}
+
+.media-tab.active {
+  background-color: var(--white);
+  border-bottom: 1px solid var(--white); 
+}
+
+/* =========================================
+   МЕДИА-РЕЙТИНГ (График)
+   ========================================= */
+.media-chart {
+  background-color: var(--white);
+  border: 1px solid var(--green);
+  border-radius: 0 12px 12px 12px;
+  padding: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.media-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.media-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.media-bar-track {
+  flex-grow: 1;
+  background-color: var(--gray-light);
+  border-radius: 20px;
+  height: 40px;
+  overflow: hidden;
+}
+
+.media-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #B5E5C7 0%, #4DA76E 100%);
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  border-radius: 20px 0 0 20px;
+  transition: width 0.5s ease-in-out;
+}
+
+.media-bar-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+/* =========================================
+   БЛОК С КНОПКАМИ
+   ========================================= */
+.rating-buttons {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.rating-buttons .btn{
+  width: fit-content;
+}
+
+/* =========================================
+   АДАПТИВ ДЛЯ МОБИЛЬНЫХ
+   ========================================= */
+@media (max-width: 768px) {
+  .media-bar-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .rating-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .media-bar-track {
+    width: 100%;
+  }
+
+  .rating-table__row, 
+  .rating-table__header {
+    padding: 0; /* Убираем внешние отступы, так как они теперь внутри ячеек */
+  }
+
+  .rating-table__cell {
+    font-size: 14px;
+    padding: 12px; /* Уменьшаем внутренние отступы на телефоне */
+  }
+
+  /* Задаем минимальную ширину таблицы, чтобы включился горизонтальный скролл */
+  .rating-table {
+    min-width: 600px; 
+  }
+}

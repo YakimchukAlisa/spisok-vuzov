@@ -1,0 +1,10 @@
+/* Стили для страницы конкретной сферы */
+.sphere-page-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  padding: 20px;
+  margin-top: 100px;
+}
+

@@ -1,0 +1,67 @@
+/* =========================================
+   БЛОК ЗАРПЛАТЫ (ЛЕСТНИЦА)
+   ========================================= */
+.salary-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  width: 100%;
+}
+
+/* Картинка слева */
+.salary-image-wrapper {
+  width: 40%;
+  max-width: 400px;
+  flex-shrink: 0;
+}
+
+.salary-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Правая часть (ступеньки) */
+.salary-stairs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Расстояние между карточками */
+  width: 100%;
+  max-width: 700px;
+}
+
+.salary-card {
+  background-color: var(--green-light-1); /* Светло-зеленый фон */
+  border-radius: 12px;
+  padding: 20px 24px;
+  width: 100%;
+  transition: transform 0.2s ease;
+}
+
+.salary-card:hover {
+  transform: translateX(10px); /* Легкий сдвиг при наведении */
+}
+
+.salary-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* =========================================
+   МОБИЛЬНАЯ ВЕРСИЯ
+   ========================================= */
+@media (max-width: 1024px) {
+  .salary-layout {
+    flex-direction: column; /* Картинка уходит наверх */
+    align-items: stretch;
+  }
+
+  .salary-image-wrapper {
+    display: none; 
+  }
+  .salary-stairs {
+    max-width: 100%;
+  }
+}

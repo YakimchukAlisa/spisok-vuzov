@@ -1,0 +1,29 @@
+.favorites-tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  border-bottom: 2px solid var(--gray-light);
+  padding-bottom: 16px;
+}
+
+.favorites-tab {
+  background: none;
+  border: none;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.favorites-tab:hover {
+  color: var(--black);
+  background-color: var(--gray-light);
+}
+
+.favorites-tab.active {
+  color: var(--white);
+  background-color: var(--green);
+}
