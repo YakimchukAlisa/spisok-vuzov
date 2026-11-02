@@ -1,0 +1,41 @@
+{
+  "raex": [
+    { "id": 1, "vuzId": 1, "rank": 1, "name": "МГУ им. М. В. Ломоносова", "score": 5.0 },
+    { "id": 2, "vuzId": 2, "rank": 2, "name": "СПбПУ Петра Великого", "score": 4.8 },
+    { "id": 3, "vuzId": 3, "rank": 3, "name": "СПбГУ", "score": 4.7 },
+    { "id": 4, "vuzId": 5, "rank": 4, "name": "МФТИ", "score": 4.5 },
+    { "id": 5, "vuzId": 4, "rank": 5, "name": "УрФУ им. Б. Н. Ельцина", "score": 4.2 },
+    { "id": 6, "vuzId": 6, "rank": 6, "name": "ТГУ", "score": 4.1 }
+  ],
+  "minobrnauki": [
+    { "id": 1, "vuzId": 2, "rank": 1, "name": "СПбПУ Петра Великого", "score": 5.0 },
+    { "id": 2, "vuzId": 1, "rank": 2, "name": "МГУ им. М. В. Ломоносова", "score": 4.9 },
+    { "id": 3, "vuzId": 5, "rank": 3, "name": "НИУ ВШЭ", "score": 4.8 },
+    { "id": 4, "vuzId": 3, "rank": 4, "name": "СПбГУ", "score": 4.6 },
+    { "id": 5, "vuzId": 4, "rank": 5, "name": "УрФУ им. Б. Н. Ельцина", "score": 4.4 }
+  ],
+  "media": {
+    "summary": [
+      { "id": 1, "vuzId": 1, "name": "МГУ им. М. В. Ломоносова", "employmentPercent": 98 },
+      { "id": 2, "vuzId": 2, "name": "СПбПУ Петра Великого", "employmentPercent": 95 },
+      { "id": 3, "vuzId": 3, "name": "СПбГУ", "employmentPercent": 92 },
+      { "id": 4, "vuzId": 4, "name": "УрФУ им. Б. Н. Ельцина", "employmentPercent": 88 },
+      { "id": 5, "vuzId": 5, "name": "МФТИ", "employmentPercent": 85 }
+    ],
+    "massMedia": [
+      { "id": 1, "vuzId": 1, "name": "МГУ им. М. В. Ломоносова", "employmentPercent": 90 },
+      { "id": 2, "vuzId": 3, "name": "СПбГУ", "employmentPercent": 85 },
+      { "id": 3, "vuzId": 6, "name": "ТГУ", "employmentPercent": 80 }
+    ],
+    "socialMedia": [
+      { "id": 1, "vuzId": 2, "name": "СПбПУ Петра Великого", "employmentPercent": 95 },
+      { "id": 2, "vuzId": 4, "name": "УрФУ им. Б. Н. Ельцина", "employmentPercent": 88 },
+      { "id": 3, "vuzId": 1, "name": "МГУ им. М. В. Ломоносова", "employmentPercent": 82 }
+    ],
+    "website": [
+      { "id": 1, "vuzId": 1, "name": "МГУ им. М. В. Ломоносова", "employmentPercent": 99 },
+      { "id": 2, "vuzId": 5, "name": "МФТИ", "employmentPercent": 92 },
+      { "id": 3, "vuzId": 3, "name": "СПбГУ", "employmentPercent": 89 }
+    ]
+  }
+}
