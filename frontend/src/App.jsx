@@ -16,6 +16,12 @@ import ProfessionPage from './ProfessionPage';
 import RatingsPage from './RatingsPage';
 import AuthPage from './AuthPage';
 import ProfilePage from './ProfilePage';
+import FavoritesPage from './FavoritesPage';
+import ComparePage from './ComparePage';
+import TestPage from './TestPage';
+
+
+
 
 function App() {
   // Состояния для поиска и фильтров
@@ -156,6 +162,9 @@ function App() {
             <Route path="/ratings" element={<RatingsPage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/compare" element={<ComparePage />} />
+            <Route path="/career-test" element={<TestPage />} />
 
 
           </Routes>

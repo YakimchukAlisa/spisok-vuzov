@@ -72,27 +72,6 @@ export default function CatalogPage() {
         <div className='title-and-catalog'>
           <h1 className="text-32b">{title}</h1>
 
-          <div className="catalog-controls">
-            <div className="field" style={{ flexGrow: 1 }}>
-              <input
-                type="text"
-                className="field__input"
-                placeholder=" "
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <label className="field__label">
-                Поиск {isSpecialties ? 'специальности' : 'профессии'}...
-              </label>
-              <img src="/search.svg" alt="Поиск" className="field__icon" />
-            </div>
-
-            <button className="btn btn--green btn--with-icon catalog-filter-btn">
-              <img src="/list.svg" alt="Фильтр" width="20" height="20" />
-              ЕГЭ
-            </button>
-          </div>
-
           <div className="catalog-grid">
             {spheresWithCounts.length > 0 ? (
               spheresWithCounts.map((sphere) => (
