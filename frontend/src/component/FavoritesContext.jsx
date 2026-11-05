@@ -4,36 +4,51 @@ const FavoritesContext = createContext();
 
 export const useFavorites = () => useContext(FavoritesContext);
 
+const MOCK_FAVORITES = {
+  vuzes: [
+    { 
+      id: 1, 
+      name: "АлтГТУ им. И. И. Ползунова", 
+      fullName: "Алтайский государственный технический университет", 
+      imageUrl: "/img/altgtu.jpg", 
+      budget: { places: 1076, minScore: 39 }, 
+      paid: { places: 940, minScore: 39, minPrice: 80000 } 
+    }
+  ],
+  faculties: [
+    {
+      id: 1,
+      vuzId: 1,
+      shortName: "ФИТ",
+      fullName: "Факультет Информационных технологий",
+      imageUrl: "/fit.svg",
+      workPlaces: ["Профильные компании", "IT-отделы"],
+      bachelor: { directions: 6, budgetPlaces: 303, paidPlaces: 195, minPrice: 160000 },
+      master: { directions: 4, budgetPlaces: 51, paidPlaces: 60, minPrice: 170000 }
+    }
+  ],
+  specialties: []
+};
+
 export const FavoritesProvider = ({ children }) => {
-  // Имитация авторизации (в реальности - проверка токена)
   const [isAuth, setIsAuth] = useState(false);
   
-  // Хранилище избранного
-  const [favorites, setFavorites] = useState({
-    vuzes: [],
-    faculties: [],
-    specialties: []
+  // Инициализируем из localStorage или заглушек
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem('favorites');
+    return saved ? JSON.parse(saved) : MOCK_FAVORITES;
   });
 
-  // При загрузке проверяем, авторизован ли пользователь (по токену в localStorage)
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    if (token) {
-      setIsAuth(true);
-      // Загружаем избранное из localStorage
-      const saved = localStorage.getItem('favorites');
-      if (saved) setFavorites(JSON.parse(saved));
-    }
+    if (token) setIsAuth(true);
   }, []);
 
   // Сохраняем в localStorage при каждом изменении
   useEffect(() => {
-    if (isAuth) {
-      localStorage.setItem('favorites', JSON.stringify(favorites));
-    }
-  }, [favorites, isAuth]);
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }, [favorites]);
 
-  // Функция Входа/Выхода
   const login = () => {
     localStorage.setItem('authToken', 'fake-token-123');
     setIsAuth(true);
@@ -41,14 +56,12 @@ export const FavoritesProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('authToken');
-    localStorage.removeItem('favorites');
+    // При выходе НЕ удаляем избранное, чтобы оно осталось (или удаляем, если хотите)
     setIsAuth(false);
-    setFavorites({ vuzes: [], faculties: [], specialties: [] });
   };
 
-  // Универсальная функция добавления/удаления
   const toggleFavorite = (type, item) => {
-    if (!isAuth) return; // Если не авторизован, ничего не делаем
+    if (!isAuth) return;
 
     setFavorites(prev => {
       const list = prev[type];
@@ -57,8 +70,8 @@ export const FavoritesProvider = ({ children }) => {
       return {
         ...prev,
         [type]: isExist 
-          ? list.filter(i => i.id !== item.id) // Удаляем
-          : [...list, item]                    // Добавляем
+          ? list.filter(i => i.id !== item.id)
+          : [...list, item]
       };
     });
   };

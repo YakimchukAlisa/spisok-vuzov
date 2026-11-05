@@ -1,23 +1,33 @@
-import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom'; // <-- ДОБАВИЛИ useParams
+import React from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { useFavorites } from './FavoritesContext.jsx'; 
+import vuzData from './../DATA/cardVuz.json'; 
 import './../css/directionCard.css';
 
-export default function DirectionCard({ data, facultyLogo }) {
-    const [isFavorite, setIsFavorite] = useState(false);
-
-    // Получаем ID вуза и факультета из текущего URL
+// 👇 ДОБАВИЛИ ПРОПС showVuzName 👇
+export default function DirectionCard({ data, facultyLogo, isGlobal = false, showVuzName = false }) {
+    const { isAuth, favorites, toggleFavorite } = useFavorites();
     const { vuzId, facultyId } = useParams();
 
     if (!data) return null;
+
+    const isFavorite = favorites.specialties.some(s => s.id === data.id);
+    const currentVuzId = vuzId || data.vuzId;
+    
+    // Ищем вуз только если нужно его показать
+    const vuz = showVuzName ? vuzData.find(v => v.id === Number(currentVuzId)) : null;
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('ru-RU').format(price);
     };
 
+    let linkPath = `/specialty/${data.id}`;
+    if (!isGlobal && vuzId && facultyId) {
+        linkPath = `/vuz/${vuzId}/faculty/${facultyId}/direction/${data.id}`;
+    }
+
     return (
         <div className="direction-card">
-
-            {/* ЛЕВАЯ ЧАСТЬ: Название, описание, предметы */}
             <div className="direction-card__main">
                 <div className="direction-card__header">
                     {facultyLogo && (
@@ -28,6 +38,13 @@ export default function DirectionCard({ data, facultyLogo }) {
                         <p className="direction-card__code">
                             {data.code} {data.code_name}
                         </p>
+                        
+                        {/* 👇 ВЫВОДИМ ВУЗ, ТОЛЬКО ЕСЛИ ПЕРЕДАН ПРОПС 👇 */}
+                        {showVuzName && vuz && (
+                            <p className="text-14m" style={{ color: 'var(--green)', marginTop: '8px' }}>
+                                {vuz.name}
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -49,12 +66,9 @@ export default function DirectionCard({ data, facultyLogo }) {
                 )}
             </div>
 
-            {/* ПРАВАЯ ЧАСТЬ: Статистика */}
             <div className="direction-card__stats-wrapper">
                 <div className="direction-card__divider"></div>
                 <div className="direction-card__stats">
-
-                    {/* Бюджет (берем из fullTime) */}
                     <div className="direction-card__stat-group">
                         <span className="text-14m" style={{ color: 'var(--green)' }}>Бюджет</span>
                         <span className="text-14r">
@@ -65,7 +79,6 @@ export default function DirectionCard({ data, facultyLogo }) {
                         </span>
                     </div>
 
-                    {/* Платно (берем из fullTime) */}
                     <div className="direction-card__stat-group">
                         <span className="text-14m" style={{ color: 'var(--green)' }}>Платно</span>
                         <span className="text-14r">
@@ -78,26 +91,37 @@ export default function DirectionCard({ data, facultyLogo }) {
                             от <span className="text-14b"> {data.educationForms?.fullTime?.paid?.minPrice ? formatPrice(data.educationForms.fullTime.paid.minPrice) : '0'}</span> ₽
                         </span>
                     </div>
-
                 </div>
             </div>
 
-            {/* БЛОК С КНОПКАМИ (в самом низу карточки) */}
             <div className="direction-card__actions">
-                <Link to={`/vuz/${vuzId}/faculty/${facultyId}/direction/${data.id}`} className="btn btn--green direction-card__btn">
+                <Link to={linkPath} className="btn btn--green direction-card__btn">
                     Подробнее
                 </Link>
-                <button
-                    className={`direction-card__favorite ${isFavorite ? 'is-active' : ''}`}
-                    onClick={() => setIsFavorite(!isFavorite)}
-                    title="В избранное"
-                >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill={isFavorite ? "var(--green)" : "none"} stroke="var(--green)" strokeWidth="2">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                    </svg>
-                </button>
-            </div>
 
+                {isAuth && (
+                    <button
+                        className={`direction-card__favorite ${isFavorite ? 'is-active' : ''}`}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            toggleFavorite('specialties', { 
+                                ...data, 
+                                vuzId: currentVuzId, 
+                                facultyId: facultyId || data.facultyId 
+                            });
+                        }}
+                        title={isFavorite ? "Убрать из избранного" : "В избранное"}
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" 
+                            fill={isFavorite ? "var(--green)" : "none"} 
+                            stroke="var(--green)" 
+                            strokeWidth="2"
+                        >
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                    </button>
+                )}
+            </div>
         </div>
     );
 }
