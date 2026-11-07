@@ -184,59 +184,52 @@
    ========================================= */
 @media (max-width: 870px) {
   
-  /* 1. Настраиваем высоту и отступы самого блока */
   .hero {
-    min-height: 500px; /* Уменьшаем высоту */
-    padding: 40px 0;   /* Добавляем отступы сверху и снизу */
+    min-height: 500px; 
+    padding: 40px 0;   
   }
 
-  /* 2. Настраиваем контейнер (отступы по 20px из макета) */
+  /* 👇 УБРАЛИ overflow-y: visible, оставили только скрытие по бокам 👇 */
   .hero__container {
     padding: 0 20px;
-    gap: 40px; /* Уменьшаем расстояние между заголовком, поиском и кнопками */
-     overflow: hidden; 
-     overflow-y: visible;
+    gap: 40px; 
+    overflow-x: hidden; 
   }
 
-  /* 3. Уменьшаем заголовок (28px, Bold, белый) */
   .hero__title {
     font-size: 28px;
     line-height: 34px;
-    max-width: 346px; /* Чтобы текст красиво переносился как в макете */
+    max-width: 346px; 
   }
 
-  /* 4. Поле поиска на всю ширину */
+  /* 👇 Поле поиска теперь найдет этот класс 👇 */
   .hero__search {
+    width: 100%;
     max-width: 100%;
   }
 
   .hero__search .field__input {
-    height: 44px; /* Чуть уменьшаем высоту поля для мобилки */
+    height: 44px; 
     font-size: 14px;
   }
 
-  /* 2. Лента фильтров */
+  /* Лента фильтров */
   .hero__filters {
     display: flex;
     flex-wrap: nowrap;
-    
-    /* Включаем скролл только для этого блока */
     overflow-x: auto; 
     
-    /* Техника "edge-to-edge": растягиваем на всю ширину экрана */
+    /* Техника "edge-to-edge" */
     width: calc(100% + 40px);
     margin-left: -20px;
     
-    /* Возвращаем отступы для кнопок внутри ленты */
     padding: 0 20px 12px 20px; 
-    
     gap: 12px;
     justify-content: flex-start;
     
     -webkit-overflow-scrolling: touch; 
   }
 
-  /* Скрываем скроллбар */
   .hero__filters::-webkit-scrollbar {
     display: none; 
   }
@@ -245,7 +238,6 @@
     scrollbar-width: none; 
   }
 
-  /* Кнопки не сжимаются */
   .hero__filters .btn {
     flex-shrink: 0; 
     font-size: 14px;

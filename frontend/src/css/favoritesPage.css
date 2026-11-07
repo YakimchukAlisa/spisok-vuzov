@@ -1,9 +1,10 @@
+/* =========================================
+   СТРАНИЦА ИЗБРАННОГО
+   ========================================= */
 .favorites-tabs {
   display: flex;
-  gap: 16px;
-  margin-bottom: 32px;
-  border-bottom: 2px solid var(--gray-light);
-  padding-bottom: 16px;
+  gap: 12px;
+  overflow-x: auto;
 }
 
 .favorites-tab {
@@ -11,11 +12,12 @@
   border: none;
   font-size: 20px;
   font-weight: 600;
-  color: var(--gray);
+  color: var(--gray-dark);
   cursor: pointer;
   padding: 8px 16px;
   border-radius: 8px;
-  transition: all 0.2s;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .favorites-tab:hover {
@@ -26,4 +28,110 @@
 .favorites-tab.active {
   color: var(--white);
   background-color: var(--green);
+}
+
+/* =========================================
+   ПАНЕЛЬ УПРАВЛЕНИЯ (Поиск и Сравнение)
+   ========================================= */
+.favorites-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* Поиск на всю ширину */
+.favorites-search {
+  width: 100%;
+}
+
+/* Блок с чекбоксом и кнопкой */
+.favorites-controls__actions {
+  display: flex;
+  align-items: center;
+  gap: 30px; /* Отступ между чекбоксом и кнопкой из макета */
+}
+
+/* Стили для чекбокса "Выбрать все" (как в макете) */
+.favorites-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+/* =========================================
+   ВУЗЫ (Чекбокс слева от карточки)
+   ========================================= */
+.vuz-item-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.vuz-item-checkbox {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.vuz-item-card {
+  flex-grow: 1;
+}
+
+/* =========================================
+   КАСТОМНЫЙ ЧЕКБОКС (Общий)
+   ========================================= */
+.checkbox-input {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--black); /* Черная рамка как в макете */
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  background-color: var(--white);
+  flex-shrink: 0;
+}
+
+.checkbox-input:checked + .checkbox-custom {
+  background-color: var(--white);
+  border-color: var(--green);
+}
+
+.checkbox-input:checked + .checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 4px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--green);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* =========================================
+   МОБИЛЬНАЯ ВЕРСИЯ
+   ========================================= */
+@media (max-width: 768px) {
+  .favorites-controls__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .favorites-tab {
+    font-size: 16px;
+    padding: 6px 12px;
+  }
+
+  .vuz-item-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

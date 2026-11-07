@@ -74,27 +74,61 @@
 }
 
 /* =========================================
-   МОБИЛЬНАЯ ВЕРСИЯ
+   МОБИЛЬНАЯ ВЕРСИЯ ХЕДЕРА
    ========================================= */
 @media (max-width: 870px) {
-  /* Показываем бургер на мобильных */
+  
+  /* Показываем бургер */
   .header__burger {
-    display: inline-flex !important;; 
+    display: inline-flex !important; 
   }
 
-  /* Прячем обычное текстовое меню */
+  /* Выпадающее меню */
   .header__nav {
     display: none; 
+    position: absolute;
+    top: 72px; 
+    left: 0;
+    width: 100%;
+    background-color: var(--white);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px 0;
+    z-index: 100;
   }
 
-  /* Настраиваем контейнер хедера, чтобы все влезло в одну строку */
+  /* Открытое меню */
+  .header__nav--open {
+    display: block;
+  }
+
+  /* Список в колонку */
+  .header__nav ul {
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+  }
+
+  /* Пункты меню на мобилке */
+  .header__nav ul li {
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid var(--gray-light);
+  }
+
+  .header__nav ul li:last-child {
+    border-bottom: none;
+  }
+
+  .header__nav-link {
+    display: block;
+    padding: 16px;
+    font-size: 18px;
+  }
+
+  /* Настраиваем контейнер хедера */
   .header__container {
-    justify-content: space-between; /* Лого слева, кнопки справа */
+    justify-content: space-between; 
     padding: 0 20px;
   }
 
-  .header__btn .btn {
-    background-color: var(--green); 
-    color: var(--white);
-  }
 }

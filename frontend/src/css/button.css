@@ -8,25 +8,23 @@
   gap: 8px; 
   
   padding: 8px 16px; 
-  height: 40px;         /* Фиксированная высота из макета */
+  height: 40px;
   
   border-radius: 8px;
-  border: 1px solid transparent; /* Чтобы кнопки с рамкой и без были одного размера */
+  border: 1px solid transparent;
   
   font-size: 14px;
   font-weight: 500;
-  text-decoration: none; /* Если кнопка это ссылка <a> */
+  text-decoration: none;
   
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   color: var(--white);
 }
 
-/* Убираем стандартные стили кнопки браузера */
 .btn:focus {
   outline: none;
 }
-
 
 /* =========================================
    ЦВЕТА (Модификаторы)
@@ -70,27 +68,25 @@
   background-color: var(--gray-dark);
 }
 
+/* Темно-серые */
 .btn--gray-dark {
-  background-color: var(--gray-dark); /* Ровно тот же цвет, что и при наведении */
+  background-color: var(--gray-dark);
   color: var(--white);
 }
 
-/* Чтобы при наведении на уже выбранную кнопку ничего не ломалось */
 .btn--gray-dark:hover {
   background-color: var(--gray-dark); 
-  opacity: 0.9; /* Можно добавить легкое затемнение для отклика */
+  opacity: 0.9; 
 }
 
 /* =========================================
    РАЗМЕРЫ И ФОРМЫ
    ========================================= */
-
-/* Круглая кнопка только с иконкой (40x40) */
 .btn--icon {
   width: 40px;
   height: 40px;
-  padding: 0; /* Убираем отступы, чтобы иконка была по центру */
-  border-radius: 50%; /* Делаем круг */
+  padding: 0; 
+  border-radius: 50%; 
 }
 
 .btn--icon-square {
@@ -100,31 +96,30 @@
   border-radius: 22px;
 }
 
-/* Кнопка с иконкой внутри (текст + иконка) */
 .btn--with-icon {
   padding: 8px 16px; 
 }
 
-/* Скрываем стандартный чекбокс браузера */
+/* =========================================
+   ТУМБЛЕРЫ (ПЕРЕКЛЮЧАТЕЛИ)
+   ========================================= */
 .toggle-input {
   display: none;
 }
 
-/* Стили для самого тумблера (фона) */
 .toggle-switch {
   width: 40px;
   height: 21px;
   background-color: var(--gray);
   border-radius: 10px;
   position: relative;
-  display: block; /* Меняем flex на block для простоты */
+  display: block; 
   padding: 3px;
   box-sizing: border-box;
-  transition: background-color 0.2s ease; /* Плавная смена цвета */
-  flex-shrink: 0; /* Чтобы тумблер не сжимался в кнопке */
+  transition: background-color 0.2s ease; 
+  flex-shrink: 0; 
 }
 
-/* Белый кружок внутри тумблера */
 .toggle-switch::after {
   content: '';
   width: 15px;
@@ -132,15 +127,54 @@
   background-color: var(--white);
   border-radius: 50%;
   display: block;
-  transition: transform 0.2s ease; /* Плавное движение кружка */
+  transition: transform 0.2s ease; 
 }
 
-/* Меняем фон тумблера на зеленый */
 .toggle-input:checked + .toggle-switch {
   background-color: var(--green);
 }
 
-/* Сдвигаем белый кружок вправо */
 .toggle-input:checked + .toggle-switch::after {
-  transform: translateX(19px); /* Сдвиг: ширина 40px - кружок 15px - отступы 6px = 19px */
+  transform: translateX(19px); 
+}
+
+/* =========================================
+   👇 СТИЛИ ДЛЯ НЕАКТИВНЫХ КНОПОК (В САМОМ КОНЦЕ!) 👇
+   ========================================= */
+
+/* Общие стили для disabled */
+.btn:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+/* 🔥 ЖЕСТКО ФИКСИРУЕМ ЦВЕТА ПРИ НАВЕДЕНИИ, ЧТОБЫ ХОВЕРЫ НЕ СРАБАТЫВАЛИ 🔥 */
+
+/* Темно-серая кнопка (наша кнопка "Сравнить") */
+.btn--gray-dark:disabled,
+.btn--gray-dark:disabled:hover {
+  background-color: var(--gray-dark) !important;
+  color: var(--white) !important;
+}
+
+/* Светло-серая кнопка */
+.btn--gray-light:disabled,
+.btn--gray-light:disabled:hover {
+  background-color: var(--gray-light) !important;
+  color: var(--white) !important;
+}
+
+/* Зеленая кнопка */
+.btn--green:disabled,
+.btn--green:disabled:hover {
+  background-color: var(--green) !important;
+  color: var(--white) !important;
+}
+
+/* Контурная зеленая */
+.btn--green-outline:disabled,
+.btn--green-outline:disabled:hover {
+  background-color: transparent !important;
+  color: var(--green) !important;
+  border-color: var(--green) !important;
 }

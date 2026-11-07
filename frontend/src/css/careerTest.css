@@ -1,0 +1,208 @@
+/* =========================================
+   КОМПОНЕНТ ТЕСТА
+   ========================================= */
+.career-test-wrapper {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 684px;
+  background-color: var(--white);
+  border: 1px solid var(--green);
+  border-radius: 20px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* =========================================
+   ЛЕВАЯ ПАНЕЛЬ
+   ========================================= */
+.career-test-sidebar {
+  width: 448px;
+  background-color: var(--green-light-1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  flex-shrink: 0;
+  border-radius: 20px 0 0 20px;
+}
+
+.career-test-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  line-height: 34px;
+  color: var(--black);
+  margin: 0;
+}
+
+.career-test-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 470px;
+  padding-right: 8px; /* Место для скролла */
+}
+
+/* Стилизация скроллбара */
+.career-test-steps::-webkit-scrollbar {
+  width: 4px;
+}
+.career-test-steps::-webkit-scrollbar-thumb {
+  background: var(--green-light);
+  border-radius: 4px;
+}
+
+/* Кружки с номерами */
+.step-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  color: var(--green);
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+
+/* Отвеченный вопрос (закрашен) */
+.step-circle--answered {
+  background-color: var(--green-light);
+  border-color: var(--white);
+  color: var(--white);
+}
+
+/* Текущий вопрос (с белой обводкой) */
+.step-circle--current {
+  border-color: var(--white);
+  box-shadow: 0 0 0 2px var(--green); /* Дополнительное кольцо */
+}
+
+/* =========================================
+   ПРАВАЯ ПАНЕЛЬ
+   ========================================= */
+.career-test-content {
+  flex-grow: 1;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.question-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.question-number {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.question-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* =========================================
+   ССЫЛКИ В ТЕКСТЕ РЕЗУЛЬТАТА
+   ========================================= */
+.result-text-link {
+  color: var(--green);
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.result-text-link:hover {
+  color: var(--green-dark); /* Темно-зеленый при наведении */
+  text-decoration-thickness: 2px; /* Делаем подчеркивание чуть толще */
+}
+
+.result-text-link:active {
+  color: #0a4d22; /* Еще темнее при клике */
+}
+
+/* Обычный стиль кнопки */
+.option-btn {
+  width: 100%;
+  padding: 20px 24px;
+  background-color: var(--white);
+  border: 1px solid var(--gray-light);
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  color: var(--black);
+}
+
+.option-btn:hover {
+  border-color: var(--green);
+  background-color: var(--green-light-1);
+  transform: translateX(4px);
+}
+
+.option-btn--selected {
+  /* Принудительно ставим зеленую рамку и толщину */
+  border: 2px solid var(--green) !important; 
+  background-color: var(--white) !important; /* Убираем заливку */
+  font-weight: 600;
+}
+
+.option-btn--selected:hover {
+  background-color: var(--green-light-1) !important; /* Оставляем легкий фон при наведении, чтобы было видно, что кнопка активна */
+  border: 2px solid var(--green) !important; /* Рамка остается зеленой */
+}
+
+/* =========================================
+   РЕЗУЛЬТАТ ТЕСТА
+   ========================================= */
+.career-test-result {
+  width: 100%;
+  max-width: 800px;
+  margin: 60px auto;
+  text-align: center;
+}
+
+.result-card {
+  background-color: var(--white);
+  border: 1px solid var(--green);
+  border-radius: 20px;
+  padding: 48px;
+  box-shadow: 0 10px 30px rgba(16, 173, 74, 0.1);
+}
+
+/* =========================================
+   МОБИЛЬНАЯ ВЕРСИЯ
+   ========================================= */
+@media (max-width: 1024px) {
+  .career-test-wrapper {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .career-test-sidebar {
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 24px;
+  }
+  
+  .career-test-title {
+    font-size: 22px;
+  }
+
+  .career-test-content {
+    padding: 24px;
+  }
+}
