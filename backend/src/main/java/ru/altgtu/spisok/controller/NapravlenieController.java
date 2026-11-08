@@ -7,8 +7,8 @@ import ru.altgtu.spisok.entity.*;
 import ru.altgtu.spisok.repository.*;
 import ru.altgtu.spisok.dto.AbstractNapravlenieDto;
 import ru.altgtu.spisok.repository.NapravlenieRepository.AbstractNapravlenieProjection;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -23,6 +23,7 @@ public class NapravlenieController {
     private final TrebExamRepository trebExamRepository;
     private final PostInfoRepository postInfoRepository;
     private final ProfessionRepository professionRepository;
+    private final VuzRepository vuzRepository;
 
     // 1. Получить все направления для конкретного вуза (СО СТАТИСТИКОЙ)
     //    ВСЕГО 3 запроса к БД (вместо сотен)
@@ -203,5 +204,149 @@ public class NapravlenieController {
         dto.setExams(List.of());
         dto.setProfiles(List.of());
         return dto;
+    }
+
+    @GetMapping("/napravlenie/{kod}")
+    public Map<String, Object> getSpecialtyByKod(@PathVariable String kod) {
+        List<Napravlenie> napravleniya = napravlenieRepository.findByKod(kod);
+        if (napravleniya.isEmpty()) throw new RuntimeException("Специальность не найдена");
+
+        Napravlenie first = napravleniya.get(0);
+        Map<Integer, Map<String, Object>> uniqueVuzes = new HashMap<>();
+
+        for (Napravlenie n : napravleniya) {
+            if (n.getFakultet() != null && n.getFakultet().getVuz() != null) {
+                Vuz v = n.getFakultet().getVuz();
+
+                // Если вуз еще не добавлен в список
+                if (!uniqueVuzes.containsKey(v.getId())) {
+
+                    // Вызываем существующий метод, который возвращает VuzDto
+                    VuzDto vuzDetails = vuzRepository.findVuzDetailsById(v.getId());
+
+                    Map<String, Object> vuzMap = new HashMap<>();
+
+                    if (vuzDetails != null) {
+                        vuzMap.put("id", vuzDetails.getId());
+                        vuzMap.put("name", vuzDetails.getName());
+                        vuzMap.put("abbreviatura", vuzDetails.getAbbreviatura());
+                        vuzMap.put("logoUrl", vuzDetails.getLogoUrl());
+                        vuzMap.put("imageUrl", vuzDetails.getImageUrl());
+
+                        // 👇 Упаковываем плоские поля VuzDto в структуру, которую ждет VuzCard
+                        vuzMap.put("budget", Map.of(
+                                "places", vuzDetails.getBudgetPlaces() != null ? vuzDetails.getBudgetPlaces() : 0,
+                                "minScore", vuzDetails.getBudgetMinScore() != null ? vuzDetails.getBudgetMinScore() : 0
+                        ));
+
+                        vuzMap.put("paid", Map.of(
+                                "places", vuzDetails.getPaidPlaces() != null ? vuzDetails.getPaidPlaces() : 0,
+                                "minScore", vuzDetails.getPaidMinScore() != null ? vuzDetails.getPaidMinScore() : 0,
+                                "minPrice", vuzDetails.getPaidMinPrice() != null ? vuzDetails.getPaidMinPrice() : 0
+                        ));
+                    } else {
+                        // Если по какой-то причине статистика не нашлась
+                        vuzMap.put("id", v.getId());
+                        vuzMap.put("name", v.getName());
+                        vuzMap.put("budget", Map.of("places", 0, "minScore", 0));
+                        vuzMap.put("paid", Map.of("places", 0, "minScore", 0, "minPrice", 0));
+                    }
+
+                    uniqueVuzes.put(v.getId(), vuzMap);
+                }
+            }
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("kod", first.getKod());
+        response.put("name", first.getName());
+        response.put("opisanie", first.getOpisanie());
+        response.put("vuzes", uniqueVuzes.values());
+
+        return response;
+    }
+
+    @GetMapping("/napravlenie/{kod}/similar")
+    public List<AbstractNapravlenieDto> getSimilarSpecialties(@PathVariable String kod) {
+        List<Napravlenie> currentList = napravlenieRepository.findByKod(kod);
+        if (currentList.isEmpty()) return List.of();
+
+        Napravlenie current = currentList.get(0);
+
+        List<Integer> currentProfIds = current.getProfessions() != null
+                ? current.getProfessions().stream().map(Profession::getId).toList()
+                : List.of();
+
+        List<Napravlenie> linkedByProfessions = currentProfIds.isEmpty()
+                ? List.of()
+                : napravlenieRepository.findByProfessionIds(currentProfIds);
+
+        Integer sphereId = current.getSpheres() != null && !current.getSpheres().isEmpty()
+                ? current.getSpheres().iterator().next().getId()
+                : null;
+
+        List<Napravlenie> sameSphere = sphereId != null
+                ? napravlenieRepository.findBySphereId(sphereId)
+                : List.of();
+
+        Map<String, Napravlenie> uniqueMap = new LinkedHashMap<>();
+
+        for (Napravlenie n : linkedByProfessions) {
+            if (!n.getName().equals(current.getName())) {
+                uniqueMap.putIfAbsent(n.getName(), n);
+            }
+        }
+
+        for (Napravlenie n : sameSphere) {
+            if (!n.getName().equals(current.getName())) {
+                uniqueMap.putIfAbsent(n.getName(), n);
+            }
+        }
+
+        return uniqueMap.values().stream()
+                .limit(4)
+                .map(n -> {
+                    AbstractNapravlenieDto dto = new AbstractNapravlenieDto();
+                    dto.setId(n.getId());
+                    dto.setKod(n.getKod());
+                    dto.setName(n.getName());
+                    dto.setOpisanie(n.getOpisanie());
+                    dto.setVuzCount(1L);
+                    dto.setProfessionCount(professionRepository.countProfessionsBySphereAndKod(n.getKod()));
+
+                    // СОБИРАЕМ ВСЕ СФЕРЫ
+                    if (n.getSpheres() != null) {
+                        dto.setSphereIds(n.getSpheres().stream().map(Sphere::getId).toList());
+                        dto.setSphereNames(n.getSpheres().stream().map(Sphere::getName).toList());
+                    }
+
+                    return dto;
+                })
+                .toList();
+    }
+
+    @GetMapping("/napravlenie/{kod}/professions")
+    public List<ProfessionDto> getProfessionsBySpecialty(@PathVariable String kod) {
+        List<Napravlenie> napravleniya = napravlenieRepository.findByKod(kod);
+        if (napravleniya.isEmpty()) return List.of();
+
+        Napravlenie firstNapravlenie = napravleniya.get(0);
+
+        return professionRepository.findProfessionsByNapravlenieKod(kod).stream()
+                .map(p -> {
+                    ProfessionDto dto = new ProfessionDto();
+                    dto.setId(p.getId());
+                    dto.setName(p.getName());
+                    dto.setDescription(p.getDescription());
+                    dto.setSpecialtyCount(napravlenieRepository.countSpecialtiesByProfessionId(p.getId()));
+
+                    // 👇 СОБИРАЕМ ВСЕ СФЕРЫ У НАПРАВЛЕНИЯ
+                    if (firstNapravlenie.getSpheres() != null) {
+                        dto.setSphereIds(firstNapravlenie.getSpheres().stream().map(Sphere::getId).toList());
+                        dto.setSphereNames(firstNapravlenie.getSpheres().stream().map(Sphere::getName).toList());
+                    }
+                    return dto;
+                })
+                .toList();
     }
 }

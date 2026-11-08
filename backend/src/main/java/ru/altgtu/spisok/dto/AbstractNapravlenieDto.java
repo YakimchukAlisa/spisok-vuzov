@@ -2,6 +2,8 @@ package ru.altgtu.spisok.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class AbstractNapravlenieDto {
     private Integer id;        // "якорный" id — MIN(ID_Napravlenie) из группы
@@ -11,4 +13,6 @@ public class AbstractNapravlenieDto {
     private Long vuzCount;     // сколько вузов предлагают это направление
     private String uroven;
     private Long professionCount;
+    private List<Integer> sphereIds;
+    private List<String> sphereNames;
 }

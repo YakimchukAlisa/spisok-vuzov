@@ -128,22 +128,25 @@ public interface NapravlenieRepository extends JpaRepository<Napravlenie, Intege
     """, nativeQuery = true)
     List<NapravlenieSphereProjection> findSpheresByVuzId(@Param("vuzId") Integer vuzId);
 
-    @Query(value = """
-    SELECT DISTINCT n.*
-    FROM "Napravlenie" n
-    JOIN "Sphere_napravlenie" sn ON sn."ID_Napravlenie" = n."ID_Napravlenie"
-    WHERE sn."ID_Sphere" = :sphereId
-    """, nativeQuery = true)
-    List<Napravlenie> findBySphereId(@Param("sphereId") Integer sphereId);
+    // 1. Найти все направления по коду (например, "09.03.01")
+    List<Napravlenie> findByKod(String kod);
+
+    // 2. Найти направления, связанные с профессиями из списка
+    @Query("SELECT DISTINCT n FROM Napravlenie n JOIN n.professions p WHERE p.id IN :profIds")
+    List<Napravlenie> findByProfessionIds(@Param("profIds") List<Integer> profIds);
+
+    // 3. Найти направления по ID сферы
+    @Query("SELECT n FROM Napravlenie n JOIN n.spheres s WHERE s.id = :sphereId")
+    List<Napravlenie> findBySphereId(@Param("sphereId") Integer sphereId); // Замените старый нативный метод на этот
 
     @Query(value = """
     SELECT
         MIN(n."ID_Napravlenie")      AS id,
-        n."Kod"                       AS kod,
+        MIN(n."Kod")                  AS kod,
         n."Name"                      AS name,
         MIN(n."Opisanie")             AS opisanie,
         COUNT(DISTINCT f."ID_Vuz")    AS vuzCount,
-        u."Name"                      AS uroven,
+        MIN(u."Name")                 AS uroven,     
         MIN(s."Logo_Url")             AS logoUrl  
     FROM "Napravlenie" n
     JOIN "Fakultet" f            ON f."ID_Fakultet"     = n."ID_Fakultet"
@@ -152,8 +155,8 @@ public interface NapravlenieRepository extends JpaRepository<Napravlenie, Intege
     JOIN "Profile" p             ON p."ID_Napravlenie"  = n."ID_Napravlenie"
     JOIN "Ur_obraz" u            ON u."ID_Ur"           = p."ID_Ur"
     WHERE sn."ID_Sphere" = :sphereId
-    GROUP BY n."Kod", n."Name", u."Name"
-    ORDER BY u."Name", n."Name"
+    GROUP BY n."Name"             
+    ORDER BY n."Name"
     """, nativeQuery = true)
     List<AbstractNapravlenieProjection> findAbstractBySphereId(@Param("sphereId") Integer sphereId);
 
@@ -178,4 +181,6 @@ public interface NapravlenieRepository extends JpaRepository<Napravlenie, Intege
     WHERE pn."ID_Profession" = :professionId
     """, nativeQuery = true)
     Long countSpecialtiesByProfessionId(@Param("professionId") Integer professionId);
+
+
 }

@@ -44,4 +44,14 @@ public class Napravlenie {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Sphere> spheres = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "Profession_napravlenie",
+            joinColumns = @JoinColumn(name = "ID_Napravlenie"),
+            inverseJoinColumns = @JoinColumn(name = "ID_Profession")
+    )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Profession> professions = new HashSet<>();
 }

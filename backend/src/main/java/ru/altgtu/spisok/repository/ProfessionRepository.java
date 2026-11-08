@@ -32,4 +32,13 @@ public interface ProfessionRepository extends JpaRepository<Profession, Integer>
         String getName();
         String getDescription();
     }
+
+    @Query(value = """
+    SELECT DISTINCT p.*
+    FROM "Profession" p
+    JOIN "Profession_napravlenie" pn ON pn."ID_Profession" = p."ID_Profession"
+    JOIN "Napravlenie" n ON n."ID_Napravlenie" = pn."ID_Napravlenie"
+    WHERE n."Kod" = :kod
+    """, nativeQuery = true)
+    List<Profession> findProfessionsByNapravlenieKod(@Param("kod") String kod);
 }

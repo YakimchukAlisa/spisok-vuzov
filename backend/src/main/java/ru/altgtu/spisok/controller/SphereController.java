@@ -33,7 +33,7 @@ public class SphereController {
             item.put("opisanie", p.getOpisanie());
             item.put("logoUrl", p.getLogoUrl());
             item.put("count", p.getCnt() != null ? p.getCnt() : 0L);          // специальности
-            item.put("profCount", p.getProfCnt() != null ? p.getProfCnt() : 0L); // 👈 профессии
+            item.put("profCount", p.getProfCnt() != null ? p.getProfCnt() : 0L); // профессии
             return item;
         }).toList();
     }
@@ -64,6 +64,11 @@ public class SphereController {
                     // Считаем количество уникальных специальностей для этой профессии
                     dto.setSpecialtyCount(napravlenieRepository.countSpecialtiesByProfessionId(p.getId()));
 
+                    dto.setSphereIds(List.of(sphereId));
+                    Sphere sphere = sphereRepository.findById(sphereId).orElse(null);
+                    if (sphere != null) {
+                        dto.setSphereNames(List.of(sphere.getName()));
+                    }
                     return dto;
                 })
                 .toList();

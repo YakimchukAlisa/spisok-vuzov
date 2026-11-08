@@ -45,6 +45,10 @@ export async function getProfili(napravlenieId) {
   return response.data;
 }
 
+export async function getNapravlenieDetails(kod) {
+  const response = await api.get(`/napravlenie/${kod}/details`);
+  return response.data;
+}
 // ==========================================
 // Профессии
 // ==========================================

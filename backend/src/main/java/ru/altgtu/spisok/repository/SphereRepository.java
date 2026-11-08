@@ -14,12 +14,16 @@ public interface SphereRepository extends JpaRepository<Sphere, Integer> {
         s."Name"        AS name,
         s."Opisanie"    AS opisanie,
         s."Logo_Url"    AS logoUrl,
-        COUNT(DISTINCT sn."ID_Napravlenie") AS cnt,
-        COUNT(DISTINCT sp."ID_Profession") AS profCnt
+        (SELECT COUNT(DISTINCT n."Name") 
+         FROM "Sphere_napravlenie" sn 
+         JOIN "Napravlenie" n ON n."ID_Napravlenie" = sn."ID_Napravlenie" 
+         WHERE sn."ID_Sphere" = s."ID_Sphere") AS cnt,
+         
+        (SELECT COUNT(DISTINCT p."ID_Profession") 
+         FROM "Sphere_profession" sp 
+         JOIN "Profession" p ON p."ID_Profession" = sp."ID_Profession" 
+         WHERE sp."ID_Sphere" = s."ID_Sphere") AS profCnt
     FROM "Sphere" s
-    LEFT JOIN "Sphere_napravlenie" sn ON sn."ID_Sphere" = s."ID_Sphere"
-    LEFT JOIN "Sphere_profession" sp ON sp."ID_Sphere" = s."ID_Sphere"
-    GROUP BY s."ID_Sphere", s."Name", s."Opisanie", s."Logo_Url"
     ORDER BY s."ID_Sphere"
     """, nativeQuery = true)
     List<SphereWithCountProjection> findAllWithCounts();
@@ -30,6 +34,6 @@ public interface SphereRepository extends JpaRepository<Sphere, Integer> {
         String getOpisanie();
         String getLogoUrl();
         Long getCnt();
-        Long getProfCnt(); // 👈 новое поле
+        Long getProfCnt();
     }
 }

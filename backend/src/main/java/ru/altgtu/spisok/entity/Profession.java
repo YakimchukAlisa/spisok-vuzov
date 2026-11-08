@@ -2,6 +2,11 @@ package ru.altgtu.spisok.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Profession")
@@ -19,9 +24,8 @@ public class Profession {
     @Column(name = "Description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    // Если вам нужна связь со сферами прямо в сущности (для Hibernate):
-    // @ManyToMany(mappedBy = "professions")
-    // @ToString.Exclude
-    // @EqualsAndHashCode.Exclude
-    // private Set<Sphere> spheres = new HashSet<>();
+    @ManyToMany(mappedBy = "professions")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Napravlenie> napravleniya = new HashSet<>();
 }

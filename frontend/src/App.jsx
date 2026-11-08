@@ -12,7 +12,7 @@ import FacultyPage from "./FacultyPage.jsx";
 import DirectionPage from './DirectionPage';
 import CatalogPage from './CatalogPage';
 import SpherePage from './SpherePage';
-// import GlobalSpecialtyPage from './GlobalSpecialtyPage';
+import GlobalSpecialtyPage from './GlobalSpecialtyPage';
 // import ProfessionPage from './ProfessionPage';
 // import RatingsPage from './RatingsPage';
 // import AuthPage from './AuthPage';
@@ -183,6 +183,7 @@ function App() {
              <Route path="/professions" element={<CatalogPage />} />
              <Route path="/specialties" element={<CatalogPage />} />
              <Route path="/sphere/:sphereId" element={<SpherePage />}  />
+             <Route path="/napravlenie/:kod" element={<GlobalSpecialtyPage />} />
           </Routes>
         </main>
 

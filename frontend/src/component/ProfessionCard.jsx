@@ -1,90 +1,57 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import spheresData from './../DATA/spheres.json';
-import professionsData from './../DATA/professions.json';
-import vuzData from './../DATA/cardVuz.json';
 import './../css/professionCard.css';
 
 export default function ProfessionCard({ data, type = 'profession', isGlobal = false, sphere: sphereProp }) {
   if (!data) return null;
 
-  // sphere: сначала пропс из SpherePage, иначе — поиск по JSON (для старых мест)
-  const sphere = sphereProp || spheresData.find(s => s.id === data.sphereId);
+  // Берем названия сфер напрямую из данных (которые прислал бэкенд)
+  let sphereNames = data.sphereNames || [];
 
-  // sphereId может быть числом, массивом или отсутствовать (у абстрактного DTO его нет)
-  const currentSphereId = Array.isArray(data.sphereId)
-    ? data.sphereId[0]
-    : (data.sphereId ?? (Array.isArray(data.sphereIds) ? data.sphereIds[0] : undefined));
-
-  let realSpecialtyCount = 0;
-  if (type === 'profession') {
-    const uniqueSpecialties = new Set();
-    vuzData.forEach(vuz => {
-      vuz.faculties?.forEach(faculty => {
-        const dirs = [
-          ...(faculty.bachelor?.directionsList || []),
-          ...(faculty.master?.directionsList || [])
-        ];
-        dirs.forEach(dir => {
-          if (dir.sphereIds?.includes(currentSphereId)) {
-            uniqueSpecialties.add(dir.name);
-          }
-        });
-      });
-    });
-    realSpecialtyCount = uniqueSpecialties.size;
+  // Если бэкенд не прислал, но мы передали сферу пропсом (как на странице сферы)
+  if (sphereNames.length === 0 && sphereProp) {
+      sphereNames = [sphereProp.name];
   }
 
-  const professionsInSphere = type === 'specialty'
-    ? professionsData.filter(prof => prof.sphereId === currentSphereId).length
-    : 0;
-
-  // ==========================================
-  // 3. ССЫЛКА
-  // ==========================================
-  let linkPath = `/profession/${data.id}`; // для профессий
-
+  // Ссылка
+  let linkPath = `/profession/${data.id}`;
   if (type === 'specialty') {
-    if (isGlobal) {
-      // В каталоге — ведём на абстрактное направление по коду
-      linkPath = data.kod
-        ? `/napravlenie/${encodeURIComponent(data.kod)}`
-        : (data.id ? `/specialty/${data.id}` : '#');
-    } else {
-      // Внутри вуза — конкретная строка Napravlenie, есть vuzId/facultyId
-      linkPath = data.vuzId
-        ? `/vuz/${data.vuzId}/faculty/${data.facultyId}/direction/${data.id}`
-        : (data.kod ? `/napravlenie/${encodeURIComponent(data.kod)}` : '#');
-    }
+    linkPath = data.kod ? `/napravlenie/${encodeURIComponent(data.kod)}` : `/specialty/${data.id}`;
   }
 
-  // Описание: в AbstractNapravlenieDto поле называется opisanie
   const description = data.opisanie ?? data.description;
 
   return (
     <div className="profession-card">
-
       <div className="profession-card__top">
-        <div className="profession-card__title-row">
-          <h3 className="profession-card__title">
-            {data.name}
 
-          </h3>
-          {sphere && (
-            <span className="profession-card__sphere">{sphere.name}</span>
-          )}
+        <div className="profession-card__title-row" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <h3 className="profession-card__title" style={{ margin: 0 }}>{data.name}</h3>
+
+          {/* 👇 Выводим овалы по названиям, пришедшим с бэкенда */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {sphereNames.map((name, idx) => (
+              <span key={idx} className="profession-card__sphere" style={{
+                backgroundColor: '#e8f5e9',
+                color: 'var(--green)',
+                padding: '4px 12px',
+                borderRadius: '20px',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}>
+                {name}
+              </span>
+            ))}
+          </div>
         </div>
 
+        {/* Статистика */}
         <div className="profession-card__stats">
-
-          {/* ДЛЯ СПЕЦИАЛЬНОСТЕЙ (Карточка "Инноватика") */}
           {type === 'specialty' && (
             <>
               <span className="profession-card__stat-link">
                 {data.vuzCount ?? 0} {data.vuzCount === 1 ? 'вуз' : 'вузов'}
               </span>
-
-              {/* Выводим количество профессий, если оно пришло */}
               {data.professionCount > 0 && (
                 <span className="profession-card__stat-link">
                   {data.professionCount} {data.professionCount === 1 ? 'профессия' : 'профессий'}
@@ -93,10 +60,8 @@ export default function ProfessionCard({ data, type = 'profession', isGlobal = f
             </>
           )}
 
-          {/* ДЛЯ ПРОФЕССИЙ ( */}
           {type === 'profession' && (
             <>
-              {/* Выводим количество специальностей, если оно пришло */}
               {data.specialtyCount > 0 && (
                 <span className="profession-card__stat-link">
                   {data.specialtyCount} {data.specialtyCount === 1 ? 'специальность' : 'специальностей'}
@@ -104,12 +69,10 @@ export default function ProfessionCard({ data, type = 'profession', isGlobal = f
               )}
             </>
           )}
-         </div>
         </div>
+      </div>
 
-      {description && (
-        <p className="profession-card__description">{description}</p>
-      )}
+      {description && <p className="profession-card__description">{description}</p>}
 
       <Link to={linkPath} className="btn btn--green profession-card__btn">
         Подробнее
