@@ -16,6 +16,9 @@ public class Fakultet {
     @Column(name = "Name", nullable = false, length = 200)
     private String name;
 
+    @Column(name = "Short_Name", length = 50)
+    private String shortName;
+
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 

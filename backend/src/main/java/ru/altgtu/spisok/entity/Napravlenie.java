@@ -2,6 +2,11 @@ package ru.altgtu.spisok.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "Napravlenie")
@@ -26,4 +31,17 @@ public class Napravlenie {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_Fakultet")
     private Fakultet fakultet;
+
+    @OneToMany(mappedBy = "napravlenie", fetch = FetchType.LAZY)
+    private Set<Profile> profiles = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "Sphere_napravlenie",
+            joinColumns = @JoinColumn(name = "ID_Napravlenie"),
+            inverseJoinColumns = @JoinColumn(name = "ID_Sphere")
+    )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Sphere> spheres = new HashSet<>();
 }

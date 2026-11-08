@@ -60,13 +60,13 @@ public interface VuzRepository extends JpaRepository<Vuz, Integer> {
             v."VK_Url" AS vkUrl,
             v."Telegram_Url" AS telegramUrl,
             v."Max_Url" AS maxUrl,
-            
             CAST(COALESCE(SUM(CASE WHEN o."Name" = 'Бюджетная основа' THEN pi."Kol_mest" ELSE 0 END), 0) AS integer) AS budgetPlaces,
             CAST(COALESCE(MIN(CASE WHEN o."Name" = 'Бюджетная основа' AND u."Name" = 'Бакалавриат' AND pi."Prohodnoi" > 0 THEN pi."Prohodnoi" END), 0) AS integer) AS budgetMinScore,
             CAST(COALESCE(SUM(CASE WHEN o."Name" = 'Полное возмещение затрат' THEN pi."Kol_mest" ELSE 0 END), 0) AS integer) AS paidPlaces,
             CAST(COALESCE(MIN(CASE WHEN o."Name" = 'Полное возмещение затрат' AND u."Name" = 'Бакалавриат' AND pi."Prohodnoi" > 0 THEN pi."Prohodnoi" END), 0) AS integer) AS paidMinScore,
-            CAST(COALESCE(MIN(CASE WHEN o."Name" = 'Полное возмещение затрат' AND u."Name" = 'Бакалавриат' AND pi."Stoimost" > 0 THEN pi."Stoimost" END), 0) AS integer) AS paidMinPrice
-        FROM "Vuz" v
+            CAST(COALESCE(MIN(CASE WHEN o."Name" = 'Полное возмещение затрат' AND u."Name" = 'Бакалавриат' AND pi."Stoimost" > 0 THEN pi."Stoimost" END), 0) AS integer) AS paidMinPrice,
+            CAST(COUNT(DISTINCT p."ID_Profile") AS integer) AS totalPrograms
+                    FROM "Vuz" v
         LEFT JOIN "Fakultet" f ON f."ID_Vuz" = v."ID_Vuz"
         LEFT JOIN "Napravlenie" n ON n."ID_Fakultet" = f."ID_Fakultet"
         LEFT JOIN "Profile" p ON p."ID_Napravlenie" = n."ID_Napravlenie"

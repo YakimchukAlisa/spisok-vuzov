@@ -20,6 +20,7 @@ public class VuzDto {
     private Integer paidPlaces;
     private Integer paidMinScore;
     private Integer paidMinPrice;
+    private Integer totalPrograms;
 
     public VuzDto() {
     }
@@ -29,7 +30,7 @@ public class VuzDto {
                   String site, String email, String phone,
                   String imageUrl, String logoUrl, String vkUrl, String telegramUrl, String maxUrl,
                   Integer budgetPlaces, Integer budgetMinScore,
-                  Integer paidPlaces, Integer paidMinScore, Integer paidMinPrice) {
+                  Integer paidPlaces, Integer paidMinScore, Integer paidMinPrice, Integer totalPrograms) {
         this.id = id;
         this.name = name;
         this.abbreviatura = abbreviatura;
@@ -48,6 +49,7 @@ public class VuzDto {
         this.paidPlaces = paidPlaces;
         this.paidMinScore = paidMinScore;
         this.paidMinPrice = paidMinPrice;
+        this.totalPrograms = totalPrograms;
     }
 
     // Геттеры и сеттеры
@@ -107,4 +109,7 @@ public class VuzDto {
 
     public Integer getPaidMinPrice() { return paidMinPrice; }
     public void setPaidMinPrice(Integer paidMinPrice) { this.paidMinPrice = paidMinPrice; }
+
+    public Integer getTotalPrograms() { return totalPrograms; }
+    public void setTotalPrograms(Integer totalPrograms) { this.totalPrograms = totalPrograms; }
 }

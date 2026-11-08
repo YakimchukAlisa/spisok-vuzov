@@ -1,139 +1,125 @@
-import React, { useMemo, useState } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
-import spheresData from './DATA/spheres.json';
-import professionsData from './DATA/professions.json';
-import vuzData from './DATA/cardVuz.json';
-import filterData from './DATA/filters.json';
+import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import ProfessionCard from './component/ProfessionCard';
-import FilterButton from './component/FilterButton';
-import CareerTestBlock from './component/CareerTestBlock';
-import './css/spherePage.css';
+import { getSphereById, getNapravleniyaBySphere, getProfessionsBySphere } from './api/api.js';
+import './css/spherePage.css';   // 👈 правильный путь к css
 
 export default function SpherePage() {
   const { sphereId } = useParams();
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const type = searchParams.get('type') || 'profession'; // 'profession' или 'specialty'
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedExams, setSelectedExams] = useState([]);
+  const [sphere, setSphere] = useState(null);
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('bachelor');
 
-  const searchParams = new URLSearchParams(location.search);
-  const type = searchParams.get('type') || 'profession';
-  const isSpecialties = type === 'specialty';
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-  const currentSphere = spheresData.find(s => s.id === Number(sphereId));
-
-  // 1. Собираем специальности (без изменений)
-  const dynamicallyCollectedSpecialties = useMemo(() => {
-    const specialtiesMap = new Map();
-    vuzData.forEach(vuz => {
-      vuz.faculties?.forEach(faculty => {
-        const dirs = [
-          ...(faculty.bachelor?.directionsList || []),
-          ...(faculty.master?.directionsList || [])
-        ];
-        dirs.forEach(dir => {
-          if (!specialtiesMap.has(dir.name)) {
-            specialtiesMap.set(dir.name, {
-              id: dir.id,
-              name: dir.name,
-              sphereId: dir.sphereIds ? dir.sphereIds[0] : null,
-              vuzCount: 1,
-              vuzIds: new Set([vuz.id]),
-              description: dir.description
-            });
-          } else {
-            const existing = specialtiesMap.get(dir.name);
-            existing.vuzIds.add(vuz.id);
-            existing.vuzCount = existing.vuzIds.size;
-          }
-        });
-      });
-    });
-    return Array.from(specialtiesMap.values()).map(item => {
-      const { vuzIds, ...rest } = item;
-      return rest;
-    });
-  }, []);
-
-  // 2. Выбираем данные
-  const baseData = isSpecialties ? dynamicallyCollectedSpecialties : professionsData;
-
-  // 3. Фильтруем по сфере, поиску И ВЫБРАННЫМ ЭКЗАМЕНАМ
-  const filteredItems = useMemo(() => {
-    return baseData.filter(item => {
-      const matchSphere = item.sphereId === Number(sphereId);
-      const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // 👇 ЛОГИКА ФИЛЬТРА ПО ПРЕДМЕТАМ 👇
-      // Если предметы не выбраны, показываем все. Если выбраны, ищем совпадения.
-      let matchExams = true;
-      if (selectedExams.length > 0 && item.exams) {
-        matchExams = selectedExams.some(exam => item.exams.includes(exam));
-      } else if (selectedExams.length > 0 && !item.exams) {
-        // Если предметы выбраны, но у профессии их нет, не показываем
-        matchExams = false;
+        // 👇 В зависимости от type, делаем разные запросы
+        if (type === 'profession') {
+          const [sphereData, professionsData] = await Promise.all([
+            getSphereById(sphereId),
+            getProfessionsBySphere(sphereId), // запрос за профессиями
+          ]);
+          setSphere(sphereData);
+          setItems(Array.isArray(professionsData) ? professionsData : []);
+        } else {
+          const [sphereData, specialtiesData] = await Promise.all([
+            getSphereById(sphereId),
+            getNapravleniyaBySphere(sphereId), // запрос за специальностями
+          ]);
+          setSphere(sphereData);
+          setItems(Array.isArray(specialtiesData) ? specialtiesData : []);
+        }
+      } catch (err) {
+        console.error('Ошибка:', err);
+        setError(err.response?.data?.message || err.message || 'Не удалось загрузить данные');
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      return matchSphere && matchSearch && matchExams;
-    });
-  }, [baseData, sphereId, searchQuery, selectedExams]);
+    if (sphereId) fetchData();
+  }, [sphereId, type]);
 
-  if (!currentSphere) {
-    return <div className="container">Сфера не найдена</div>;
-  }
+  // Фильтр по уровню (только для специальностей)
+  const filteredItems = type === 'specialty'
+    ? items.filter(item => {
+        const target = activeTab === 'bachelor' ? 'Бакалавриат' : 'Магистратура';
+        return (item.uroven || '').toLowerCase().includes(target.toLowerCase());
+      })
+    : items;
+
+  if (isLoading) return <div className="container" style={{ padding: 100, textAlign: 'center' }}>Загрузка...</div>;
+  if (error)     return <div className="container" style={{ padding: 100, textAlign: 'center', color: 'red' }}>Ошибка: {error}</div>;
+  if (!sphere)   return <div className="container" style={{ padding: 100, textAlign: 'center' }}>Сфера не найдена (id={sphereId})</div>;
 
   return (
-    <div className="wrapper">
-      <div className="container">
-        <div className='sphere-page-list'>
-          <h1 className="text-32b" style={{ marginBottom: '32px' }}>
-            {currentSphere.name}: {isSpecialties ? 'Специальности' : 'Профессии'}
-          </h1>
+    <div className="container" style={{ padding: '40px 20px' }}>
+      <h1 className="text-32b">
+        {sphere.name}: {type === 'specialty' ? 'Специальности' : 'Профессии'}
+      </h1>
 
-          {/* БЛОК ПОИСКА И ФИЛЬТРА */}
-          <div className="catalog-controls">
-            {/* Поле поиска */}
-            <div className="field" style={{ flexGrow: 1 }}>
-              <input
-                type="text"
-                className="field__input"
-                placeholder=" "
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <label className="field__label">
-                Поиск {isSpecialties ? 'специальности' : 'профессии'}...
-              </label>
-              <img src="/search.svg" alt="Поиск" className="field__icon" />
-            </div>
+      {sphere.opisanie && (
+        <p className="text-16r" style={{ color: 'var(--gray)', marginTop: 8 }}>{sphere.opisanie}</p>
+      )}
 
-            {isSpecialties && (
-              <FilterButton
-                text="ЕГЭ"
-                iconSrc="/list.svg"
-                options={{ "Все предметы": filterData.exams }}
-                selectedValues={selectedExams}
-                onChange={setSelectedExams}
-              />
-            )}
-          </div>
-
-          {/* СПИСОК КАРТОЧЕК */}
-          <div className="professions-block__list" style={{ marginBottom: '60px' }}>
-            {filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
-                <ProfessionCard key={item.id} data={item} type={type} isGlobal={true} />
-              ))
-            ) : (
-              <p className="text-20r" style={{ color: 'var(--gray)' }}>
-                В этой сфере пока нет {isSpecialties ? 'специальностей' : 'профессий'} по вашему запросу.
-              </p>
-            )}
-          </div>
+      {/* Вкладки показываем только для специальностей */}
+      {type === 'specialty' && (
+        <div style={{ display: 'flex', gap: '40px', margin: '24px 0' }}>
+          <button
+            onClick={() => setActiveTab('bachelor')}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: '0 0 8px 0', fontSize: '24px', fontWeight: '700',
+              color: activeTab === 'bachelor' ? 'var(--black)' : 'var(--gray)',
+              borderBottom: activeTab === 'bachelor' ? '3px solid var(--green)' : '3px solid transparent',
+              transition: 'all 0.2s ease',
+            }}
+          >Бакалавриат</button>
+          <button
+            onClick={() => setActiveTab('master')}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: '0 0 8px 0', fontSize: '24px', fontWeight: '700',
+              color: activeTab === 'master' ? 'var(--black)' : 'var(--gray)',
+              borderBottom: activeTab === 'master' ? '3px solid var(--green)' : '3px solid transparent',
+              transition: 'all 0.2s ease',
+            }}
+          >Магистратура</button>
         </div>
+      )}
 
-        <CareerTestBlock />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {filteredItems.length > 0 ? (
+          filteredItems.map(item => (
+            <ProfessionCard
+              key={item.id} // для профессий и специальностей ID уникален
+              data={item}
+              type={type}
+              isGlobal={true}
+              sphere={sphere}
+            />
+          ))
+        ) : (
+          <p className="text-14r" style={{ color: 'var(--gray)' }}>
+            {type === 'specialty'
+              ? `Направлений (${activeTab === 'bachelor' ? 'бакалавриат' : 'магистратура'}) пока нет`
+              : 'Профессий пока нет'}
+          </p>
+        )}
       </div>
+
+      <Link to={type === 'specialty' ? '/specialties' : '/professions'}
+            className="btn btn--green" style={{ marginTop: 24 }}>
+        Назад к каталогу
+      </Link>
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function VuzDetailsHero({ data }) {
         <div className="vuz-hero__top">
           <div className="vuz-hero__title-block">
 
-            {/* Логотип (выводится только если есть в JSON) */}
+            {/* Логотип  */}
             {data.logoUrl && (
               <div className="vuz-hero__logo">
                 <img
@@ -66,8 +66,8 @@ export default function VuzDetailsHero({ data }) {
         {/* СТАТИСТИКА */}
         <div className="vuz-hero__stats">
           <div className="vuz-hero__stat-item">
-            <span className="text-32b">39</span>
-            <span className="vuz-hero__stat-label text-14r">программ</span>
+         <span className="text-32b">{data.totalPrograms || 0}</span>
+         <span className="vuz-hero__stat-label text-14r">программ</span>
           </div>
           <div className="vuz-hero__stat-item">
             <span className="text-32b">{data.budget.places}</span>

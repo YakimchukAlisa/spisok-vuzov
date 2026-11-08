@@ -3,7 +3,6 @@ package ru.altgtu.spisok.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ru.altgtu.spisok.dto.FakultetCardDto;
 import ru.altgtu.spisok.entity.Fakultet;
 import java.util.List;
 
@@ -16,8 +15,9 @@ public interface FakultetRepository extends JpaRepository<Fakultet, Integer> {
     @Query(value = """
         SELECT 
             f."ID_Fakultet" AS id,
-            f."Name" AS shortName,
-            f."Description" AS fullName,
+            f."Short_Name" AS shortName,
+            f."Name" AS fullName,  
+            f."Description" AS description,
             f."Logo_Url" AS imageUrl,
             
             -- Статистика БАКАЛАВРИАТА
@@ -46,8 +46,9 @@ public interface FakultetRepository extends JpaRepository<Fakultet, Integer> {
     // Интерфейс-проекция для маппинга результата запроса
     interface FakultetStatsProjection {
         Integer getId();
-        String getShortName();
+        String getDescription();
         String getFullName();
+        String getShortName();
         String getImageUrl();
 
         Integer getBachelorDirections();

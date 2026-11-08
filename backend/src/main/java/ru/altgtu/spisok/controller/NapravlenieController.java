@@ -2,13 +2,11 @@ package ru.altgtu.spisok.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.altgtu.spisok.dto.NapravlenieDto;
-import ru.altgtu.spisok.dto.PostInfoDto;
-import ru.altgtu.spisok.dto.ProfileDto;
-import ru.altgtu.spisok.dto.TrebExamDto;
+import ru.altgtu.spisok.dto.*;
 import ru.altgtu.spisok.entity.*;
 import ru.altgtu.spisok.repository.*;
-
+import ru.altgtu.spisok.dto.AbstractNapravlenieDto;
+import ru.altgtu.spisok.repository.NapravlenieRepository.AbstractNapravlenieProjection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +22,7 @@ public class NapravlenieController {
     private final IspitaniaRepository ispitaniaRepository;
     private final TrebExamRepository trebExamRepository;
     private final PostInfoRepository postInfoRepository;
+    private final ProfessionRepository professionRepository;
 
     // 1. Получить все направления для конкретного вуза (СО СТАТИСТИКОЙ)
     //    ВСЕГО 3 запроса к БД (вместо сотен)
@@ -48,6 +47,13 @@ public class NapravlenieController {
                                 Collectors.mapping(this::toProfileStats, Collectors.toList())
                         ));
 
+        Map<Integer, List<Integer>> spheresByNapravlenie =
+                napravlenieRepository.findSpheresByVuzId(vuzId).stream()
+                        .collect(Collectors.groupingBy(
+                                NapravlenieRepository.NapravlenieSphereProjection::getNapravlenieId,
+                                Collectors.mapping(NapravlenieRepository.NapravlenieSphereProjection::getSphereId, Collectors.toList())
+                        ));
+
         // 4. Собираем DTO из мап без дополнительных запросов
         return napravleniya.stream()
                 .map(p -> {
@@ -58,9 +64,9 @@ public class NapravlenieController {
                     dto.setOpisanie(p.getOpisanie());
                     dto.setFakultetId(p.getFakultetId());
                     dto.setFakultet(p.getFakultet());
-                    dto.setUroven(p.getUroven());
                     dto.setExams(examsByNapravlenie.getOrDefault(p.getId(), List.of()));
                     dto.setProfiles(profilesByNapravlenie.getOrDefault(p.getId(), List.of()));
+                    dto.setSphereIds(spheresByNapravlenie.getOrDefault(p.getId(), List.of()));
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -78,6 +84,7 @@ public class NapravlenieController {
         ps.setPaidPlaces(proj.getPaidPlaces());
         ps.setPaidMinScore(proj.getPaidMinScore());
         ps.setPaidMinPrice(proj.getPaidMinPrice());
+        ps.setUroven(proj.getUroven());
         return ps;
     }
 
@@ -161,5 +168,40 @@ public class NapravlenieController {
                 .map(Napravlenie::getName)
                 .distinct()
                 .toList();
+    }
+
+    @GetMapping("/napravleniya/by-sphere/{sphereId}")
+    public List<AbstractNapravlenieDto> getNapravleniyaBySphere(@PathVariable Integer sphereId) {
+        return napravlenieRepository.findAbstractBySphereId(sphereId).stream()
+                .map(p -> {
+                    AbstractNapravlenieDto dto = new AbstractNapravlenieDto();
+                    dto.setId(p.getId());
+                    dto.setKod(p.getKod());
+                    dto.setName(p.getName());
+                    dto.setOpisanie(p.getOpisanie());
+                    dto.setVuzCount(p.getVuzCount() != null ? p.getVuzCount() : 0L);
+                    dto.setUroven(p.getUroven());
+                    dto.setProfessionCount(
+                            professionRepository.countProfessionsBySphereAndKod(p.getKod())
+                    );
+                    return dto;
+                })
+                .toList();
+    }
+
+    private NapravlenieDto toNapravlenieDto(Napravlenie n) {
+        NapravlenieDto dto = new NapravlenieDto();
+        dto.setId(n.getId());
+        dto.setKod(n.getKod());
+        dto.setName(n.getName());
+        dto.setOpisanie(n.getOpisanie());
+        if (n.getFakultet() != null) {
+            dto.setFakultetId(n.getFakultet().getId());
+            dto.setFakultet(n.getFakultet().getName());
+        }
+        dto.setSphereIds(n.getSpheres().stream().map(Sphere::getId).toList());
+        dto.setExams(List.of());
+        dto.setProfiles(List.of());
+        return dto;
     }
 }

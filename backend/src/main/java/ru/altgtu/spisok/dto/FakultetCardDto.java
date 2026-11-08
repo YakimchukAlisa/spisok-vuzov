@@ -5,8 +5,8 @@ import lombok.Data;
 @Data // Используем Lombok для геттеров/сеттеров
 public class FakultetCardDto {
     private Integer id;
-    private String shortName;
     private String fullName;
+    private String shortName;
     private String description;
     private String imageUrl;
 

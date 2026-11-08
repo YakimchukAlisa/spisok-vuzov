@@ -24,6 +24,7 @@ public class FakultetController {
             dto.setId(p.getId());
             dto.setShortName(p.getShortName());
             dto.setFullName(p.getFullName());
+            dto.setDescription(p.getDescription());
             dto.setImageUrl(p.getImageUrl());
 
             FakultetCardDto.Stats bachelor = new FakultetCardDto.Stats();

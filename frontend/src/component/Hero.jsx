@@ -1,3 +1,4 @@
+import React from 'react';
 import FilterButton from "./FilterButton.jsx";
 import filterData from '../DATA/filters.json';
 
@@ -12,8 +13,20 @@ function Hero({
     setSelectedCities,
     hasDormitory, setHasDormitory,
     hasMilitary, setHasMilitary,
-    dynamicSpecialties
+    dynamicSpecialties,
+    citiesData = [], // Данные с бэкенда
+    examsData = []   // Данные с бэкенда
 }) {
+    // Безопасная проверка для городов: если с бэкенда пусто, используем JSON
+    const availableCities = citiesData && citiesData.length > 0
+        ? citiesData
+        : filterData.cities;
+
+    // Безопасная проверка для экзаменов: если с бэкенда пусто, используем JSON
+    const availableExams = examsData && examsData.length > 0
+        ? examsData
+        : filterData.exams;
+
     return (
         <section className="hero">
             <div className="container hero__container">
@@ -42,25 +55,25 @@ function Hero({
                         <FilterButton
                             text="Специальность"
                             iconSrc="/teaching.svg"
-                            options={dynamicSpecialties} // <--- 2. ЗАМЕНИЛИ НА ДИНАМИЧЕСКИЕ
+                            options={dynamicSpecialties}
                             selectedValues={selectedSpecialties}
                             onChange={setSelectedSpecialties}
                         />
 
-                        {/* Фильтр Предметы ЕГЭ */}
+                        {/* Фильтр Предметы ЕГЭ (ИЗ БД) */}
                         <FilterButton
                             text="ЕГЭ"
                             iconSrc="/list.svg"
-                            options={{ "Все предметы": filterData.exams }}
+                            options={{ "Все предметы": availableExams }}
                             selectedValues={selectedExams}
                             onChange={setSelectedExams}
                         />
 
-                        {/* Фильтр Города */}
+                        {/* Фильтр Города (ИЗ БД) */}
                         <FilterButton
                             text="Город"
                             iconSrc="/location.svg"
-                            options={{ "Все города": filterData.cities }}
+                            options={{ "Все города": availableCities }}
                             selectedValues={selectedCities}
                             onChange={setSelectedCities}
                         />

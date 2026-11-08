@@ -31,7 +31,7 @@ export default function FacultyCard({ data, showVuzName = false }) {
                     <div className="faculty-card__title-block">
                         <h3 className="faculty-card__short-name">{data.shortName}</h3>
                         <p className="faculty-card__full-name">{data.fullName}</p>
-                        
+
                         {/* 👇 ВЫВОДИМ ВУЗ, ТОЛЬКО ЕСЛИ ПЕРЕДАН ПРОПС 👇 */}
                         {showVuzName && vuz && (
                             <p className="text-14m" style={{ color: 'var(--green)', marginTop: '8px' }}>
@@ -41,15 +41,15 @@ export default function FacultyCard({ data, showVuzName = false }) {
                     </div>
                 </div>
 
-                <div className="faculty-card__work">
-                    <span className="faculty-card__work-title">Где работать?</span>
-                    <ul className="faculty-card__work-list">
-                        {data.workPlaces?.map((place, index) => (
-                            <li key={index}>- {place}</li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
+           <div className="faculty-card__work">
+             <span className="faculty-card__work-title">Где работать?</span>
+             <p
+               style={{whiteSpace: 'pre-line' }}
+             >
+               {data.description || 'Информация пока отсутствует.'}
+             </p>
+           </div>
+           </div>
 
             <div className="faculty-card__stats-wrapper">
                 <div className="faculty-card__divider"></div>
@@ -75,7 +75,7 @@ export default function FacultyCard({ data, showVuzName = false }) {
                 <Link to={`/vuz/${currentVuzId}/faculty/${data.id}`} className="btn btn--green faculty-card__btn">
                     Подробнее
                 </Link>
-                
+
                 {isAuth && (
                     <button
                         className={`faculty-card__favorite ${isFavorite ? 'is-active' : ''}`}
@@ -85,9 +85,9 @@ export default function FacultyCard({ data, showVuzName = false }) {
                         }}
                         title={isFavorite ? "Убрать из избранного" : "В избранное"}
                     >
-                        <svg width="24" height="24" viewBox="0 0 24 24" 
-                            fill={isFavorite ? "var(--green)" : "none"} 
-                            stroke="var(--green)" 
+                        <svg width="24" height="24" viewBox="0 0 24 24"
+                            fill={isFavorite ? "var(--green)" : "none"}
+                            stroke="var(--green)"
                             strokeWidth="2"
                         >
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>

@@ -1,83 +1,176 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import vuzData from './DATA/cardVuz.json';
 import DirectionCard from './component/DirectionCard';
 import VuzDetailsHero from './component/VuzDetailsHero';
-
+import { getVuzById, getNapravleniya, getFakultety, getVozmozhnosti } from './api/api';
 
 export default function FacultyPage() {
-  // 1. Получаем ОБА ID из адресной строки
   const { vuzId, facultyId } = useParams();
-
-  // Состояние для переключения вкладок
   const [activeTab, setActiveTab] = useState('bachelor');
 
-  // 2. Ищем нужный вуз по ID
-  const vuz = vuzData.find((v) => v.id === Number(vuzId));
+  const [vuz, setVuz] = useState(null);
+  const [allDirections, setAllDirections] = useState([]);
+  const [fakultety, setFakultety] = useState([]);
+  const [features, setFeatures] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // 3. Ищем нужный факультет ВНУТРИ этого вуза
-  const faculty = vuz?.faculties?.find((f) => f.id === Number(facultyId));
+  useEffect(() => {
+    Promise.all([
+      getVuzById(vuzId),
+      getNapravleniya(vuzId),
+      getFakultety(vuzId),
+      // если getVozmozhnosti упадёт — не ломаем основной поток
+      getVozmozhnosti(vuzId).catch(() => []),
+    ])
+      .then(([vuzData, napravleniyaData, fakultetyData, featuresData]) => {
+        setVuz(vuzData);
+        setAllDirections(Array.isArray(napravleniyaData) ? napravleniyaData : []);
+        setFakultety(Array.isArray(fakultetyData) ? fakultetyData : []);
+        setFeatures(Array.isArray(featuresData) ? featuresData : []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Ошибка загрузки:", err);
+        setLoading(false);
+      });
+  }, [vuzId]);
 
-  // Если вуз или факультет не найдены — показываем ошибку
-  if (!vuz || !faculty) {
+  if (loading) {
+    return <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>Загрузка...</div>;
+  }
+  if (!vuz) {
     return (
       <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>
-        <h1 className="text-32b">Факультет не найден 😢</h1>
-        <Link to="/" className="btn btn--green" style={{ marginTop: '20px' }}>
-          Вернуться на главную
-        </Link>
+        <h1 className="text-32b">Вуз не найден 😢</h1>
+        <Link to="/" className="btn btn--green" style={{ marginTop: '20px' }}>Вернуться на главную</Link>
       </div>
     );
   }
 
-  // 4. Получаем список направлений для активной вкладки (bachelor или master)
-  const directions = faculty[activeTab]?.directionsList || [];
+  const currentFaculty = fakultety.find(f => String(f.id) === String(facultyId));
+  const logoForCard = currentFaculty?.imageUrl || vuz.logoUrl;
+
+  // Адаптируем vuz под VuzDetailsHero + features из отдельного запроса
+  const adaptedVuz = {
+    id: vuz.id,
+    name: vuz.name,
+    fullName: vuz.abbreviatura,
+    address: vuz.adress || 'Адрес не указан',
+    imageUrl: vuz.imageUrl || '/img/default.jpg',
+    logoUrl: vuz.logoUrl,
+    totalPrograms: vuz.totalPrograms || 0,
+    budget: { places: vuz.budgetPlaces || 0, minScore: vuz.budgetMinScore || 0 },
+    paid: {
+      places: vuz.paidPlaces || 0,
+      minScore: vuz.paidMinScore || 0,
+      minPrice: vuz.paidMinPrice || 0,
+    },
+    features,
+    contacts: { phone: vuz.phone, email: vuz.email },
+    socials: {
+      website: vuz.site,
+      vk: vuz.vkUrl,
+      telegram: vuz.telegramUrl,
+      max: vuz.maxUrl,
+    },
+  };
+
+  // 1. Направления — только этого факультета (уровень у направления не фильтруем)
+  const facultyDirections = allDirections.filter(
+    dir => String(dir.fakultetId) === String(facultyId)
+  );
+
+  // 2. Уровень, который хотим показать
+  const targetLevel =
+    activeTab === 'bachelor' ? 'Бакалавриат'
+    : activeTab === 'master' ? 'Магистратура'
+    : 'Специалитет';
 
   return (
     <div className="wrapper">
-      <VuzDetailsHero data={vuz} />
-      <div className="container" style={{ padding: '40px 20px' }}>
-        <div className="containerDirections" >
-          {/* Вкладки (Бакалавриат / Магистратура) */}
-          <div style={{ display: 'flex', gap: '40px' }}>
-            <button
-              onClick={() => setActiveTab('bachelor')}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                padding: '0 0 8px 0', fontSize: '24px', fontWeight: '700',
-                color: activeTab === 'bachelor' ? 'var(--black)' : 'var(--gray)',
-                borderBottom: activeTab === 'bachelor' ? '3px solid var(--green)' : '3px solid transparent',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              Бакалавриат
-            </button>
+      <VuzDetailsHero data={adaptedVuz} />
 
-            <button
-              onClick={() => setActiveTab('master')}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                padding: '0 0 8px 0', fontSize: '24px', fontWeight: '700',
-                color: activeTab === 'master' ? 'var(--black)' : 'var(--gray)',
-                borderBottom: activeTab === 'master' ? '3px solid var(--green)' : '3px solid transparent',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              Магистратура
-            </button>
+      <div className="container" style={{ padding: '40px 20px' }}>
+        <div className="containerDirections">
+          {/* Вкладки */}
+          <div style={{ display: 'flex', gap: '40px', marginBottom: '24px' }}>
+            {[
+              { key: 'bachelor', label: 'Бакалавриат' },
+              { key: 'master', label: 'Магистратура' },
+              { key: 'specialist', label: 'Специалитет' },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  padding: '0 0 8px 0', fontSize: '24px', fontWeight: '700',
+                  color: activeTab === tab.key ? 'var(--black)' : 'var(--gray)',
+                  borderBottom: activeTab === tab.key ? '3px solid var(--green)' : '3px solid transparent',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
-          {/* Список карточек направлений */}
+          {/* Карточки */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {directions.length > 0 ? (
-              directions.map((dir) => (
-                <DirectionCard key={dir.id} data={dir} facultyLogo={faculty.imageUrl} />
-              ))
-            ) : (
-              <p className="text-14r" style={{ color: 'var(--gray)' }}>
-                Направления пока не добавлены.
-              </p>
-            )}
+            {(() => {
+              const cards = [];
+
+            facultyDirections.forEach((dir) => {
+              const profiles = dir.profiles || [];
+              const levelProfiles = profiles.filter(p => p.uroven === targetLevel);
+              const fullTimeProfiles = levelProfiles.filter(p => p.forma === 'Очная');
+
+              if (fullTimeProfiles.length === 0) return;
+
+              fullTimeProfiles.forEach((profile) => {
+                cards.push(
+                  <DirectionCard
+                    key={profile.id}
+                    data={{
+                      ...profile,
+                      // код и название направления
+                      code: dir.kod,
+                      code_name: dir.name,
+                      kod: dir.kod,
+                      napravlenieName: dir.name,
+                      // экзамены направления
+                      exams: dir.exams || [],
+                      // статистика в формате, который ждёт DirectionCard
+                      educationForms: {
+                        fullTime: {
+                          name: profile.forma || 'Очная',
+                          budget: {
+                            places: profile.budgetPlaces || 0,
+                            minScore: profile.budgetMinScore || 0,
+                          },
+                          paid: {
+                            places: profile.paidPlaces || 0,
+                            minScore: profile.paidMinScore || 0,
+                            minPrice: profile.paidMinPrice || 0,
+                          },
+                        },
+                      },
+                    }}
+                    facultyLogo={logoForCard}
+                  />
+                );
+              });
+            });
+
+              if (cards.length === 0) {
+                return (
+                  <p className="text-14r" style={{ color: 'var(--gray)' }}>
+                    Направления для этой вкладки пока не добавлены.
+                  </p>
+                );
+              }
+              return cards;
+            })()}
           </div>
         </div>
       </div>

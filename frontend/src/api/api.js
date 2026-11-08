@@ -45,6 +45,60 @@ export async function getProfili(napravlenieId) {
   return response.data;
 }
 
+// ==========================================
+// Профессии
+// ==========================================
+export async function getProfessions() {
+  const response = await api.get('/professions');
+  return response.data;
+}
+
+export async function getProfessionById(id) {
+  const response = await api.get(`/professions/${id}`);
+  return response.data;
+}
+
+// ==========================================
+// Сферы
+// ==========================================
+export async function getSpheres() {
+  const response = await api.get('/spheres');
+  return response.data;
+}
+
+export async function getSpheresWithCounts() {
+  const response = await api.get('/spheres/with-counts');
+  return response.data;
+}
+
+export async function getSphereById(id) {
+  const response = await api.get(`/spheres/${id}`);
+  return response.data;
+}
+
+export async function getNapravleniyaBySphere(sphereId) {
+  const response = await api.get(`/napravleniya/by-sphere/${sphereId}`);
+  return response.data;
+}
+
+export async function getProfessionsBySphere(sphereId) {
+  const response = await api.get(`/spheres/${sphereId}/professions`);
+  return response.data;
+}
+// ==========================================
+// Тест на профориентацию
+// ==========================================
+export async function getTestQuestions() {
+  const response = await api.get('/test/questions');
+  return response.data;
+}
+
+// Сохранить результат теста
+export async function saveTestResult(userId, sphereIds) {
+  const response = await api.post('/test/result', { userId, sphereIds });
+  return response.data;
+}
+
 // Информация о поступлении (бюджет/платно) для профиля
 export async function getPostInfo(profileId) {
   const response = await api.get(`/profil/${profileId}/post_info`);

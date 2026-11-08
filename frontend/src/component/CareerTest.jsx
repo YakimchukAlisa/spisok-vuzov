@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import spheresData from '../DATA/spheres.json';
 import questionsData from '../DATA/test.json'; 
-import '../css/careerTest.css';
+//import '../css/careerTest.css';
 
 export default function CareerTest() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
