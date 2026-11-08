@@ -61,7 +61,7 @@ public class SphereController {
                     dto.setName(p.getName());
                     dto.setDescription(p.getDescription());
 
-                    // 👇 Считаем количество уникальных специальностей для этой профессии
+                    // Считаем количество уникальных специальностей для этой профессии
                     dto.setSpecialtyCount(napravlenieRepository.countSpecialtiesByProfessionId(p.getId()));
 
                     return dto;

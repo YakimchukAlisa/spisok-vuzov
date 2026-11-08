@@ -14,10 +14,7 @@ img {
 
 .wrapper {
     width: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr auto; /* Хедер - авто, Контент - 1fr (занимает всё место), Футер - авто */
   min-height: 100vh;
-  min-height: 100dvh;
 }
 
 .container {

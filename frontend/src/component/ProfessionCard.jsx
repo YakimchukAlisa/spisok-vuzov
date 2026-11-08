@@ -16,7 +16,6 @@ export default function ProfessionCard({ data, type = 'profession', isGlobal = f
     ? data.sphereId[0]
     : (data.sphereId ?? (Array.isArray(data.sphereIds) ? data.sphereIds[0] : undefined));
 
-  // 1. ЛОГИКА ДЛЯ ПРОФЕССИЙ (оставлена как была — на JSON)
   let realSpecialtyCount = 0;
   if (type === 'profession') {
     const uniqueSpecialties = new Set();
@@ -36,7 +35,6 @@ export default function ProfessionCard({ data, type = 'profession', isGlobal = f
     realSpecialtyCount = uniqueSpecialties.size;
   }
 
-  // 2. ЛОГИКА ДЛЯ СПЕЦИАЛЬНОСТЕЙ (оставлена как была — на JSON)
   const professionsInSphere = type === 'specialty'
     ? professionsData.filter(prof => prof.sphereId === currentSphereId).length
     : 0;
@@ -70,11 +68,7 @@ export default function ProfessionCard({ data, type = 'profession', isGlobal = f
         <div className="profession-card__title-row">
           <h3 className="profession-card__title">
             {data.name}
-            {data.kod && (
-              <span className="profession-card__kod" style={{ marginLeft: 8, color: 'var(--gray)', fontWeight: 400 }}>
-                {data.kod}
-              </span>
-            )}
+
           </h3>
           {sphere && (
             <span className="profession-card__sphere">{sphere.name}</span>
@@ -83,7 +77,7 @@ export default function ProfessionCard({ data, type = 'profession', isGlobal = f
 
         <div className="profession-card__stats">
 
-          {/* 👇 ДЛЯ СПЕЦИАЛЬНОСТЕЙ (Карточка "Инноватика") */}
+          {/* ДЛЯ СПЕЦИАЛЬНОСТЕЙ (Карточка "Инноватика") */}
           {type === 'specialty' && (
             <>
               <span className="profession-card__stat-link">
@@ -99,7 +93,7 @@ export default function ProfessionCard({ data, type = 'profession', isGlobal = f
             </>
           )}
 
-          {/* 👇 ДЛЯ ПРОФЕССИЙ (Карточка "Архитектор") */}
+          {/* ДЛЯ ПРОФЕССИЙ ( */}
           {type === 'profession' && (
             <>
               {/* Выводим количество специальностей, если оно пришло */}

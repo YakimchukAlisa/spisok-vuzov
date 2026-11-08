@@ -8,3 +8,33 @@
   margin-top: 100px;
 }
 
+.catalog-controls {
+  position: relative;
+  z-index: 50; /* Поднимаем фильтры поверх карточек */
+}
+.sphere-page-list {
+  overflow: visible; 
+}
+
+
+/* =========================================
+   СТИЛИ ДЛЯ КНОПКИ ФИЛЬТРА НА СТРАНИЦЕ СФЕРЫ
+   ========================================= */
+
+/* Делаем кнопку внутри catalog-controls зеленой */
+.catalog-controls .filter-wrapper > button {
+  background-color: var(--green) !important;
+  color: var(--white) !important;
+  border-color: var(--green) !important;
+}
+
+/* При наведении делаем ее чуть темнее */
+.catalog-controls .filter-wrapper > button:hover {
+  background-color: var(--green-dark) !important;
+}
+
+/* Если фильтры выбраны, делаем ее темно-зеленой (чтобы было видно, что фильтр активен) */
+.catalog-controls .filter-wrapper > button.btn--gray-dark {
+  background-color: var(--green-dark) !important;
+  color: var(--white) !important;
+}
