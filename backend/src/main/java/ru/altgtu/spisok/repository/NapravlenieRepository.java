@@ -76,7 +76,6 @@ public interface NapravlenieRepository extends JpaRepository<Napravlenie, Intege
     LEFT JOIN "Post_info" pi ON pi."ID_Profile" = p."ID_Profile"
     LEFT JOIN "Osnov_priema" o ON o."ID_Osnov" = pi."ID_Osnov"
     WHERE f."ID_Vuz" = :vuzId
-      AND fo."Name" ILIKE '%очн%'
     GROUP BY p."ID_Napravlenie", p."ID_Profile", p."Name", fo."Name", p."Srok_obuch_mes", u."Name"
     """, nativeQuery = true)
     List<ProfileStatsForVuzProjection> findProfileStatsByVuzId(@Param("vuzId") Integer vuzId);

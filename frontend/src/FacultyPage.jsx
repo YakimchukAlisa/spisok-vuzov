@@ -120,48 +120,62 @@ export default function FacultyPage() {
             {(() => {
               const cards = [];
 
-            facultyDirections.forEach((dir) => {
-              const profiles = dir.profiles || [];
-              const levelProfiles = profiles.filter(p => p.uroven === targetLevel);
-              const fullTimeProfiles = levelProfiles.filter(p => p.forma === 'Очная');
+         facultyDirections.forEach((dir) => {
+           const profiles = dir.profiles || [];
 
-              if (fullTimeProfiles.length === 0) return;
+           // 1. Фильтруем по уровню (Бакалавриат / Магистратура)
+           const levelProfiles = profiles.filter(p => p.uroven === targetLevel);
 
-              fullTimeProfiles.forEach((profile) => {
-                cards.push(
-                  <DirectionCard
-                    key={profile.id}
-                    data={{
-                      ...profile,
-                      // код и название направления
-                      code: dir.kod,
-                      code_name: dir.name,
-                      description: dir.opisanie,
-                      kod: dir.kod,
-                      napravlenieName: dir.name,
-                      // экзамены направления
-                      exams: dir.exams || [],
-                      // статистика в формате, который ждёт DirectionCard
-                      educationForms: {
-                        fullTime: {
-                          name: profile.forma || 'Очная',
-                          budget: {
-                            places: profile.budgetPlaces || 0,
-                            minScore: profile.budgetMinScore || 0,
-                          },
-                          paid: {
-                            places: profile.paidPlaces || 0,
-                            minScore: profile.paidMinScore || 0,
-                            minPrice: profile.paidMinPrice || 0,
-                          },
-                        },
-                      },
-                    }}
-                    facultyLogo={logoForCard}
-                  />
-                );
-              });
-            });
+           if (levelProfiles.length === 0) return;
+
+           // 2. Группируем профили по названию (чтобы очная и заочная с одинаковым названием объединились)
+           const groupedProfiles = {};
+
+           levelProfiles.forEach(profile => {
+             const key = profile.name; // Ключ — название профиля
+             if (!groupedProfiles[key]) {
+               groupedProfiles[key] = profile; // Берем первый попавшийся
+             } else {
+               // Если уже есть — проверяем: если текущий очный, а сохраненный заочный, заменяем на очный
+               if (profile.forma === 'Очная' && groupedProfiles[key].forma !== 'Очная') {
+                 groupedProfiles[key] = profile;
+               }
+             }
+           });
+
+           // 3. Выводим уникальные профили (уже с приоритетом очной формы)
+           Object.values(groupedProfiles).forEach((profile) => {
+             cards.push(
+               <DirectionCard
+                 key={profile.id}
+                 data={{
+                   ...profile,
+                   code: dir.kod,
+                   code_name: dir.name,
+                   description: dir.opisanie,
+                   kod: dir.kod,
+                   napravlenieName: dir.name,
+                   exams: dir.exams || [],
+                   educationForms: {
+                     fullTime: {
+                       name: profile.forma || 'Очная', // Тут будет "Очная" (если есть) или "Заочная"
+                       budget: {
+                         places: profile.budgetPlaces || 0,
+                         minScore: profile.budgetMinScore || 0,
+                       },
+                       paid: {
+                         places: profile.paidPlaces || 0,
+                         minScore: profile.paidMinScore || 0,
+                         minPrice: profile.paidMinPrice || 0,
+                       },
+                     },
+                   },
+                 }}
+                 facultyLogo={logoForCard}
+               />
+             );
+           });
+         });
 
               if (cards.length === 0) {
                 return (
