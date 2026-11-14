@@ -25,6 +25,7 @@ public class NapravlenieDto {
         private Integer id;
         private String name;
         private String forma;
+        private String opisanie;
         private Integer srokObuchMes;
         private Integer budgetPlaces;
         private Integer budgetMinScore;

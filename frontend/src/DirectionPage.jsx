@@ -1,40 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import vuzData from './DATA/cardVuz.json';
+import axios from 'axios';
 import VuzDetailsHero from './component/VuzDetailsHero';
 import FeedbackForm from './component/FeedbackForm';
 import ProfessionsBlock from './component/ProfessionsBlock';
 import SimilarDirections from './component/SimilarDirections';
 
-
 export default function DirectionPage() {
-    const { vuzId, facultyId, directionId } = useParams();
+   const { directionId } = useParams();
+    const [profile, setProfile] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const vuz = vuzData.find((v) => v.id === Number(vuzId));
-    const faculty = vuz?.faculties?.find((f) => f.id === Number(facultyId));
+    useEffect(() => {
+        axios.get(`http://localhost:8080/api/profil/${directionId}`)
+            .then(res => {
+                setProfile(res.data);
+                setIsLoading(false);
+            })
+            .catch(err => {
+                console.error("Ошибка загрузки профиля:", err);
+                setIsLoading(false);
+            });
+    }, [directionId]);
 
-    let direction = faculty?.bachelor?.directionsList?.find(d => d.id === Number(directionId));
-    if (!direction) {
-        direction = faculty?.master?.directionsList?.find(d => d.id === Number(directionId));
-    }
-
-    if (!direction) {
-        return <div className="container">Направление не найдено</div>;
-    }
+    if (isLoading) return <div className="container" style={{ padding: '100px' }}>Загрузка...</div>;
+    if (!profile) return <div className="container" style={{ padding: '100px' }}>Профиль не найден</div>;
 
     const formatPrice = (price) => new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
 
+    // Формируем объект для VuzDetailsHero, чтобы шапка отрисовалась (если нужно)
+    const adaptedVuz = {
+        name: profile.vuzName,
+        id: profile.vuzId,
+        // Добавьте другие поля, если VuzDetailsHero их требует (например, логотип)
+    };
+
     return (
         <div className="wrapper">
-            <VuzDetailsHero data={vuz} />
-            <div className="containerDirection">
+            {/* Если нужна шапка вуза, можно передать данные, но лучше передать полный объект вуза */}
+            {/* <VuzDetailsHero data={adaptedVuz} /> */}
+
+            <div className="containerDirection" style={{ paddingTop: '40px' }}>
 
                 {/* ШАПКА НАПРАВЛЕНИЯ */}
                 <div className="direction-header">
                     <div className="direction-header__logo">
-                        {faculty.imageUrl && (
+                        {profile.fakultetLogo && (
                             <img
-                                src={faculty.imageUrl}
+                                src={profile.fakultetLogo}
                                 alt="Логотип"
                                 className="direction-header__logo-img"
                             />
@@ -42,10 +55,13 @@ export default function DirectionPage() {
                     </div>
                     <div className="direction-header__titles">
                         <h1 className="direction-header__title text-28sm">
-                            {direction.name}
+                            {profile.name}
                         </h1>
                         <p className="direction-header__code text-20r" style={{ color: 'var(--black)', marginTop: '4px' }}>
-                            {direction.code} {direction.code_name}
+                            {profile.kod} {profile.napravlenieName}
+                        </p>
+                        <p className="text-20r" style={{ color: 'var(--gray)', marginTop: '8px' }}>
+                            {profile.vuzName} • {profile.fakultetName}
                         </p>
                     </div>
                 </div>
@@ -53,120 +69,61 @@ export default function DirectionPage() {
                 {/* ОПИСАНИЕ */}
                 <div className="direction-description">
                     <h2 className="text-20b" style={{ color: 'var(--green)' }}>
-                        Всего: {vuzData.length} ВУЗа
+                        {profile.forma} форма обучения ({profile.uroven})
                     </h2>
-                    <p className="text-20r" style={{ marginTop: '16px' }}>{direction.description}</p>
+                    <p className="text-20r" style={{ marginTop: '16px' }}>{profile.opisanie}</p>
+                    <p className="text-20r" style={{ marginTop: '8px', color: 'var(--gray)' }}>
+                        Срок обучения: {profile.srokObuchMes} мес.
+                    </p>
                 </div>
 
-                {/* КАКИЕ ПРЕДМЕТЫ СДАВАТЬ */}
-                {direction.exams && direction.exams.length > 0 && (
-                    <div className="direction-skills">
-                        <h2 className="text-28sm">Какие предметы сдавать?</h2>
-                        <div className="direction-skills__grid">
-                            {direction.exams.map((exam, index) => (
-                                <div key={index} className="direction-skill-card">
-                                    <span className="direction-skill-card__number">{index + 1}</span>
-                                    <span className="text-20r">{exam}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* ФОРМЫ ОБУЧЕНИЯ */}
-                <div className="direction-forms">
-                    <h2 className="text-28sm">Формы обучения</h2>
+                {/* ФОРМЫ ОБУЧЕНИЯ И МЕСТА */}
+                <div className="direction-forms" style={{ marginTop: '40px' }}>
+                    <h2 className="text-28sm">Поступление</h2>
 
                     <div className="direction-forms__list">
-                        {/* Очная форма */}
                         <div className="direction-form-group">
-                            <h3 className="text-20r" style={{ color: 'var(--green)' }}>
-                                {direction.educationForms?.fullTime?.name}
-                            </h3>
                             <div className="direction-forms__cards">
                                 <div className="direction-form-card">
                                     <div className="direction-form-card__number">1</div>
                                     <div className="direction-form-card__info">
                                         <h4 className="text-24b">Бюджет</h4>
-                                        <p className="text-20b">{direction.educationForms?.fullTime?.budget?.places} мест</p>
-                                        <p className="text-20r">от {direction.educationForms?.fullTime?.budget?.minScore} баллов</p>
+                                        <p className="text-20b">{profile.budgetPlaces} мест</p>
+                                        <p className="text-20r">от {profile.budgetMinScore} баллов</p>
                                     </div>
                                 </div>
                                 <div className="direction-form-card">
                                     <div className="direction-form-card__number">2</div>
                                     <div className="direction-form-card__info">
                                         <h4 className="text-24b">Платно</h4>
-                                        <p className="text-20b">{direction.educationForms?.fullTime?.paid?.places} мест</p>
-                                        <p className="text-20r">от {direction.educationForms?.fullTime?.paid?.minScore} баллов</p>
-                                        <p className="text-20r">от {direction.educationForms?.fullTime?.paid?.minPrice ? formatPrice(direction.educationForms.fullTime.paid.minPrice) : ''}</p>
+                                        <p className="text-20b">{profile.paidPlaces} мест</p>
+                                        <p className="text-20r">от {profile.paidMinScore} баллов</p>
+                                        {profile.paidMinPrice > 0 && (
+                                            <p className="text-20r">от {formatPrice(profile.paidMinPrice)}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Заочная форма (если есть) */}
-                        {direction.educationForms?.partTime && (
-                            <div className="direction-form-group">
-                                <h3 className="text-20r" style={{ color: 'var(--green)' }}>
-                                    {direction.educationForms.partTime.name}
-                                </h3>
-                                <div className="direction-forms__cards">
-                                    <div className="direction-form-card">
-                                        <div className="direction-form-card__number">1</div>
-                                        <div className="direction-form-card__info">
-                                            <h4 className="text-24b">Бюджет</h4>
-                                            <p className="text-20b">{direction.educationForms.partTime.budget.places} мест</p>
-                                            <p className="text-20r">от {direction.educationForms.partTime.budget.minScore} баллов</p>
-                                        </div>
-                                    </div>
-                                    <div className="direction-form-card">
-                                        <div className="direction-form-card__number">2</div>
-                                        <div className="direction-form-card__info">
-                                            <h4 className="text-24b">Платно</h4>
-                                            <p className="text-20b">{direction.educationForms.partTime.paid.places} мест</p>
-                                            <p className="text-20r">от {direction.educationForms.partTime.paid.minScore} баллов</p>
-                                            <p className="text-20r">от {formatPrice(direction.educationForms.partTime.paid.minPrice)}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
 
-                {/* ФАЙЛЫ */}
-                {direction.files && direction.files.length > 0 && (
-                    <div className="direction-files">
-                        <h2 className="text-28sm">Файлы</h2>
-                        <div className="direction-files__list">
-                            {direction.files.map((file, index) => (
-                                <a key={index} href={file.url} download className="direction-file-card">
-                                    <img
-                                        src="/download.svg"
-                                        alt="Скачать"
-                                        className="direction-file-card__icon"
-                                    />
-                                    <span className="text-20r">{file.name}</span>
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-                )}
-                <div className='direction-title-and-form'>
+                {/* БЛОК С ВОПРОСАМИ */}
+                <div className='direction-title-and-form' style={{ marginTop: '40px' }}>
                     <h2 className="text-28sm">Остались вопросы?</h2>
                     <div className='text-and-form'>
                         <h3 className="text-20r">Задайте вопрос в приёмную комиссию ВУЗа и сотрудник с радостью ответит Вам!</h3>
                         <FeedbackForm
-                            vuzName={vuz.name}
-                            vuzEmail={vuz.contacts?.email || 'info@example.com'}
+                            vuzName={profile.vuzName}
+                            vuzEmail="info@example.com" // Лучше добавить email вуза в ответ бэкенда
                         />
                     </div>
                 </div>
-                <ProfessionsBlock sphereIds={direction.sphereIds} />
-                <SimilarDirections
-                    currentDirectionId={direction.id}
-                    sphereIds={direction.sphereIds}
-                />
+
+                {/* Кнопка назад */}
+                <Link to={`/vuz/${profile.vuzId}/faculty/${profile.facultyId}`} className="btn btn--green" style={{ marginTop: '40px' }}>
+                    Назад к факультету
+                </Link>
             </div>
         </div>
     );

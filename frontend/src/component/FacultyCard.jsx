@@ -4,7 +4,6 @@ import { useFavorites } from './FavoritesContext.jsx';
 import vuzData from './../DATA/cardVuz.json'; 
 import './../css/facultyCard.css';
 
-// 👇 ДОБАВИЛИ ПРОПС showVuzName 👇
 export default function FacultyCard({ data, showVuzName = false }) {
     const { id: vuzIdFromUrl } = useParams(); 
     const { isAuth, favorites, toggleFavorite } = useFavorites(); 
@@ -32,7 +31,6 @@ export default function FacultyCard({ data, showVuzName = false }) {
                         <h3 className="faculty-card__short-name">{data.shortName}</h3>
                         <p className="faculty-card__full-name">{data.fullName}</p>
 
-                        {/* 👇 ВЫВОДИМ ВУЗ, ТОЛЬКО ЕСЛИ ПЕРЕДАН ПРОПС 👇 */}
                         {showVuzName && vuz && (
                             <p className="text-14m" style={{ color: 'var(--green)', marginTop: '8px' }}>
                                 {vuz.name}

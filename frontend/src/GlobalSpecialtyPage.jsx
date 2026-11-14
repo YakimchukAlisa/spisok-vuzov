@@ -64,6 +64,21 @@ export default function GlobalSpecialtyPage() {
                     {specialty.opisanie && <p className="text-20r" style={{ marginTop: '16px' }}>{specialty.opisanie}</p>}
                 </div>
 
+                                {/* КАКИЕ ПРЕДМЕТЫ СДАВАТЬ */}
+                                {specialty.exams && specialty.exams.length > 0 && (
+                                    <div className="global-specialty-exams" style={{ padding: '0px 20px', marginTop: '40px' }}>
+                                        <h2 className="text-28sm" style={{ marginBottom: '24px' }}>Какие предметы сдавать?</h2>
+                                        <div className="direction-skills__grid">
+                                            {specialty.exams.map((exam, index) => (
+                                                <div key={indsex} className="direction-skill-card">
+                                                    <span className="direction-skill-card__number">{index + 1}</span>
+                                                    <span className="text-20r">{exam}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
                 {/* СПИСОК ВУЗОВ */}
                 <div className="global-specialty-vuzes" style={{padding: '0px 20px', marginTop: '40px'}}>
                     <h2 className="text-28sm" style={{ display: 'flex', alignItems: 'center', gap: '20px'}}>

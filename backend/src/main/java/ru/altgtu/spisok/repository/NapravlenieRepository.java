@@ -182,5 +182,17 @@ public interface NapravlenieRepository extends JpaRepository<Napravlenie, Intege
     """, nativeQuery = true)
     Long countSpecialtiesByProfessionId(@Param("professionId") Integer professionId);
 
+    @Query(value = """
+    SELECT DISTINCT e."Name"
+    FROM "Napravlenie" n
+    JOIN "Profile" p ON p."ID_Napravlenie" = n."ID_Napravlenie"
+    JOIN "Post_info" pi ON pi."ID_Profile" = p."ID_Profile"
+    JOIN "Ispitania" isp ON isp."ID_Info" = pi."ID_Info"
+    JOIN "Treb_exam" te ON te."ID_Ispit" = isp."ID_Ispit"
+    JOIN "Exam" e ON e."ID_Exam" = te."ID_Exam"
+    WHERE n."Kod" = :kod 
+      AND te."Forma_sdachi" ILIKE '%ЕГЭ%'
+    """, nativeQuery = true)
+    List<String> findExamsByKod(@Param("kod") String kod);
 
 }

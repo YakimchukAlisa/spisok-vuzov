@@ -48,11 +48,11 @@ export default function DirectionCard({ data, facultyLogo, isGlobal = false, sho
                     </div>
                 </div>
 
-                {data.description && (
-                    <div className="direction-card__description">
-                        <p className="text-14r">{data.description}</p>
-                    </div>
-                )}
+                   {data.description && (
+                                    <div className="direction-card__description">
+                                        <p className="text-14r">{data.description}</p>
+                                    </div>
+                                )}
 
                 {data.exams && data.exams.length > 0 && (
                     <div className="direction-card__exams">

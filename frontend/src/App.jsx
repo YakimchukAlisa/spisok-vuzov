@@ -184,6 +184,7 @@ function App() {
              <Route path="/specialties" element={<CatalogPage />} />
              <Route path="/sphere/:sphereId" element={<SpherePage />}  />
              <Route path="/napravlenie/:kod" element={<GlobalSpecialtyPage />} />
+             <Route path="/vuz/:vuzId/faculty/:facultyId/direction/:directionId" element={<DirectionPage />} />
           </Routes>
         </main>
 

@@ -262,6 +262,7 @@ public class NapravlenieController {
         response.put("name", first.getName());
         response.put("opisanie", first.getOpisanie());
         response.put("vuzes", uniqueVuzes.values());
+        response.put("exams", napravlenieRepository.findExamsByKod(kod));
 
         return response;
     }
@@ -340,7 +341,7 @@ public class NapravlenieController {
                     dto.setDescription(p.getDescription());
                     dto.setSpecialtyCount(napravlenieRepository.countSpecialtiesByProfessionId(p.getId()));
 
-                    // 👇 СОБИРАЕМ ВСЕ СФЕРЫ У НАПРАВЛЕНИЯ
+                    // СОБИРАЕМ ВСЕ СФЕРЫ У НАПРАВЛЕНИЯ
                     if (firstNapravlenie.getSpheres() != null) {
                         dto.setSphereIds(firstNapravlenie.getSpheres().stream().map(Sphere::getId).toList());
                         dto.setSphereNames(firstNapravlenie.getSpheres().stream().map(Sphere::getName).toList());
@@ -348,5 +349,37 @@ public class NapravlenieController {
                     return dto;
                 })
                 .toList();
+    }
+
+    @GetMapping("/profil/{id}")
+    public Map<String, Object> getProfileDetails(@PathVariable Integer id) {
+        Map<String, Object> rawData = profileRepository.findProfileWithStatsById(id);
+        if (rawData == null) {
+            throw new RuntimeException("Профиль не найден");
+        }
+
+        Map<String, Object> result = new HashMap<>();
+
+        // Безопасно достаем данные (если null — подставится null)
+        result.put("id", rawData.getOrDefault("id", id));
+        result.put("name", rawData.getOrDefault("name", ""));
+        result.put("napravlenieName", rawData.getOrDefault("napravleniename", ""));
+        result.put("kod", rawData.getOrDefault("kod", ""));
+        result.put("opisanie", rawData.getOrDefault("opisanie", ""));
+        result.put("fakultetName", rawData.getOrDefault("fakultetname", ""));
+        result.put("fakultetLogo", rawData.getOrDefault("fakultetlogo", ""));
+        result.put("vuzName", rawData.getOrDefault("vuzname", ""));
+        result.put("forma", rawData.getOrDefault("forma", ""));
+        result.put("uroven", rawData.getOrDefault("uroven", ""));
+
+        // Числовые поля могут вернуться как BigDecimal, приводим к Integer
+        result.put("srokObuchMes", rawData.get("srokobuchmes") != null ? ((Number)rawData.get("srokobuchmes")).intValue() : 0);
+        result.put("budgetPlaces", rawData.get("budgetplaces") != null ? ((Number)rawData.get("budgetplaces")).intValue() : 0);
+        result.put("budgetMinScore", rawData.get("budgetminscore") != null ? ((Number)rawData.get("budgetminscore")).intValue() : 0);
+        result.put("paidPlaces", rawData.get("paidplaces") != null ? ((Number)rawData.get("paidplaces")).intValue() : 0);
+        result.put("paidMinScore", rawData.get("paidminscore") != null ? ((Number)rawData.get("paidminscore")).intValue() : 0);
+        result.put("paidMinPrice", rawData.get("paidminprice") != null ? ((Number)rawData.get("paidminprice")).intValue() : 0);
+
+        return result;
     }
 }

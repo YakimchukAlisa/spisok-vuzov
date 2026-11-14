@@ -136,6 +136,7 @@ export default function FacultyPage() {
                       // код и название направления
                       code: dir.kod,
                       code_name: dir.name,
+                      description: dir.opisanie,
                       kod: dir.kod,
                       napravlenieName: dir.name,
                       // экзамены направления
