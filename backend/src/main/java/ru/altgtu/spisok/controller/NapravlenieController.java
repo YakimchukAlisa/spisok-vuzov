@@ -24,6 +24,7 @@ public class NapravlenieController {
     private final PostInfoRepository postInfoRepository;
     private final ProfessionRepository professionRepository;
     private final VuzRepository vuzRepository;
+    private final ProfileFileRepository profileFileRepository;
 
     // 1. Получить все направления для конкретного вуза (СО СТАТИСТИКОЙ)
     //    ВСЕГО 3 запроса к БД (вместо сотен)
@@ -233,7 +234,7 @@ public class NapravlenieController {
                         vuzMap.put("logoUrl", vuzDetails.getLogoUrl());
                         vuzMap.put("imageUrl", vuzDetails.getImageUrl());
 
-                        // 👇 Упаковываем плоские поля VuzDto в структуру, которую ждет VuzCard
+                        // Упаковываем плоские поля VuzDto в структуру, которую ждет VuzCard
                         vuzMap.put("budget", Map.of(
                                 "places", vuzDetails.getBudgetPlaces() != null ? vuzDetails.getBudgetPlaces() : 0,
                                 "minScore", vuzDetails.getBudgetMinScore() != null ? vuzDetails.getBudgetMinScore() : 0
@@ -353,32 +354,114 @@ public class NapravlenieController {
 
     @GetMapping("/profil/{id}")
     public Map<String, Object> getProfileDetails(@PathVariable Integer id) {
-        Map<String, Object> rawData = profileRepository.findProfileWithStatsById(id);
-        if (rawData == null) {
-            throw new RuntimeException("Профиль не найден");
+        // 1. Находим текущий профиль
+        Profile currentProfile = profileRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Профиль не найден"));
+
+        // 2. Находим ВСЕ профили с таким же названием и в этом же вузе (или просто по названию направления)
+        // Для простоты берем все профили этого направления (по ID направления)
+        Integer napravlenieId = currentProfile.getNapravlenie().getId();
+        List<Profile> allProfiles = profileRepository.findByNapravlenieId(napravlenieId);
+
+        // 3. Собираем статистику для каждого профиля
+        List<Map<String, Object>> formsStats = new ArrayList<>();
+
+        for (Profile p : allProfiles) {
+            Map<String, Object> rawStats = profileRepository.findProfileWithStatsById(p.getId());
+            if (rawStats != null) {
+                Map<String, Object> formInfo = new HashMap<>();
+                formInfo.put("profileId", p.getId());
+                formInfo.put("forma", rawStats.getOrDefault("forma", ""));
+                formInfo.put("uroven", rawStats.getOrDefault("uroven", ""));
+                formInfo.put("srokObuchMes", rawStats.get("srokobuchmes") != null ? ((Number) rawStats.get("srokobuchmes")).intValue() : 0);
+                formInfo.put("budgetPlaces", rawStats.get("budgetplaces") != null ? ((Number) rawStats.get("budgetplaces")).intValue() : 0);
+                formInfo.put("budgetMinScore", rawStats.get("budgetminscore") != null ? ((Number) rawStats.get("budgetminscore")).intValue() : 0);
+                formInfo.put("paidPlaces", rawStats.get("paidplaces") != null ? ((Number) rawStats.get("paidplaces")).intValue() : 0);
+                formInfo.put("paidMinScore", rawStats.get("paidminscore") != null ? ((Number) rawStats.get("paidminscore")).intValue() : 0);
+                formInfo.put("paidMinPrice", rawStats.get("paidminprice") != null ? ((Number) rawStats.get("paidminprice")).intValue() : 0);
+                formsStats.add(formInfo);
+            }
         }
 
+        // 4. Берем базовую инфу из первого профиля (или из текущего)
+        Map<String, Object> rawData = profileRepository.findProfileWithStatsById(id);
         Map<String, Object> result = new HashMap<>();
 
-        // Безопасно достаем данные (если null — подставится null)
-        result.put("id", rawData.getOrDefault("id", id));
-        result.put("name", rawData.getOrDefault("name", ""));
-        result.put("napravlenieName", rawData.getOrDefault("napravleniename", ""));
-        result.put("kod", rawData.getOrDefault("kod", ""));
-        result.put("opisanie", rawData.getOrDefault("opisanie", ""));
-        result.put("fakultetName", rawData.getOrDefault("fakultetname", ""));
-        result.put("fakultetLogo", rawData.getOrDefault("fakultetlogo", ""));
-        result.put("vuzName", rawData.getOrDefault("vuzname", ""));
-        result.put("forma", rawData.getOrDefault("forma", ""));
-        result.put("uroven", rawData.getOrDefault("uroven", ""));
+        result.put("id", rawData.get("id"));
+        result.put("name", rawData.get("name"));
+        result.put("napravlenieName", rawData.get("napravleniename"));
+        result.put("kod", rawData.get("kod"));
+        result.put("opisanie", rawData.get("opisanie"));
+        result.put("fakultetName", rawData.get("fakultetname"));
+        result.put("fakultetLogo", rawData.get("fakultetlogo"));
+        result.put("vuzName", rawData.get("vuzname"));
+        result.put("vuzId", rawData.get("vuzid"));
+        result.put("facultyId", rawData.get("facultyid"));
 
-        // Числовые поля могут вернуться как BigDecimal, приводим к Integer
-        result.put("srokObuchMes", rawData.get("srokobuchmes") != null ? ((Number)rawData.get("srokobuchmes")).intValue() : 0);
-        result.put("budgetPlaces", rawData.get("budgetplaces") != null ? ((Number)rawData.get("budgetplaces")).intValue() : 0);
-        result.put("budgetMinScore", rawData.get("budgetminscore") != null ? ((Number)rawData.get("budgetminscore")).intValue() : 0);
-        result.put("paidPlaces", rawData.get("paidplaces") != null ? ((Number)rawData.get("paidplaces")).intValue() : 0);
-        result.put("paidMinScore", rawData.get("paidminscore") != null ? ((Number)rawData.get("paidminscore")).intValue() : 0);
-        result.put("paidMinPrice", rawData.get("paidminprice") != null ? ((Number)rawData.get("paidminprice")).intValue() : 0);
+        // ПЕРЕДАЕМ МАССИВ ВСЕХ ФОРМ ОБУЧЕНИЯ
+        result.put("forms", formsStats);
+
+
+        List<Map<String, String>> files = profileFileRepository.findByProfileId(id).stream()
+                .map(f -> Map.of(
+                        "name", f.getName(),
+                        "url", f.getFileUrl()
+                ))
+                .toList();
+        result.put("files", files);
+
+        String kod = (String) rawData.get("kod");
+        // ДОБАВЛЯЕМ ПРОФЕССИИ (копируем логику из getProfessionsBySpecialty)
+        List<ProfessionDto> professions = professionRepository.findProfessionsByNapravlenieKod(kod).stream()
+                .map(p -> {
+                    ProfessionDto dto = new ProfessionDto();
+                    dto.setId(p.getId());
+                    dto.setName(p.getName());
+                    dto.setDescription(p.getDescription());
+                    dto.setSpecialtyCount(napravlenieRepository.countSpecialtiesByProfessionId(p.getId()));
+                    return dto;
+                })
+                .toList();
+        result.put("professions", professions);
+
+        // ДОБАВЛЯЕМ ПОХОЖИЕ СПЕЦИАЛЬНОСТИ (копируем логику из getSimilarSpecialties)
+        List<Napravlenie> currentList = napravlenieRepository.findByKod(kod);
+        if (!currentList.isEmpty()) {
+            Napravlenie current = currentList.get(0);
+            List<Integer> currentProfIds = current.getProfessions() != null
+                    ? current.getProfessions().stream().map(Profession::getId).toList()
+                    : List.of();
+            List<Napravlenie> linkedByProfessions = currentProfIds.isEmpty() ? List.of() : napravlenieRepository.findByProfessionIds(currentProfIds);
+            Integer sphereId = current.getSpheres() != null && !current.getSpheres().isEmpty() ? current.getSpheres().iterator().next().getId() : null;
+            List<Napravlenie> sameSphere = sphereId != null ? napravlenieRepository.findBySphereId(sphereId) : List.of();
+
+            Map<String, Napravlenie> uniqueMap = new LinkedHashMap<>();
+            for (Napravlenie n : linkedByProfessions)
+                if (!n.getName().equals(current.getName())) uniqueMap.putIfAbsent(n.getName(), n);
+            for (Napravlenie n : sameSphere)
+                if (!n.getName().equals(current.getName())) uniqueMap.putIfAbsent(n.getName(), n);
+
+            List<AbstractNapravlenieDto> similar = uniqueMap.values().stream()
+                    .limit(4)
+                    .map(n -> {
+                        AbstractNapravlenieDto dto = new AbstractNapravlenieDto();
+                        dto.setId(n.getId());
+                        dto.setKod(n.getKod());
+                        dto.setName(n.getName());
+                        dto.setOpisanie(n.getOpisanie());
+                        dto.setVuzCount(1L);
+                        dto.setProfessionCount(professionRepository.countProfessionsBySphereAndKod(n.getKod()));
+                        if (n.getSpheres() != null) {
+                            dto.setSphereIds(n.getSpheres().stream().map(Sphere::getId).toList());
+                            dto.setSphereNames(n.getSpheres().stream().map(Sphere::getName).toList());
+                        }
+                        return dto;
+                    })
+                    .toList();
+            result.put("similar", similar);
+        } else {
+            result.put("similar", List.of());
+        }
 
         return result;
     }
