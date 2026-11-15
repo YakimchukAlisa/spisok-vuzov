@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.altgtu.spisok.entity.Napravlenie;
 import java.util.List;
+import java.util.Map;
 
 public interface NapravlenieRepository extends JpaRepository<Napravlenie, Integer> {
 
@@ -194,4 +195,19 @@ public interface NapravlenieRepository extends JpaRepository<Napravlenie, Intege
     """, nativeQuery = true)
     List<String> findExamsByKod(@Param("kod") String kod);
 
+    @Query(value = """
+    SELECT 
+        i."ID_Ispit" AS ispitaniaId,
+        e."Name" AS examName,
+        te."Forma_sdachi" AS formaSdachi,
+        te."Is_obiaz" AS isobiaz
+    FROM "Napravlenie" n
+    JOIN "Profile" p ON p."ID_Napravlenie" = n."ID_Napravlenie"
+    JOIN "Post_info" pi ON pi."ID_Profile" = p."ID_Profile"
+    JOIN "Ispitania" i ON i."ID_Info" = pi."ID_Info"
+    JOIN "Treb_exam" te ON te."ID_Ispit" = i."ID_Ispit"
+    JOIN "Exam" e ON e."ID_Exam" = te."ID_Exam"
+    WHERE n."Kod" = :kod
+    """, nativeQuery = true)
+    List<Map<String, Object>> findRawExamsByKod(@Param("kod") String kod);
 }

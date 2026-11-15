@@ -352,14 +352,54 @@ public class NapravlenieController {
                 .toList();
     }
 
+    // Метод для определения обязательных предметов (которые есть во ВСЕХ комбинациях)
+    private List<Map<String, Object>> getExamsWithMandatoryFlag(String kod) {
+        List<Map<String, Object>> rawExams = napravlenieRepository.findRawExamsByKod(kod);
+
+        Map<String, Map<String, Object>> uniqueExams = new LinkedHashMap<>();
+
+        for (Map<String, Object> row : rawExams) {
+            String examName = (String) row.get("examname");
+            String forma = (String) row.get("formasdachi");
+            Boolean isObiaz = (Boolean) row.get("isobiaz");
+
+            boolean isEge = forma != null && forma.toUpperCase().contains("ЕГЭ");
+            boolean isMandatory = isObiaz != null ? isObiaz : false;
+
+            // 👇 УСЛОВИЕ ФИЛЬТРАЦИИ:
+            // Если это НЕ ЕГЭ (внутренний) и он НЕ обязательный (для колледжников) — пропускаем его!
+            if (!isEge && !isMandatory) {
+                continue;
+            }
+
+            if (!uniqueExams.containsKey(examName)) {
+                Map<String, Object> examMap = new HashMap<>();
+                examMap.put("name", examName);
+                examMap.put("isMandatory", isMandatory);
+                examMap.put("isEge", isEge);
+                uniqueExams.put(examName, examMap);
+            }
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>(uniqueExams.values());
+        result.sort((a, b) -> {
+            boolean m1 = (Boolean) a.get("isMandatory");
+            boolean m2 = (Boolean) b.get("isMandatory");
+            if (m1 && !m2) return -1;
+            if (!m1 && m2) return 1;
+            return ((String)a.get("name")).compareTo((String)b.get("name"));
+        });
+
+        return result;
+    }
+
     @GetMapping("/profil/{id}")
     public Map<String, Object> getProfileDetails(@PathVariable Integer id) {
-        // 1. Находим текущий профиль
+        // Находим текущий профиль
         Profile currentProfile = profileRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Профиль не найден"));
 
-        // 2. Находим ВСЕ профили с таким же названием и в этом же вузе (или просто по названию направления)
-        // Для простоты берем все профили этого направления (по ID направления)
+        // Находим ВСЕ профили с таким же названием и в этом же вузе (или просто по названию направления)
         Integer napravlenieId = currentProfile.getNapravlenie().getId();
         List<Profile> allProfiles = profileRepository.findByNapravlenieId(napravlenieId);
 
@@ -401,14 +441,23 @@ public class NapravlenieController {
         // ПЕРЕДАЕМ МАССИВ ВСЕХ ФОРМ ОБУЧЕНИЯ
         result.put("forms", formsStats);
 
+        List<Map<String, String>> files = new ArrayList<>();
+        for (Profile p : allProfiles) {
+            List<Map<String, String>> profileFiles = profileFileRepository.findByProfileId(p.getId()).stream()
+                    .map(f -> Map.of(
+                            "name", f.getName(),
+                            "url", f.getFileUrl()
+                    ))
+                    .toList();
+            files.addAll(profileFiles);
+        }
 
-        List<Map<String, String>> files = profileFileRepository.findByProfileId(id).stream()
-                .map(f -> Map.of(
-                        "name", f.getName(),
-                        "url", f.getFileUrl()
-                ))
+        // Убираем дубликаты (если один и тот же файл привязан к очной и заочной форме, он выведется один раз)
+        List<Map<String, String>> uniqueFiles = files.stream()
+                .distinct()
                 .toList();
-        result.put("files", files);
+
+        result.put("files", uniqueFiles);
 
         String kod = (String) rawData.get("kod");
         // ДОБАВЛЯЕМ ПРОФЕССИИ (копируем логику из getProfessionsBySpecialty)
@@ -462,7 +511,7 @@ public class NapravlenieController {
         } else {
             result.put("similar", List.of());
         }
-
+        result.put("exams", getExamsWithMandatoryFlag(kod));
         return result;
     }
 }
