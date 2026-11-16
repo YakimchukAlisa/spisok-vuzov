@@ -1,0 +1,154 @@
+{
+  "universities": [
+    {
+      "id": "1",
+      "name": "АлтГТУ им. И. И. Ползунова",
+      "fullName": "Алтайский государственный технический университет имени И. И. Ползунова",
+      "city": ["Барнаул"],
+      "address": "пр-т Ленина, 46",
+      "imageUrl": "/img/altgtu/altgtu.jpg",
+      "logoUrl": "/img/altgtu/altgtu.svg",
+      "contacts": {
+        "phone": "+7 (3852) 29-07-29",
+        "email": "politeh@altgtu.ru"
+      },
+      "features": [
+        "Общежитие",
+        "Военный учебный центр",
+        "Центр культурно-массовой работы"
+      ],
+      "socials": {},
+      "faculties": [
+        {
+          "id": 1,
+          "shortName": "ФИТ",
+          "fullName": "Факультет Информационных технологий",
+          "imageUrl": "/img/altgtu/fit.svg",
+          "bachelor": {
+            "directionsList": [
+              {
+                "id": 101,
+                "code": "09.03.04",
+                "code_name": "Программная инженерия",
+                "description": "Комплексная подготовка по проектированию, программированию и тестированию компьютерных программ.",
+                "spheres": ["it"],
+                "profiles": [
+                  {
+                    "id": 1001,
+                    "name": "Разработка программно-информационных систем",
+                    "description": "Профиль по созданию и сопровождению информационных систем.",
+                    "budget": { "places": 87, "minScore": 68 },
+                    "paid": { "places": 60, "minScore": 40, "price": 170000 }
+                  },
+                  {
+                    "id": 1002,
+                    "name": "Искусственный интеллект",
+                    "description": "Профиль по машинному обучению и анализу данных.",
+                    "budget": { "places": 30, "minScore": 75 },
+                    "paid": { "places": 20, "minScore": 50, "price": 180000 }
+                  }
+                ]
+              },
+              {
+                "id": 102,
+                "code": "09.03.02",
+                "code_name": "Информационные системы и технологии",
+                "description": "Подготовка специалистов в области создания и внедрения ИС.",
+                "spheres": ["it", "economics"],
+                "profiles": [
+                  {
+                    "id": 1003,
+                    "name": "Информационные системы и технологии",
+                    "description": "Общий профиль по ИС.",
+                    "budget": { "places": 50, "minScore": 65 },
+                    "paid": { "places": 40, "minScore": 45, "price": 150000 }
+                  }
+                ]
+              }
+            ]
+          },
+          "master": {
+            "directionsList": [
+              {
+                "id": 201,
+                "code": "09.04.01",
+                "code_name": "Информатика и вычислительная техника",
+                "description": "Магистерская программа по ИИ.",
+                "spheres": ["it"],
+                "profiles": [
+                  {
+                    "id": 1004,
+                    "name": "Искусственный интеллект и анализ данных",
+                    "description": "Магистерский профиль по ИИ.",
+                    "budget": { "places": 25, "minScore": 75 },
+                    "paid": { "places": 30, "minScore": 50, "price": 180000 }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "СПбПУ Петра Великого",
+      "fullName": "Санкт-Петербургский политехнический университет Петра Великого",
+      "city": ["Санкт-Петербург"],
+      "address": "ул. Политехническая, 29",
+      "imageUrl": "/img/spbpu/spbpu.jpg",
+      "logoUrl": "/img/spbpu/spbpu.svg",
+      "features": ["Общежитие", "Военный учебный центр"],
+      "contacts": { "phone": "+7 (812) 775-05-30", "email": "office@spbstu.ru" },
+      "socials": {},
+      "faculties": [
+        {
+          "id": 2,
+          "shortName": "ИКНТ",
+          "fullName": "Институт компьютерных наук и технологий",
+          "imageUrl": "/img/spbpu/iknt.svg",
+          "bachelor": {
+            "directionsList": [
+              {
+                "id": 103,
+                "code": "09.03.04",
+                "code_name": "Программная инженерия",
+                "description": "Фундаментальная подготовка в области разработки ПО.",
+                "spheres": ["it"],
+                "profiles": [
+                  {
+                    "id": 1005,
+                    "name": "Разработка ПО",
+                    "description": "Профиль по разработке программного обеспечения.",
+                    "budget": { "places": 100, "minScore": 75 },
+                    "paid": { "places": 50, "minScore": 45, "price": 220000 }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "spheres": [
+    {
+      "id": 1,
+      "code": "it",
+      "name": "Информационные технологии",
+      "imageUrl": "/IT.svg"
+    },
+    {
+      "id": 2,
+      "code": "economics",
+      "name": "Управление и экономика",
+      "imageUrl": "/economics.svg"
+    },
+    {
+      "id": 3,
+      "code": "medicine",
+      "name": "Медицина",
+      "imageUrl": "/medicine.svg"
+    }
+  ]
+}
