@@ -23,6 +23,24 @@ export function AdminLayout() {
           >
             Вузы
           </NavLink>
+          <NavLink
+            to="/admin/spheres"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Сферы
+          </NavLink>
+          <NavLink
+            to="/admin/professions"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Профессии
+          </NavLink>
+          <NavLink
+            to="/admin/test"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Тест на профориентацию
+          </NavLink>
           <NavLink to="/" className="admin-header__to-site">
             На основной сайт
           </NavLink>
