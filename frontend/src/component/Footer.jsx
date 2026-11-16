@@ -13,9 +13,6 @@ function Footer() {
                 <nav className="footer__nav">
                     <ul>
                         <li>
-                            <a href="/" className="footer__nav-link text-14m">Вузы России</a>
-                        </li>
-                        <li>
                             <Link to="/professions" className="footer__nav-link text-14m">Профессии</Link>
                         </li>
                         <li>
