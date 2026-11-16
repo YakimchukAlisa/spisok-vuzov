@@ -1,98 +1,101 @@
-import React, { useMemo, useState } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
-import spheresData from './DATA/spheres.json';
-import professionsData from './DATA/professions.json';
-import vuzData from './DATA/cardVuz.json';
-import filterData from './DATA/filters.json';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import ProfessionCard from './component/ProfessionCard';
 import FilterButton from './component/FilterButton';
 import CareerTestBlock from './component/CareerTestBlock';
+import filterData from './DATA/filters.json';
+import { getSphereById, getNapravleniyaBySphere, getProfessionsBySphere } from './api/api.js';
 import './css/spherePage.css';
 
 export default function SpherePage() {
   const { sphereId } = useParams();
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const type = searchParams.get('type') || 'profession';
+  const isSpecialties = type === 'specialty';
+
+  const [sphere, setSphere] = useState(null);
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedExams, setSelectedExams] = useState([]);
 
-  const searchParams = new URLSearchParams(location.search);
-  const type = searchParams.get('type') || 'profession';
-  const isSpecialties = type === 'specialty';
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-  const currentSphere = spheresData.find(s => s.id === Number(sphereId));
+        // Запрашиваем направления для специальностей, или профессии
+        if (isSpecialties) {
+          const [sphereData, specialtiesData] = await Promise.all([
+            getSphereById(sphereId),
+            getNapravleniyaBySphere(sphereId),
+          ]);
+          setSphere(sphereData);
+          setItems(Array.isArray(specialtiesData) ? specialtiesData : []);
+        } else {
+          const [sphereData, professionsData] = await Promise.all([
+            getSphereById(sphereId),
+            getProfessionsBySphere(sphereId),
+          ]);
+          setSphere(sphereData);
+          setItems(Array.isArray(professionsData) ? professionsData : []);
+        }
+      } catch (err) {
+        console.error('Ошибка:', err);
+        setError(err.response?.data?.message || err.message || 'Не удалось загрузить данные');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // 1. Собираем специальности (без изменений)
-  const dynamicallyCollectedSpecialties = useMemo(() => {
-    const specialtiesMap = new Map();
-    vuzData.forEach(vuz => {
-      vuz.faculties?.forEach(faculty => {
-        const dirs = [
-          ...(faculty.bachelor?.directionsList || []),
-          ...(faculty.master?.directionsList || [])
-        ];
-        dirs.forEach(dir => {
-          if (!specialtiesMap.has(dir.name)) {
-            specialtiesMap.set(dir.name, {
-              id: dir.id,
-              name: dir.name,
-              sphereId: dir.sphereIds ? dir.sphereIds[0] : null,
-              vuzCount: 1,
-              vuzIds: new Set([vuz.id]),
-              description: dir.description
-            });
-          } else {
-            const existing = specialtiesMap.get(dir.name);
-            existing.vuzIds.add(vuz.id);
-            existing.vuzCount = existing.vuzIds.size;
-          }
-        });
-      });
-    });
-    return Array.from(specialtiesMap.values()).map(item => {
-      const { vuzIds, ...rest } = item;
-      return rest;
-    });
-  }, []);
+    if (sphereId) fetchData();
+  }, [sphereId, type, isSpecialties]);
 
-  // 2. Выбираем данные
-  const baseData = isSpecialties ? dynamicallyCollectedSpecialties : professionsData;
-
-  // 3. Фильтруем по сфере, поиску И ВЫБРАННЫМ ЭКЗАМЕНАМ
+  // Фильтрация: только по поиску и ЕГЭ (без вкладок)
   const filteredItems = useMemo(() => {
-    return baseData.filter(item => {
-      const matchSphere = item.sphereId === Number(sphereId);
-      const matchSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return items.filter(item => {
+      // 1. Поиск (по названию или коду)
+      const searchStr = `${item.name} ${item.kod || ''}`.toLowerCase();
+      const matchSearch = searchStr.includes(searchQuery.toLowerCase());
 
-      // 👇 ЛОГИКА ФИЛЬТРА ПО ПРЕДМЕТАМ 👇
-      // Если предметы не выбраны, показываем все. Если выбраны, ищем совпадения.
+      // 2. ЕГЭ (если выбраны предметы)
       let matchExams = true;
-      if (selectedExams.length > 0 && item.exams) {
-        matchExams = selectedExams.some(exam => item.exams.includes(exam));
-      } else if (selectedExams.length > 0 && !item.exams) {
-        // Если предметы выбраны, но у профессии их нет, не показываем
-        matchExams = false;
+      if (selectedExams.length > 0) {
+        if (item.exams && item.exams.length > 0) {
+          matchExams = selectedExams.some(exam => item.exams.includes(exam));
+        } else {
+          matchExams = false;
+        }
       }
 
-      return matchSphere && matchSearch && matchExams;
+      return matchSearch && matchExams;
     });
-  }, [baseData, sphereId, searchQuery, selectedExams]);
+  }, [items, searchQuery, selectedExams]);
 
-  if (!currentSphere) {
-    return <div className="container">Сфера не найдена</div>;
-  }
+  if (isLoading) return <div className="container" style={{ padding: 100, textAlign: 'center' }}>Загрузка...</div>;
+  if (error)     return <div className="container" style={{ padding: 100, textAlign: 'center', color: 'red' }}>Ошибка: {error}</div>;
+  if (!sphere)   return <div className="container" style={{ padding: 100, textAlign: 'center' }}>Сфера не найдена</div>;
 
   return (
     <div className="wrapper">
-      <div className="container">
+      <div className="container" style={{ paddingTop: '40px' }}>
         <div className='sphere-page-list'>
-          <h1 className="text-32b" style={{ marginBottom: '32px' }}>
-            {currentSphere.name}: {isSpecialties ? 'Специальности' : 'Профессии'}
+
+          <h1 className="text-32b" style={{ marginBottom: '16px' }}>
+            {sphere.name}: {isSpecialties ? 'Специальности' : 'Профессии'}
           </h1>
 
+          {sphere.opisanie && (
+            <p className="text-20r sphere-page__description" style={{ marginBottom: '32px' }}>
+              {sphere.opisanie}
+            </p>
+          )}
+
           {/* БЛОК ПОИСКА И ФИЛЬТРА */}
-          <div className="catalog-controls">
-            {/* Поле поиска */}
+          <div className="catalog-controls" style={{ marginBottom: '32px' }}>
             <div className="field" style={{ flexGrow: 1 }}>
               <input
                 type="text"
@@ -102,7 +105,7 @@ export default function SpherePage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               <label className="field__label">
-                Поиск {isSpecialties ? 'специальности' : 'профессии'}...
+                Поиск {isSpecialties ? 'направления' : 'профессии'}...
               </label>
               <img src="/search.svg" alt="Поиск" className="field__icon" />
             </div>
@@ -119,14 +122,20 @@ export default function SpherePage() {
           </div>
 
           {/* СПИСОК КАРТОЧЕК */}
-          <div className="professions-block__list" style={{ marginBottom: '60px' }}>
+          <div className="professions-block__list" style={{ marginBottom: '60px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
-                <ProfessionCard key={item.id} data={item} type={type} isGlobal={true} />
+              filteredItems.map(item => (
+                <ProfessionCard
+                  key={item.kod || item.id} // kod уникален для направления
+                  data={item}
+                  type={type}
+                  isGlobal={true}
+                  sphere={sphere}
+                />
               ))
             ) : (
               <p className="text-20r" style={{ color: 'var(--gray)' }}>
-                В этой сфере пока нет {isSpecialties ? 'специальностей' : 'профессий'} по вашему запросу.
+                В этой сфере пока нет {isSpecialties ? 'направлений' : 'профессий'} по вашему запросу.
               </p>
             )}
           </div>
