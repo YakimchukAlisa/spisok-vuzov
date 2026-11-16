@@ -34,9 +34,6 @@ function Header() {
         <nav className={`header__nav ${isMobileMenuOpen ? 'header__nav--open' : ''}`}>
           <ul>
             <li>
-              <Link to="/" className="header__nav-link text-14m" onClick={closeMenu}>Вузы России</Link>
-            </li>
-            <li>
               <Link to="/professions" className="header__nav-link text-14m" onClick={closeMenu}>Профессии</Link>
             </li>
             <li>
