@@ -1,11 +1,14 @@
-import React, { useState, useMemo } from 'react'; // <--- ДОБАВИЛИ useMemo
+import React, { useState, useMemo, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './css/main.css';
+
+// Компоненты
 import Header from './component/Header.jsx';
 import Footer from './component/Footer.jsx';
 import Hero from './component/Hero.jsx';
 import VuzCard from "./component/VuzCard.jsx";
-import vuzData from './DATA/cardVuz.json';
+
+// Страницы
 import VuzPage from './VuzPage.jsx';
 import FacultyPage from "./FacultyPage.jsx";
 import DirectionPage from './DirectionPage';
@@ -21,12 +24,17 @@ import ComparePage from './ComparePage';
 import TestPage from './TestPage';
 import { AdminApp } from './admin/AdminApp';
 
-
-
-
+import { getVuzCards, getGoroda, getNapravleniyaList, getExams } from "./api/api.js";
 
 function App() {
-  // Состояния для поиска и фильтров
+  // --- СОСТОЯНИЯ ДЛЯ ДАННЫХ С БЭКЕНДА ---
+  const [vuzData, setVuzData] = useState([]);
+  const [citiesData, setCitiesData] = useState([]);
+  const [specialtiesData, setSpecialtiesData] = useState([]);
+  const [examsData, setExamsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // --- СОСТОЯНИЯ ДЛЯ ПОИСКА И ФИЛЬТРОВ ---
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCities, setSelectedCities] = useState([]);
   const [selectedSpecialties, setSelectedSpecialties] = useState([]);
@@ -34,79 +42,74 @@ function App() {
   const [hasDormitory, setHasDormitory] = useState(false);
   const [hasMilitary, setHasMilitary] = useState(false);
 
-  // 1. АВТОМАТИЧЕСКИЙ СБОР СПЕЦИАЛЬНОСТЕЙ (Мемоизация)
-  // Пересчитывается только при первом рендере (так как vuzData не меняется)
-  const dynamicSpecialties = useMemo(() => {
-    const allSpecialties = new Set(); // Set убирает дубликаты
+  // --- ЗАГРУЗКА ДАННЫХ ПРИ СТАРТЕ ---
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [vuzList, citiesList, specialtiesList, examsList] = await Promise.all([
+          getVuzCards(),
+          getGoroda(),
+          getNapravleniyaList(),
+          getExams()
+        ]);
 
-    vuzData.forEach(vuz => {
-      vuz.faculties?.forEach(faculty => {
-        const dirs = [
-          ...(faculty.bachelor?.directionsList || []),
-          ...(faculty.master?.directionsList || [])
-        ];
-        dirs.forEach(dir => {
-          allSpecialties.add(dir.name); // Собираем только названия
-        });
-      });
-    });
-
-    // Сортируем по алфавиту
-    const sorted = Array.from(allSpecialties).sort();
-
-    // Группируем по первой букве
-    return sorted.reduce((acc, spec) => {
-      const firstLetter = spec[0].toUpperCase();
-      if (!acc[firstLetter]) {
-        acc[firstLetter] = [];
+        setVuzData(vuzList);
+        setCitiesData(citiesList);
+        setSpecialtiesData(specialtiesList);
+        setExamsData(examsList);
+      } catch (error) {
+        console.error("Ошибка при загрузке данных с сервера:", error);
+      } finally {
+        setIsLoading(false);
       }
-      acc[firstLetter].push(spec);
+    };
+
+    fetchData();
+  }, []);
+
+  // --- ГРУППИРОВКА СПЕЦИАЛЬНОСТЕЙ ---
+  const dynamicSpecialties = useMemo(() => {
+    if (!specialtiesData || specialtiesData.length === 0) return {};
+
+    return specialtiesData.reduce((acc, name) => {
+      if (!name) return acc;
+      const letter = name[0].toUpperCase();
+      if (!acc[letter]) acc[letter] = [];
+      acc[letter].push(name);
       return acc;
     }, {});
-  }, []); // Пустой массив зависимостей означает, что считаем 1 раз
+  }, [specialtiesData]);
 
-  // ЛОГИКА ФИЛЬТРАЦИИ
+  // --- ЛОГИКА ФИЛЬТРАЦИИ ---
   const filteredVuz = vuzData.filter(vuz => {
     // 1. Поиск по названию
-    const matchSearch = vuz.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = vuz.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (vuz.fullName && vuz.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // 2. Фильтр по городам
+    const vuzCity = vuz.city || vuz.address || '';
     const matchCity = selectedCities.length === 0 ||
-      selectedCities.some(city => vuz.address.includes(city));
+      selectedCities.some(city => vuzCity.includes(city));
 
-    // 3. Фильтр по специальностям и предметам
-    let matchSpecialty = selectedSpecialties.length === 0;
-    let matchExam = selectedExams.length === 0;
-
-    if (vuz.faculties) {
-      vuz.faculties.forEach(fac => {
-        const dirs = [...(fac.bachelor?.directionsList || []), ...(fac.master?.directionsList || [])];
-
-        dirs.forEach(dir => {
-          // Проверяем специальность
-          if (selectedSpecialties.some(spec => dir.name.includes(spec) || dir.code.includes(spec))) {
-            matchSpecialty = true;
-          }
-          // Проверяем предметы
-          if (dir.exams && dir.exams.some(exam => selectedExams.includes(exam))) {
-            matchExam = true;
-          }
-        });
-      });
-    }
-
-    // 4. Фильтр по общежитию
-    const matchDormitory = !hasDormitory ||
-      (vuz.features && vuz.features.includes("Общежитие"));
-
-    // 5. Фильтр по ВУЦ
-    const matchMilitary = !hasMilitary ||
-      (vuz.features && vuz.features.includes("Военный учебный центр"));
+    // 3. Заглушки для остальных фильтров
+    let matchSpecialty = true;
+    let matchExam = true;
+    const matchDormitory = !hasDormitory || true;
+    const matchMilitary = !hasMilitary || true;
 
     return matchSearch && matchCity && matchSpecialty && matchExam && matchDormitory && matchMilitary;
   });
 
+  // --- ЭКРАН ЗАГРУЗКИ ---
+  if (isLoading) {
     return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', fontSize: '24px', fontWeight: 'bold' }}>
+        Загрузка списка вузов...
+      </div>
+    );
+  }
+
+  return (
     <BrowserRouter>
       <Routes>
         {/* ========================================== */}
@@ -142,13 +145,24 @@ function App() {
                           hasMilitary={hasMilitary}
                           setHasMilitary={setHasMilitary}
                           dynamicSpecialties={dynamicSpecialties}
+                          citiesData={citiesData}
+                          examsData={examsData}
                         />
 
                         <div className="container" style={{ marginTop: '40px', marginBottom: '60px' }}>
                           <div className="vuz-list">
                             {filteredVuz.length > 0 ? (
                               filteredVuz.map((vuz) => (
-                                <VuzCard key={vuz.id} data={vuz} />
+                                <VuzCard
+                                  key={vuz.id}
+                                  data={{
+                                    ...vuz,
+                                    // Преобразуем данные бекенда под формат карточки
+                                    budget: { places: vuz.budgetPlaces, minScore: vuz.budgetMinScore },
+                                    paid: { places: vuz.paidPlaces, minScore: vuz.paidMinScore, minPrice: vuz.paidMinPrice },
+                                    imageUrl: vuz.imageUrl || '/img/default.jpg'
+                                  }}
+                                />
                               ))
                             ) : (
                               <div style={{ textAlign: 'center', padding: '40px 0' }}>
