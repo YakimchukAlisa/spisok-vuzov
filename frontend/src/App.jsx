@@ -24,6 +24,7 @@ import ComparePage from './ComparePage';
 import TestPage from './TestPage';
 import { AdminApp } from './admin/AdminApp';
 
+// Импорт методов API
 import { getVuzCards, getGoroda, getNapravleniyaList, getExams } from "./api/api.js";
 
 function App() {
@@ -82,16 +83,13 @@ function App() {
 
   // --- ЛОГИКА ФИЛЬТРАЦИИ ---
   const filteredVuz = vuzData.filter(vuz => {
-    // 1. Поиск по названию
     const matchSearch = vuz.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         (vuz.fullName && vuz.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    // 2. Фильтр по городам
-    const vuzCity = vuz.city || vuz.address || '';
+    const vuzCity = vuz.gorod || vuz.adress || '';
     const matchCity = selectedCities.length === 0 ||
       selectedCities.some(city => vuzCity.includes(city));
 
-    // 3. Заглушки для остальных фильтров
     let matchSpecialty = true;
     let matchExam = true;
     const matchDormitory = !hasDormitory || true;
@@ -127,6 +125,7 @@ function App() {
               <Header />
               <main className="main-content">
                 <Routes>
+                  {/* ГЛАВНАЯ */}
                   <Route
                     path="/"
                     element={
@@ -157,7 +156,6 @@ function App() {
                                   key={vuz.id}
                                   data={{
                                     ...vuz,
-                                    // Преобразуем данные бекенда под формат карточки
                                     budget: { places: vuz.budgetPlaces, minScore: vuz.budgetMinScore },
                                     paid: { places: vuz.paidPlaces, minScore: vuz.paidMinScore, minPrice: vuz.paidMinPrice },
                                     imageUrl: vuz.imageUrl || '/img/default.jpg'
@@ -178,14 +176,21 @@ function App() {
                     }
                   />
 
+                  {/* ВУЗЫ И НАПРАВЛЕНИЯ */}
                   <Route path="/vuz/:id" element={<VuzPage />} />
                   <Route path="/vuz/:vuzId/faculty/:facultyId" element={<FacultyPage />} />
                   <Route path="/vuz/:vuzId/faculty/:facultyId/direction/:directionId" element={<DirectionPage />} />
+                  
+                  {/* КАТАЛОГИ */}
                   <Route path="/professions" element={<CatalogPage />} />
                   <Route path="/specialties" element={<CatalogPage />} />
                   <Route path="/sphere/:sphereId" element={<SpherePage />} />
-                  <Route path="/specialty/:id" element={<GlobalSpecialtyPage />} />
-                  <Route path="/profession/:id" element={<ProfessionPage />} />
+                  
+                  {/* ГЛОБАЛЬНЫЕ СУЩНОСТИ */}
+                  <Route path="/napravlenie/:kod" element={<GlobalSpecialtyPage />} />
+                  <Route path="/profession/:kod" element={<ProfessionPage />} />
+                  
+                  {/* ОСТАЛЬНЫЕ СТРАНИЦЫ */}
                   <Route path="/ratings" element={<RatingsPage />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/profile" element={<ProfilePage />} />

@@ -14,13 +14,13 @@ export default function FacultyPage() {
   const [features, setFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. ЗАГРУЗКА ДАННЫХ С БЕКЕНДА
   useEffect(() => {
     Promise.all([
       getVuzById(vuzId),
       getNapravleniya(vuzId),
       getFakultety(vuzId),
-      getVozmozhnosti(vuzId).catch(() => []), // Если нет возможностей — не ломаем
+      // если getVozmozhnosti упадёт — не ломаем основной поток
+      getVozmozhnosti(vuzId).catch(() => []),
     ])
       .then(([vuzData, napravleniyaData, fakultetyData, featuresData]) => {
         setVuz(vuzData);
@@ -38,7 +38,6 @@ export default function FacultyPage() {
   if (loading) {
     return <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>Загрузка...</div>;
   }
-  
   if (!vuz) {
     return (
       <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>
@@ -48,13 +47,10 @@ export default function FacultyPage() {
     );
   }
 
-  // Находим текущий факультет
   const currentFaculty = fakultety.find(f => String(f.id) === String(facultyId));
-  if (!currentFaculty) {
-    return <div className="container" style={{ padding: '100px 20px', textAlign: 'center' }}>Факультет не найден</div>;
-  }
+  const logoForCard = currentFaculty?.imageUrl || vuz.logoUrl;
 
-  // Адаптируем вуз для шапки
+  // Адаптируем vuz под VuzDetailsHero + features из отдельного запроса
   const adaptedVuz = {
     id: vuz.id,
     name: vuz.name,
@@ -64,92 +60,40 @@ export default function FacultyPage() {
     logoUrl: vuz.logoUrl,
     totalPrograms: vuz.totalPrograms || 0,
     budget: { places: vuz.budgetPlaces || 0, minScore: vuz.budgetMinScore || 0 },
-    paid: { places: vuz.paidPlaces || 0, minScore: vuz.paidMinScore || 0, minPrice: vuz.paidMinPrice || 0 },
+    paid: {
+      places: vuz.paidPlaces || 0,
+      minScore: vuz.paidMinScore || 0,
+      minPrice: vuz.paidMinPrice || 0,
+    },
     features,
     contacts: { phone: vuz.phone, email: vuz.email },
-    socials: { website: vuz.site, vk: vuz.vkUrl, telegram: vuz.telegramUrl, max: vuz.maxUrl },
+    socials: {
+      website: vuz.site,
+      vk: vuz.vkUrl,
+      telegram: vuz.telegramUrl,
+      max: vuz.maxUrl,
+    },
   };
 
-  const logoForCard = currentFaculty?.imageUrl || vuz.logoUrl;
-
-  // 2. ФИЛЬТРАЦИЯ НАПРАВЛЕНИЙ И ГРУППИРОВКА
+  // 1. Направления — только этого факультета (уровень у направления не фильтруем)
   const facultyDirections = allDirections.filter(
     dir => String(dir.fakultetId) === String(facultyId)
   );
 
+  // 2. Уровень, который хотим показать
   const targetLevel =
     activeTab === 'bachelor' ? 'Бакалавриат'
     : activeTab === 'master' ? 'Магистратура'
     : 'Специалитет';
 
-  // Функция для рендера карточек
-  const renderCards = () => {
-    const cards = [];
-
-    facultyDirections.forEach((dir) => {
-      const profiles = dir.profiles || [];
-      const levelProfiles = profiles.filter(p => p.uroven === targetLevel);
-
-      if (levelProfiles.length === 0) return;
-
-      // Группируем профили по названию (чтобы не было дублей очно/заочно)
-      const groupedProfiles = {};
-      levelProfiles.forEach(profile => {
-        const key = profile.name;
-        if (!groupedProfiles[key]) {
-          groupedProfiles[key] = profile;
-        } else if (profile.forma === 'Очная' && groupedProfiles[key].forma !== 'Очная') {
-          groupedProfiles[key] = profile;
-        }
-      });
-
-      Object.values(groupedProfiles).forEach((profile) => {
-        cards.push(
-          <DirectionCard
-            key={profile.id}
-            data={{
-              ...profile,
-              code: dir.kod,
-              code_name: dir.name,
-              description: dir.opisanie,
-              kod: dir.kod,
-              napravlenieName: dir.name,
-              exams: dir.exams || [],
-              educationForms: {
-                fullTime: {
-                  name: profile.forma || 'Очная',
-                  budget: {
-                    places: profile.budgetPlaces || 0,
-                    minScore: profile.budgetMinScore || 0,
-                  },
-                  paid: {
-                    places: profile.paidPlaces || 0,
-                    minScore: profile.paidMinScore || 0,
-                    minPrice: profile.paidMinPrice || 0,
-                  },
-                },
-              },
-            }}
-            facultyLogo={logoForCard}
-          />
-        );
-      });
-    });
-
-    if (cards.length === 0) {
-      return <p className="text-14r" style={{ color: 'var(--gray)' }}>Направления для этой вкладки пока не добавлены.</p>;
-    }
-    return cards;
-  };
-
   return (
     <div className="wrapper">
       <VuzDetailsHero data={adaptedVuz} />
+
       <div className="container" style={{ padding: '40px 20px' }}>
         <div className="containerDirections">
-          
           {/* Вкладки */}
-          <div style={{ display: 'flex', gap: '40px' }}>
+          <div style={{ display: 'flex', gap: '40px', marginBottom: '24px' }}>
             {[
               { key: 'bachelor', label: 'Бакалавриат' },
               { key: 'master', label: 'Магистратура' },
@@ -163,7 +107,7 @@ export default function FacultyPage() {
                   padding: '0 0 8px 0', fontSize: '24px', fontWeight: '700',
                   color: activeTab === tab.key ? 'var(--black)' : 'var(--gray)',
                   borderBottom: activeTab === tab.key ? '3px solid var(--green)' : '3px solid transparent',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
                 }}
               >
                 {tab.label}
@@ -171,9 +115,63 @@ export default function FacultyPage() {
             ))}
           </div>
 
-          {/* Список карточек */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '24px' }}>
-            {renderCards()}
+          {/* Карточки */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {(() => {
+              const cards = [];
+
+            facultyDirections.forEach((dir) => {
+              const profiles = dir.profiles || [];
+              const levelProfiles = profiles.filter(p => p.uroven === targetLevel);
+              const fullTimeProfiles = levelProfiles.filter(p => p.forma === 'Очная');
+
+              if (fullTimeProfiles.length === 0) return;
+
+              fullTimeProfiles.forEach((profile) => {
+                cards.push(
+                  <DirectionCard
+                    key={profile.id}
+                    data={{
+                      ...profile,
+                      // код и название направления
+                      code: dir.kod,
+                      code_name: dir.name,
+                      description: dir.opisanie,
+                      kod: dir.kod,
+                      napravlenieName: dir.name,
+                      // экзамены направления
+                      exams: dir.exams || [],
+                      // статистика в формате, который ждёт DirectionCard
+                      educationForms: {
+                        fullTime: {
+                          name: profile.forma || 'Очная',
+                          budget: {
+                            places: profile.budgetPlaces || 0,
+                            minScore: profile.budgetMinScore || 0,
+                          },
+                          paid: {
+                            places: profile.paidPlaces || 0,
+                            minScore: profile.paidMinScore || 0,
+                            minPrice: profile.paidMinPrice || 0,
+                          },
+                        },
+                      },
+                    }}
+                    facultyLogo={logoForCard}
+                  />
+                );
+              });
+            });
+
+              if (cards.length === 0) {
+                return (
+                  <p className="text-14r" style={{ color: 'var(--gray)' }}>
+                    Направления для этой вкладки пока не добавлены.
+                  </p>
+                );
+              }
+              return cards;
+            })()}
           </div>
         </div>
       </div>

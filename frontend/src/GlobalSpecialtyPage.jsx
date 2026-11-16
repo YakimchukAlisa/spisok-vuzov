@@ -70,7 +70,7 @@ export default function GlobalSpecialtyPage() {
                                         <h2 className="text-28sm" style={{ marginBottom: '24px' }}>Какие предметы сдавать?</h2>
                                         <div className="direction-skills__grid">
                                             {specialty.exams.map((exam, index) => (
-                                                <div key={indsex} className="direction-skill-card">
+                                                <div key={index} className="direction-skill-card">
                                                     <span className="direction-skill-card__number">{index + 1}</span>
                                                     <span className="text-20r">{exam}</span>
                                                 </div>
