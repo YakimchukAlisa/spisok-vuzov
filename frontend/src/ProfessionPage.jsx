@@ -120,11 +120,9 @@ export default function ProfessionPage() {
             </h2>
 
             {/* Текст-описание */}
-            {profession.salaryText && (
-              <p className="text-20r" style={{ marginBottom: '40px'}}>
-                {profession.salaryText}
-              </p>
-            )}
+            <p className="text-20r" style={{ marginBottom: '40px' }}>
+              Зарплата специалиста в сфере «{profession.name}» в России может зависеть от ряда факторов, включая уровень образования, опыт, регион работы, а также конкретное место работы.
+            </p>
 
             {/* Контейнер для картинки и лестницы */}
             <div className="salary-layout">
