@@ -4,6 +4,17 @@ spring:
     username: kaiki_c_94140e38c495ff4b7a9807c0
     password: "Kk1!GsnbuogzsNSP4GY5KOJ5FZTFnvtQ"
     driver-class-name: org.postgresql.Driver
+  mail:
+    host: smtp.yandex.ru
+    port: 465
+    username: alicayakimchuk@yandex.ru
+    password: iytuakiovgcazvsw
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
   jpa:
     hibernate:
       ddl-auto: validate

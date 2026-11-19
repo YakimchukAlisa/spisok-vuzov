@@ -399,9 +399,10 @@ public class NapravlenieController {
         Profile currentProfile = profileRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Профиль не найден"));
 
-        // Находим ВСЕ профили с таким же названием и в этом же вузе (или просто по названию направления)
         Integer napravlenieId = currentProfile.getNapravlenie().getId();
-        List<Profile> allProfiles = profileRepository.findByNapravlenieId(napravlenieId);
+        List<Profile> allProfiles = profileRepository.findByNapravlenieId(napravlenieId).stream()
+                .filter(p -> p.getName().equals(currentProfile.getName())) // ФИЛЬТР ПО ИМЕНИ
+                .toList();
 
         // 3. Собираем статистику для каждого профиля
         List<Map<String, Object>> formsStats = new ArrayList<>();

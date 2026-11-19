@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import './../css/feedbackForm.css';
 
 export default function FeedbackForm({ vuzName, vuzEmail }) {
@@ -7,17 +8,40 @@ export default function FeedbackForm({ vuzName, vuzEmail }) {
         email: '',
         message: ''
     });
+    const [isSending, setIsSending] = useState(false);
+    const [status, setStatus] = useState(null); // 'success' | 'error' | null
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Здесь будет логика отправки на бэкенд
-        console.log('Отправлено:', formData);
-        alert('Сообщение отправлено!');
+        setIsSending(true);
+        setStatus(null);
+
+        try {
+            // 👇 ОТПРАВЛЯЕМ ЗАПРОС НА БЭКЕНД
+            await axios.post('http://localhost:8080/api/feedback', {
+                name: formData.name,
+                contact: formData.email, // На бэкенде ждем поле contact
+                message: formData.message,
+                vuzName: vuzName
+            });
+
+            setStatus('success');
+            setFormData({ name: '', email: '', message: '' }); // Очищаем форму
+
+            // Убираем сообщение об успехе через 5 секунд
+            setTimeout(() => setStatus(null), 5000);
+
+        } catch (error) {
+            console.error("Ошибка отправки:", error);
+            setStatus('error');
+        } finally {
+            setIsSending(false);
+        }
     };
 
     return (
@@ -45,6 +69,7 @@ export default function FeedbackForm({ vuzName, vuzEmail }) {
                             value={formData.name}
                             onChange={handleChange}
                             required
+                            disabled={isSending}
                         />
                         <label className="field__label">От кого (Ваше имя)</label>
                     </div>
@@ -52,13 +77,14 @@ export default function FeedbackForm({ vuzName, vuzEmail }) {
                     {/* Поле Email */}
                     <div className="field">
                         <input
-                            type="email"
+                            type="text"
                             name="email"
                             className="field__input"
                             placeholder=" "
                             value={formData.email}
                             onChange={handleChange}
                             required
+                            disabled={isSending}
                         />
                         <label className="field__label">Ваш Email или телефон</label>
                     </div>
@@ -72,14 +98,27 @@ export default function FeedbackForm({ vuzName, vuzEmail }) {
                             value={formData.message}
                             onChange={handleChange}
                             required
+                            disabled={isSending}
                         />
                         <label className="field__label">Сообщение</label>
                     </div>
 
                     {/* Кнопка */}
-                    <button type="submit" className="btn btn--green">
-                        Отправить
+                    <button type="submit" className="btn btn--green" disabled={isSending}>
+                        {isSending ? 'Отправка...' : 'Отправить'}
                     </button>
+
+                    {/* Сообщения об успехе или ошибке */}
+                    {status === 'success' && (
+                        <p className="text-14r" style={{ color: 'var(--green)', marginTop: '12px', textAlign: 'center' }}>
+                            Ваше сообщение успешно отправлено! Мы свяжемся с вами.
+                        </p>
+                    )}
+                    {status === 'error' && (
+                        <p className="text-14r" style={{ color: 'red', marginTop: '12px', textAlign: 'center' }}>
+                            Произошла ошибка при отправке. Попробуйте позже.
+                        </p>
+                    )}
                 </form>
 
             </div>
