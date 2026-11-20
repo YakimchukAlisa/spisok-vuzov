@@ -188,7 +188,6 @@ function App() {
                   
                   {/* ГЛОБАЛЬНЫЕ СУЩНОСТИ */}
                   <Route path="/napravlenie/:kod" element={<GlobalSpecialtyPage />} />
-                  <Route path="/profession/:kod" element={<ProfessionPage />} />
                   
                   {/* ОСТАЛЬНЫЕ СТРАНИЦЫ */}
                   <Route path="/ratings" element={<RatingsPage />} />
@@ -197,6 +196,7 @@ function App() {
                   <Route path="/favorites" element={<FavoritesPage />} />
                   <Route path="/compare" element={<ComparePage />} />
                   <Route path="/career-test" element={<TestPage />} />
+                  <Route path="/profession/:id" element={<ProfessionPage />} />
                 </Routes>
               </main>
               <Footer />

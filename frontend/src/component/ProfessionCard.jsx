@@ -28,7 +28,7 @@ export default function ProfessionCard({ data, type = 'profession', isGlobal = f
         <div className="profession-card__title-row" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <h3 className="profession-card__title" style={{ margin: 0 }}>{data.name}</h3>
 
-          {/* 👇 Выводим овалы по названиям, пришедшим с бэкенда */}
+          {/* Выводим овалы по названиям, пришедшим с бэкенда */}
           <div style={{ display: 'flex', gap: '8px' }}>
             {sphereNames.map((name, idx) => (
               <span key={idx} className="profession-card__sphere" style={{
