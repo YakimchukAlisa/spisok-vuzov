@@ -209,7 +209,7 @@ export default function DirectionPage() {
                         <h3 className="text-20r">Задайте вопрос в приёмную комиссию ВУЗа и сотрудник с радостью ответит Вам!</h3>
                         <FeedbackForm
                             vuzName={profile.vuzName}
-                            vuzEmail={profile.vuzEmail || 'pk@altgtu.ru'}
+                            vuzEmail={vuz?.email}
                         />
                     </div>
                 </div>

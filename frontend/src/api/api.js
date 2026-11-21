@@ -177,3 +177,8 @@ export async function updateProfile(data) {
   const res = await api.put('/auth/profile', data);
   return res.data;
 }
+
+export async function getTest(testId = 1) {
+  const res = await api.get(`/test/${testId}`);
+  return res.data;
+}
