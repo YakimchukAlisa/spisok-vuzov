@@ -86,7 +86,7 @@ export default function ProfessionPage() {
         {profession.salaryLevels && profession.salaryLevels.length > 0 && (
           <div className="profession-salary" style={{ marginTop: '48px' }}>
             <h2 className="text-32b" style={{ marginBottom: '24px' }}>
-              Зарплата {profession.name.toLowerCase()}а
+              Зарплата
             </h2>
 
             <p className="text-20r" style={{ marginBottom: '40px' }}>

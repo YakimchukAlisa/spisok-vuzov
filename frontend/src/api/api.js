@@ -147,3 +147,33 @@ export async function getVuzCards() {
   const response = await api.get('/vuz/cards');
   return response.data;
 }
+
+export async function sendCode(phone) {
+  const res = await api.post('/auth/send-code', { phone });
+  return res.data;
+}
+
+export async function verifyCode(phone, code) {
+  const res = await api.post('/auth/verify-code', { phone, code });
+  return res.data;
+}
+
+export async function registerUser(phone, name, email) {
+  const res = await api.post('/auth/register', { phone, name, email });
+  return res.data;
+}
+
+export async function adminLogin(phone, password) {
+  const res = await api.post('/auth/admin-login', { phone, password });
+  return res.data;
+}
+
+export async function getProfile(phone) {
+  const res = await api.get('/auth/profile', { params: { phone } });
+  return res.data;
+}
+
+export async function updateProfile(data) {
+  const res = await api.put('/auth/profile', data);
+  return res.data;
+}

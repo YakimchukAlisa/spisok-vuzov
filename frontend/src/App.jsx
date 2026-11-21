@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './css/main.css';
 
 // Компоненты
@@ -113,7 +113,14 @@ function App() {
         {/* ========================================== */}
         {/* 1. МАРШРУТЫ АДМИНКИ (БЕЗ ОСНОВНОГО ХЭДЭРА)  */}
         {/* ========================================== */}
-        <Route path="/admin/*" element={<AdminApp />} />
+       <Route
+         path="/admin"
+         element={
+           localStorage.getItem('isAdmin') === 'true'
+             ? <AdminApp />
+             : <Navigate to="/auth" replace />
+         }
+       />
 
         {/* ========================================== */}
         {/* 2. МАРШРУТЫ ОСНОВНОГО САЙТА (С ХЭДЭРОМ)    */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFavorites } from './component/FavoritesContext.jsx';
+import { getProfile, updateProfile } from './api/api.js';
 import './css/profilePage.css';
 
 export default function ProfilePage() {
@@ -16,31 +17,44 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // массив всех сохранённых тестов
   const [testResults, setTestResults] = useState([]);
 
   useEffect(() => {
-    // ----- Профиль -----
-    const savedData = localStorage.getItem('userProfile');
-    if (savedData) {
-      const parsed = JSON.parse(savedData);
-      setUserData(parsed);
-      setEditForm(parsed);
-    } else {
-      const mock = {
-        name: 'Карина',
-        school: 'Не указана',
-        phone: '+7 923 169 52 10',
-        email: '14150226c@gmail.com'
-      };
-      setUserData(mock);
-      setEditForm(mock);
+    const phone = localStorage.getItem('currentPhone');
+    if (!phone) {
+      navigate('/auth');
+      return;
     }
 
-    // ----- Тесты -----
-    let results = [];
+    // ----- Профиль с бэкенда -----
+    getProfile(phone)
+      .then(data => {
+        const profile = {
+          name: data.name || '',
+          school: data.school || 'Не указана',
+          phone: data.phone || phone,
+          email: data.email || ''
+        };
+        setUserData(profile);
+        setEditForm(profile);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error('Ошибка загрузки профиля:', err);
+        setError('Не удалось загрузить профиль');
+        setIsLoading(false);
+        // Если пользователь не найден — на страницу входа
+        if (err.response?.status === 404) {
+          localStorage.removeItem('currentPhone');
+          navigate('/auth');
+        }
+      });
 
+    // ----- Тесты (пока из localStorage) -----
+    let results = [];
     const savedArr = localStorage.getItem('careerTestResults');
     if (savedArr) {
       try {
@@ -49,55 +63,51 @@ export default function ProfilePage() {
         results = [];
       }
     }
-
-    // Миграция: если массив пуст, но есть старый одиночный результат
     if (results.length === 0) {
       const legacy = localStorage.getItem('careerTestResult');
       if (legacy) {
         try {
           const parsed = JSON.parse(legacy);
           results = [parsed];
-          // записываем в новый формат, чтобы больше не мигрировать
           localStorage.setItem('careerTestResults', JSON.stringify(results));
-        } catch {
-          /* ignore */
-        }
+        } catch { /* ignore */ }
       }
     }
-
-    // сортировка: свежие сверху
-    results.sort((a, b) => {
-      const ta = a.timestamp ?? 0;
-      const tb = b.timestamp ?? 0;
-      if (ta !== tb) return tb - ta;
-      // если timestamp нет — оставляем как есть
-      return 0;
-    });
-
+    results.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
     setTestResults(results);
-  }, []);
+  }, [navigate]);
 
   const handleEdit = () => {
     setEditForm({ ...userData });
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    setUserData(editForm);
-    localStorage.setItem('userProfile', JSON.stringify(editForm));
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      await updateProfile({
+        phone: userData.phone,
+        name: editForm.name,
+        email: editForm.email
+      });
+      setUserData(editForm);
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Ошибка сохранения профиля:', err);
+      setError(err.response?.data?.error || 'Не удалось сохранить профиль');
+    }
   };
 
   const handleLogoutClick = () => setShowLogoutModal(true);
   const confirmLogout = () => {
+    localStorage.removeItem('currentPhone');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('userProfile');
     logout();
     navigate('/');
   };
   const cancelLogout = () => setShowLogoutModal(false);
 
-  // ----- утилиты -----
   const getSpheres = (test) => {
-    // [{id, name}]
     if (
       Array.isArray(test.spheres) &&
       test.spheres.length &&
@@ -105,7 +115,6 @@ export default function ProfilePage() {
     ) {
       return test.spheres;
     }
-    // строка "A, B" + sphereIds [1, 2]
     if (typeof test.spheres === 'string' && Array.isArray(test.sphereIds)) {
       const names = test.spheres.split(',').map(s => s.trim());
       return test.sphereIds.map((id, i) => ({
@@ -131,6 +140,26 @@ export default function ProfilePage() {
     return '—';
   };
 
+  if (isLoading) {
+    return (
+      <div className="wrapper">
+        <div className="container" style={{ marginTop: '100px' }}>
+          Загрузка профиля...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="wrapper">
+        <div className="container" style={{ marginTop: '100px' }}>
+          {error}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="wrapper">
       <div
@@ -154,7 +183,6 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* ---------- Карточка профиля ---------- */}
         <div className="profile-card" style={{ marginTop: '32px' }}>
           <div className="profile-card__image-wrapper">
             <img
@@ -176,14 +204,14 @@ export default function ProfilePage() {
                 {isEditing ? (
                   <input
                     className="profile-info-row__input"
-                    value={editForm.name}
+                    value={editForm.name || ''}
                     onChange={e =>
                       setEditForm({ ...editForm, name: e.target.value })
                     }
                   />
                 ) : (
                   <span className="text-14m profile-info-row__value">
-                    {userData.name}
+                    {userData.name || 'Не указано'}
                   </span>
                 )}
               </div>
@@ -200,14 +228,14 @@ export default function ProfilePage() {
                 {isEditing ? (
                   <input
                     className="profile-info-row__input"
-                    value={editForm.phone}
+                    value={editForm.phone || ''}
                     onChange={e =>
                       setEditForm({ ...editForm, phone: e.target.value })
                     }
                   />
                 ) : (
                   <span className="text-14m profile-info-row__value">
-                    {userData.phone}
+                    {userData.phone || 'Не указан'}
                   </span>
                 )}
               </div>
@@ -222,14 +250,14 @@ export default function ProfilePage() {
                 {isEditing ? (
                   <input
                     className="profile-info-row__input"
-                    value={editForm.email}
+                    value={editForm.email || ''}
                     onChange={e =>
                       setEditForm({ ...editForm, email: e.target.value })
                     }
                   />
                 ) : (
                   <span className="text-14m profile-info-row__value">
-                    {userData.email}
+                    {userData.email || 'Не указана'}
                   </span>
                 )}
               </div>
@@ -261,7 +289,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ---------- Все сохранённые тесты ---------- */}
         {testResults.length > 0 &&
           testResults.map((test, idx) => {
             const spheres = getSpheres(test);
@@ -352,7 +379,6 @@ export default function ProfilePage() {
           })}
       </div>
 
-      {/* ---------- Модалка выхода ---------- */}
       {showLogoutModal && (
         <div className="modal-overlay" onClick={cancelLogout}>
           <div
