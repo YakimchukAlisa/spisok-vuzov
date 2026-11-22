@@ -182,3 +182,28 @@ export async function getTest(testId = 1) {
   const res = await api.get(`/test/${testId}`);
   return res.data;
 }
+
+export async function getRaexRating(year = 2026) {
+  const res = await api.get('/ratings/raex', { params: { year } });
+  return res.data;
+}
+
+export async function searchVuzInRaex(name, year = 2026) {
+  const res = await api.get('/ratings/raex/search', { params: { name, year } });
+  return res.data;
+}
+
+export async function refreshRaex() {
+  const res = await api.post('/ratings/raex/refresh');
+  return res.data;
+}
+
+export async function getMRateRating(category = 'consolidated', year = 2026) {
+  const res = await api.get('/ratings/mrate', { params: { category, year } });
+  return res.data;
+}
+
+export async function refreshMRate() {
+  const res = await api.post('/ratings/mrate/refresh');
+  return res.data;
+}

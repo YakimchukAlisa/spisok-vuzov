@@ -41,16 +41,22 @@
   overflow: hidden;
 }
 
-/* Шапка таблицы */
+/* Шапка и строки — Grid с 7 колонками */
+.rating-table__header,
+.rating-table__row {
+  display: grid;
+  /* место | вуз | место2025 | балл | условия | востребованность | наука */
+  grid-template-columns: 80px 1fr 100px 100px 100px 130px 100px;
+}
+
+/* Шапка */
 .rating-table__header {
-  display: flex;
-  background-color: #CFEFDB; 
+  background-color: #CFEFDB;
   border-bottom: 1px solid var(--green);
 }
 
-/* Строки таблицы */
+/* Строки */
 .rating-table__row {
-  display: flex;
   background-color: var(--white);
   border-bottom: 1px solid var(--green);
 }
@@ -59,31 +65,47 @@
   border-bottom: none;
 }
 
-/* Ячейки таблицы */
+/* Ячейки */
 .rating-table__cell {
   font-family: 'Inter', sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--black);
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  /* Отступы внутри ячейки */
-  padding: 20px; 
-  
-  /* Вертикальная граница справа */
+  padding: 14px 10px;
   border-right: 1px solid var(--green);
+  word-break: break-word;
 }
 
-/* Убираем границу у последней ячейки в строке */
 .rating-table__cell:last-child {
   border-right: none;
 }
 
 .rating-table__header .rating-table__cell {
   font-weight: 600;
+}
+
+/* Числовые колонки — в одну строку */
+.rating-table__cell:nth-child(1),
+.rating-table__cell:nth-child(3),
+.rating-table__cell:nth-child(4),
+.rating-table__cell:nth-child(5),
+.rating-table__cell:nth-child(6),
+.rating-table__cell:nth-child(7) {
+  white-space: nowrap;
+}
+
+/* Горизонтальный скролл на узких экранах */
+@media (max-width: 1200px) {
+  .rating-table-wrapper {
+    overflow-x: auto;
+  }
+  .rating-table {
+    min-width: 1000px;
+  }
 }
 
 /* =========================================
