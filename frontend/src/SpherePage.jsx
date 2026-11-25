@@ -7,6 +7,12 @@ import filterData from './DATA/filters.json';
 import { getSphereById, getNapravleniyaBySphere, getProfessionsBySphere } from './api/api.js';
 import './css/spherePage.css';
 
+const TABS = [
+  { key: 'bachelor', label: 'Бакалавриат' },
+  { key: 'master', label: 'Магистратура' },
+  { key: 'specialist', label: 'Специалитет' },
+];
+
 export default function SpherePage() {
   const { sphereId } = useParams();
   const [searchParams] = useSearchParams();
@@ -20,6 +26,7 @@ export default function SpherePage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedExams, setSelectedExams] = useState([]);
+  const [activeTab, setActiveTab] = useState('bachelor');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,7 +34,6 @@ export default function SpherePage() {
         setIsLoading(true);
         setError(null);
 
-        // Запрашиваем направления для специальностей, или профессии
         if (isSpecialties) {
           const [sphereData, specialtiesData] = await Promise.all([
             getSphereById(sphereId),
@@ -54,26 +60,34 @@ export default function SpherePage() {
     if (sphereId) fetchData();
   }, [sphereId, type, isSpecialties]);
 
-  // Фильтрация: только по поиску и ЕГЭ (без вкладок)
+  const targetLevel = activeTab === 'bachelor' ? 'Бакалавриат'
+    : activeTab === 'master' ? 'Магистратура'
+    : 'Специалитет';
+
+  // Фильтрация: уровень + поиск + ЕГЭ
   const filteredItems = useMemo(() => {
     return items.filter(item => {
-      // 1. Поиск (по названию или коду)
-      const searchStr = `${item.name} ${item.kod || ''}`.toLowerCase();
-      const matchSearch = searchStr.includes(searchQuery.toLowerCase());
-
-      // 2. ЕГЭ (если выбраны предметы)
-      let matchExams = true;
-      if (selectedExams.length > 0) {
-        if (item.exams && item.exams.length > 0) {
-          matchExams = selectedExams.some(exam => item.exams.includes(exam));
-        } else {
-          matchExams = false;
-        }
+      // 0. Уровень образования (только для специальностей)
+      if (isSpecialties) {
+        const levels = item.uroven || '';
+        if (!levels.includes(targetLevel)) return false;
       }
 
-      return matchSearch && matchExams;
+      // 1. Поиск (по названию или коду)
+      const searchStr = `${item.name} ${item.kod || ''}`.toLowerCase();
+      if (!searchStr.includes(searchQuery.toLowerCase())) return false;
+
+      // 2. ЕГЭ (если выбраны предметы)
+      if (selectedExams.length > 0) {
+        if (item.exams && item.exams.length > 0) {
+          return selectedExams.some(exam => item.exams.includes(exam));
+        }
+        return false;
+      }
+
+      return true;
     });
-  }, [items, searchQuery, selectedExams]);
+  }, [items, searchQuery, selectedExams, activeTab, targetLevel, isSpecialties]);
 
   if (isLoading) return <div className="container" style={{ padding: 100, textAlign: 'center' }}>Загрузка...</div>;
   if (error)     return <div className="container" style={{ padding: 100, textAlign: 'center', color: 'red' }}>Ошибка: {error}</div>;
@@ -92,6 +106,27 @@ export default function SpherePage() {
             <p className="text-20r sphere-page__description" style={{ marginBottom: '32px' }}>
               {sphere.opisanie}
             </p>
+          )}
+
+          {/* ВКЛАДКИ ПО УРОВНЮ — только для специальностей */}
+          {isSpecialties && (
+            <div style={{ display: 'flex', gap: '40px', marginBottom: '24px' }}>
+              {TABS.map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '0 0 8px 0', fontSize: '24px', fontWeight: '700',
+                    color: activeTab === tab.key ? 'var(--black)' : 'var(--gray)',
+                    borderBottom: activeTab === tab.key ? '3px solid var(--green)' : '3px solid transparent',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           )}
 
           {/* БЛОК ПОИСКА И ФИЛЬТРА */}
@@ -126,7 +161,7 @@ export default function SpherePage() {
             {filteredItems.length > 0 ? (
               filteredItems.map(item => (
                 <ProfessionCard
-                  key={item.kod || item.id} // kod уникален для направления
+                  key={item.kod || item.id}
                   data={item}
                   type={type}
                   isGlobal={true}
@@ -135,7 +170,9 @@ export default function SpherePage() {
               ))
             ) : (
               <p className="text-20r" style={{ color: 'var(--gray)' }}>
-                В этой сфере пока нет {isSpecialties ? 'направлений' : 'профессий'} по вашему запросу.
+                {isSpecialties
+                  ? `В этой сфере пока нет направлений уровня «${targetLevel}» по вашему запросу.`
+                  : 'В этой сфере пока нет профессий по вашему запросу.'}
               </p>
             )}
           </div>

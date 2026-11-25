@@ -104,11 +104,6 @@ export async function getTestQuestions() {
   return response.data;
 }
 
-export async function saveTestResult(userId, sphereIds) {
-  const response = await api.post('/test/result', { userId, sphereIds });
-  return response.data;
-}
-
 export async function getPostInfo(profileId) {
   const response = await api.get(`/profil/${profileId}/post_info`);
   return response.data;
@@ -207,3 +202,6 @@ export async function refreshMRate() {
   const res = await api.post('/ratings/mrate/refresh');
   return res.data;
 }
+
+export const saveTestResult = (payload) => api.post('/results', payload);
+export const getTestResults = (userId) => api.get(`/results/${userId}`);

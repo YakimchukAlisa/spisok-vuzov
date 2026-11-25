@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useFavorites } from './FavoritesContext.jsx';
-import vuzData from './../DATA/cardVuz.json';
 import './../css/directionCard.css';
 
 // 👇 ДОБАВИЛИ ПРОПС showVuzName 👇
@@ -11,18 +10,21 @@ export default function DirectionCard({ data, facultyLogo, isGlobal = false, sho
 
     if (!data) return null;
 
-    const isFavorite = favorites.specialties.some(s => s.id === data.id);
-    const currentVuzId = vuzId || data.vuzId;
+    const isFavorite = favorites.specialties.some(
+        s => (s.napravId ?? s.id) === data.id
+    );
 
-    // Ищем вуз только если нужно его показать
-    const vuz = showVuzName ? vuzData.find(v => v.id === Number(currentVuzId)) : null;
+    const currentVuzId = vuzId || data.vuzId;
+    const vuzName = data.vuzName;
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('ru-RU').format(price);
     };
 
     let linkPath = `/specialty/${data.id}`;
-    if (!isGlobal && vuzId && facultyId) {
+    if (data.vuzId && data.facultyId) {
+        linkPath = `/vuz/${data.vuzId}/faculty/${data.facultyId}/direction/${data.id}`;
+    } else if (!isGlobal && vuzId && facultyId) {
         linkPath = `/vuz/${vuzId}/faculty/${facultyId}/direction/${data.id}`;
     }
 
@@ -39,20 +41,19 @@ export default function DirectionCard({ data, facultyLogo, isGlobal = false, sho
                             {data.code} {data.code_name}
                         </p>
 
-                        {/* 👇 ВЫВОДИМ ВУЗ, ТОЛЬКО ЕСЛИ ПЕРЕДАН ПРОПС 👇 */}
-                        {showVuzName && vuz && (
+                        {showVuzName && vuzName && (
                             <p className="text-14m" style={{ color: 'var(--green)', marginTop: '8px' }}>
-                                {vuz.name}
+                                {vuzName}
                             </p>
                         )}
                     </div>
                 </div>
 
-                   {data.description && (
-                                    <div className="direction-card__description">
-                                        <p className="text-14r">{data.description}</p>
-                                    </div>
-                                )}
+                {data.description && (
+                    <div className="direction-card__description">
+                        <p className="text-14r">{data.description}</p>
+                    </div>
+                )}
 
                 {data.exams && data.exams.length > 0 && (
                     <div className="direction-card__exams">
@@ -110,13 +111,12 @@ export default function DirectionCard({ data, facultyLogo, isGlobal = false, sho
                                 facultyId: facultyId || data.facultyId
                             });
                         }}
-                        title={isFavorite ? "Убрать из избранного" : "В избранное"}
+                        title={isFavorite ? 'Убрать из избранного' : 'В избранное'}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24"
                             fill={isFavorite ? "var(--green)" : "none"}
                             stroke="var(--green)"
-                            strokeWidth="2"
-                        >
+                            strokeWidth="2">
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                         </svg>
                     </button>

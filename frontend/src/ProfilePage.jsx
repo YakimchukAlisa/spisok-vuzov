@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFavorites } from './component/FavoritesContext.jsx';
-import { getProfile, updateProfile } from './api/api.js';
+import { getProfile, updateProfile, getTestResults, getTest } from './api/api.js';
 import './css/profilePage.css';
 
 export default function ProfilePage() {
@@ -41,6 +41,44 @@ export default function ProfilePage() {
         setUserData(profile);
         setEditForm(profile);
         setIsLoading(false);
+
+        // ----- Результаты теста из базы -----
+        const userId = data.id ?? data.userId ?? 5; // id из ответа профиля, 5 — fallback
+
+        return Promise.all([getTestResults(userId), getTest(1)]);
+      })
+      .then(([resultsRes, testData]) => {
+        if (!resultsRes) return;
+
+        // сопоставляем названия сфер с их id — для кнопок «Профессии/Специальности»
+        const nameToId = {};
+        ((testData && testData.spheres) || []).forEach(s => {
+          nameToId[s.name] = s.id;
+        });
+
+        const results = (resultsRes.data || []).map(r => {
+          const d = r.dataProhozhdenia ? new Date(r.dataProhozhdenia) : null;
+          return {
+            date: d ? d.toLocaleDateString('ru-RU') : '',
+            time: d
+              ? d.toLocaleTimeString('ru-RU', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : '',
+            timestamp: d ? d.getTime() : 0,
+           spheres: (r.sfery || '')
+             .split(';')
+             .map(n => n.trim())
+             .filter(Boolean)
+             .map(n => ({ id: nameToId[n] ?? null, name: n }))
+
+          };
+        });
+
+        // сначала новые
+        results.sort((a, b) => b.timestamp - a.timestamp);
+        setTestResults(results);
       })
       .catch(err => {
         console.error('Ошибка загрузки профиля:', err);
@@ -52,29 +90,6 @@ export default function ProfilePage() {
           navigate('/auth');
         }
       });
-
-    // ----- Тесты (пока из localStorage) -----
-    let results = [];
-    const savedArr = localStorage.getItem('careerTestResults');
-    if (savedArr) {
-      try {
-        results = JSON.parse(savedArr) || [];
-      } catch {
-        results = [];
-      }
-    }
-    if (results.length === 0) {
-      const legacy = localStorage.getItem('careerTestResult');
-      if (legacy) {
-        try {
-          const parsed = JSON.parse(legacy);
-          results = [parsed];
-          localStorage.setItem('careerTestResults', JSON.stringify(results));
-        } catch { /* ignore */ }
-      }
-    }
-    results.sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0));
-    setTestResults(results);
   }, [navigate]);
 
   const handleEdit = () => {
@@ -107,36 +122,9 @@ export default function ProfilePage() {
   };
   const cancelLogout = () => setShowLogoutModal(false);
 
-  const getSpheres = (test) => {
-    if (
-      Array.isArray(test.spheres) &&
-      test.spheres.length &&
-      typeof test.spheres[0] === 'object'
-    ) {
-      return test.spheres;
-    }
-    if (typeof test.spheres === 'string' && Array.isArray(test.sphereIds)) {
-      const names = test.spheres.split(',').map(s => s.trim());
-      return test.sphereIds.map((id, i) => ({
-        id,
-        name: names[i] || 'Сфера'
-      }));
-    }
-    return [];
-  };
-
   const formatDateTime = (test) => {
     if (test.date && test.time) return `${test.date}, ${test.time}`;
     if (test.date) return test.date;
-    if (test.timestamp) {
-      return new Date(test.timestamp).toLocaleString('ru-RU', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
     return '—';
   };
 
@@ -290,93 +278,93 @@ export default function ProfilePage() {
         </div>
 
         {testResults.length > 0 &&
-          testResults.map((test, idx) => {
-            const spheres = getSpheres(test);
-            return (
-              <div
-                key={test.timestamp || idx}
-                style={{
-                  marginTop: '40px',
-                  padding: '32px',
-                  backgroundColor: 'var(--green-light-1)',
-                  borderRadius: '20px'
-                }}
+          testResults.map((test, idx) => (
+            <div
+              key={test.timestamp || idx}
+              style={{
+                marginTop: '40px',
+                padding: '32px',
+                backgroundColor: 'var(--green-light-1)',
+                borderRadius: '20px'
+              }}
+            >
+              <h2 className="text-28sm" style={{ marginBottom: '16px' }}>
+                Результаты профориентации
+              </h2>
+              <p
+                className="text-16r"
+                style={{ marginBottom: '8px', color: 'var(--black)' }}
               >
-                <h2 className="text-28sm" style={{ marginBottom: '16px' }}>
-                  Результаты профориентации
-                </h2>
-                <p
-                  className="text-16r"
-                  style={{ marginBottom: '8px', color: 'var(--black)' }}
-                >
-                  Дата прохождения:{' '}
-                  <strong>{formatDateTime(test)}</strong>
-                </p>
+                Дата прохождения: <strong>{formatDateTime(test)}</strong>
+              </p>
 
-                {spheres.length > 0 ? (
-                  <>
-                    <p
-                      className="text-20b"
-                      style={{
-                        color: 'var(--black)',
-                        marginBottom: '24px'
-                      }}
-                    >
-                      Вам подходит:
-                    </p>
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '16px'
-                      }}
-                    >
-                      {spheres.map(sphere => (
-                        <div
-                          key={sphere.id}
+              {test.spheres.length > 0 ? (
+                <>
+                  <p
+                    className="text-20b"
+                    style={{
+                      color: 'var(--black)',
+                      marginBottom: '24px'
+                    }}
+                  >
+                    Вам подходит:
+                  </p>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px'
+                    }}
+                  >
+                    {test.spheres.map((sphere, i) => (
+                      <div
+                        key={sphere.id ?? `${sphere.name}-${i}`}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '16px',
+                          flexWrap: 'wrap'
+                        }}
+                      >
+                        <span
+                          className="text-20b"
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '16px',
-                            flexWrap: 'wrap'
+                            minWidth: '180px',
+                            color: 'var(--black)'
                           }}
                         >
-                          <span
-                            className="text-20b"
-                            style={{
-                              minWidth: '180px',
-                              color: 'var(--black)'
-                            }}
-                          >
-                            {sphere.name}
-                          </span>
-                          <a
-                            href={`/sphere/${sphere.id}?type=profession`}
-                            className="btn btn--green text-14m"
-                          >
-                            Профессии
-                          </a>
-                          <a
-                            href={`/sphere/${sphere.id}?type=specialty`}
-                            className="btn btn--green text-14m"
-                          >
-                            Специальности
-                          </a>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <p
-                    className="text-14r"
-                    style={{ color: 'var(--gray-dark)' }}
-                  >
-                    Нет данных о подходящих сферах.
-                  </p>
-                )}
-              </div>
-            );
-          })}
+                          {sphere.name}
+                        </span>
+                        {sphere.id !== null && (
+                          <>
+                            <a
+                              href={`/sphere/${sphere.id}?type=profession`}
+                              className="btn btn--green text-14m"
+                            >
+                              Профессии
+                            </a>
+                            <a
+                              href={`/sphere/${sphere.id}?type=specialty`}
+                              className="btn btn--green text-14m"
+                            >
+                              Специальности
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p
+                  className="text-14r"
+                  style={{ color: 'var(--gray-dark)' }}
+                >
+                  Нет данных о подходящих сферах.
+                </p>
+              )}
+            </div>
+          ))}
       </div>
 
       {showLogoutModal && (

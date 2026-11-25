@@ -10,11 +10,13 @@ export default function FacultyCard({ data, showVuzName = false }) {
 
     if (!data) return null;
 
-    const isFavorite = favorites.faculties.some(f => f.id === data.id);
+ const isFavorite = favorites.faculties.some(
+   f => (f.fakId ?? f.id) === data.id
+ );
     const currentVuzId = vuzIdFromUrl || data.vuzId;
     
     // Ищем вуз только если нужно его показать (для экономии ресурсов)
-    const vuz = showVuzName ? vuzData.find(v => v.id === Number(currentVuzId)) : null;
+   const vuzName = data.vuzName;
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('ru-RU').format(price);
@@ -31,11 +33,12 @@ export default function FacultyCard({ data, showVuzName = false }) {
                         <h3 className="faculty-card__short-name">{data.shortName}</h3>
                         <p className="faculty-card__full-name">{data.fullName}</p>
 
-                        {showVuzName && vuz && (
-                            <p className="text-14m" style={{ color: 'var(--green)', marginTop: '8px' }}>
-                                {vuz.name}
-                            </p>
-                        )}
+                    {showVuzName && vuzName && (
+                        <p className="text-14m" style={{ color: 'var(--green)', marginTop: '8px' }}>
+                            {vuzName}
+                        </p>
+                    )}
+
                     </div>
                 </div>
 

@@ -22,10 +22,24 @@ export default function FavoritesPage() {
     { id: 'specialties', label: 'Специальности' }
   ];
 
-  // --- ЛОГИКА ДЛЯ ВУЗОВ ---
-  const currentVuzes = favorites.vuzes || [];
+  // --- Обогащение записей из API данными из JSON ---
+const currentVuzes = favorites.vuzes || [];
+const currentFaculties = favorites.faculties || [];
+const currentSpecialties = favorites.specialties || []
+
+  // --- Фильтрация с защитой от отсутствующих полей ---
+  const query = searchQuery.toLowerCase();
+
   const filteredVuzes = currentVuzes.filter(v =>
-    v.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (v.name ?? '').toLowerCase().includes(query)
+  );
+
+  const filteredFaculties = currentFaculties.filter(f =>
+    (f.fullName ?? f.shortName ?? '').toLowerCase().includes(query)
+  );
+
+  const filteredSpecialties = currentSpecialties.filter(s =>
+    (s.name ?? '').toLowerCase().includes(query)
   );
 
   // Выбрать все / Снять все
@@ -52,15 +66,6 @@ export default function FavoritesPage() {
     setSearchQuery('');
   };
 
-  // Фильтрация для факультетов и специальностей
-  const filteredFaculties = (favorites.faculties || []).filter(f =>
-    f.fullName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const filteredSpecialties = (favorites.specialties || []).filter(s =>
-    s.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
     <div className="wrapper">
       <div className="container" style={{ marginTop: '100px', marginBottom: '100px', gap: '32px'}}>
@@ -76,7 +81,11 @@ export default function FavoritesPage() {
               className={`favorites-tab ${activeTab === tab.id ? 'active' : ''}`}
               onClick={() => handleTabChange(tab.id)}
             >
-              {tab.label} ({favorites[tab.id]?.length || 0})
+              {tab.label} ({currentVuzes?.length && tab.id === 'vuzes'
+                ? currentVuzes.length
+                : tab.id === 'faculties'
+                ? currentFaculties.length
+                : currentSpecialties.length})
             </button>
           ))}
         </div>
@@ -143,9 +152,9 @@ export default function FavoritesPage() {
                   <VuzCard
                     key={vuz.id}
                     data={vuz}
-                    showCheckbox={true} // Включаем чекбокс
-                    isChecked={selectedVuzes.includes(vuz.id)} // Проверяем, выбран ли
-                    onCheck={() => handleSelectVuz(vuz.id)} // Обработчик клика
+                    showCheckbox={true}
+                    isChecked={selectedVuzes.includes(vuz.id)}
+                    onCheck={() => handleSelectVuz(vuz.id)}
                   />
                 ))
               )}
@@ -171,9 +180,32 @@ export default function FavoritesPage() {
               {filteredSpecialties.length === 0 ? (
                 <p className="text-20r" style={{ color: 'var(--gray)' }}>Ничего не найдено.</p>
               ) : (
-                filteredSpecialties.map(spec => (
-                  <DirectionCard key={spec.id} data={spec} isGlobal={true} showVuzName={true} showCheckbox={true} />
-                ))
+               filteredSpecialties.map(spec => (
+                 <DirectionCard
+                   key={spec.id}
+                  data={{
+                    ...spec,
+                    code: spec.code,
+                    code_name: spec.code_name,
+                    description: spec.description,
+                    facultyId: spec.fakultetId,
+                    exams: spec.exams || [],
+                    educationForms: {
+                      fullTime: {
+                        name: spec.forma || 'Очная',
+                        budget: { places: spec.budgetPlaces || 0, minScore: spec.budgetMinScore || 0 },
+                        paid: { places: spec.paidPlaces || 0, minScore: spec.paidMinScore || 0, minPrice: spec.paidMinPrice || 0 },
+                      },
+                    },
+                  }}
+
+                   facultyLogo={spec.fakultetLogo}
+                   isGlobal={true}
+                   showVuzName={true}
+                   showCheckbox={true}
+                 />
+               ))
+
               )}
             </div>
           )}

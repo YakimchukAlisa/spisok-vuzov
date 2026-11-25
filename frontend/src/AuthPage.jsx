@@ -69,19 +69,19 @@ export default function AuthPage() {
     setError('');
 
     try {
-      const response = await verifyCode(phone, code);
-      // response = { message, phone, isNewUser, isAdmin }
+    const response = await verifyCode(phone, code);
+    // response = { message, phone, isNewUser, isAdmin, userId }
 
-      if (response.isAdmin) {
-        setStep('admin_password');
-      } else if (response.isNewUser) {
-        setStep('profile');
-      } else {
-        // Существующий пользователь — сохраняем, кто именно вошёл
-        localStorage.setItem('currentPhone', phone);
-        login();
-        navigate('/profile');
-      }
+    if (response.isAdmin) {
+      setStep('admin_password');
+    } else if (response.isNewUser) {
+      setStep('profile');
+    } else {
+      localStorage.setItem('currentPhone', phone);
+      login(response.userId);
+      navigate('/profile');
+     }
+
     } catch (err) {
       setError(err.response?.data?.error || 'Неверный код');
     } finally {
@@ -113,11 +113,12 @@ export default function AuthPage() {
     setIsLoading(true);
 
     try {
-      await registerUser(phone, profileData.name, profileData.email);
-      // Сохраняем, кто именно зарегистрировался
+      const res = await registerUser(phone, profileData.name, profileData.email);
       localStorage.setItem('currentPhone', phone);
-      login();
+      login(res.userId);   // register теперь возвращает userId; если api.js оборачивает в axios — res.data.userId
       navigate('/profile');
+
+
     } catch (err) {
       setError(err.response?.data?.error || 'Не удалось сохранить профиль');
     } finally {

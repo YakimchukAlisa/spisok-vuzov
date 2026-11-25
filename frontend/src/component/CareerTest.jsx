@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getTest } from '../api/api.js';
+import { getTest, saveTestResult } from '../api/api.js';
 import '../css/careerTest.css';
 
 export default function CareerTest() {
@@ -91,38 +91,37 @@ export default function CareerTest() {
     setIsSaved(false);
   };
 
-  // --- СОХРАНЕНИЕ В ПРОФИЛЬ ---
-  const handleSaveToProfile = () => {
-    if (isSaved) return;
+  const handleSaveToProfile = async () => {
+      if (isSaved) return;
+      try {
+          const handleSaveToProfile = async () => {
+              if (isSaved) return;
+              try {
+                  // узнаём id вошедшего пользователя по телефону
+                  const phone = localStorage.getItem('currentPhone');
+                  const profile = await getProfile(phone);
 
-    const now = new Date();
+                  await saveTestResult({
+                      userId: profile.id,          // ← реальный id из базы
+                      testId: 1,
+                      sfery: resultSpheres.map(s => s.name).join('; '),
+                  });
+                  setIsSaved(true);
+                  alert('Результат сохранён в личном кабинете!');
+              } catch (err) {
+                  console.error(err);
+                  alert('Не удалось сохранить результат. Попробуйте ещё раз.');
+              }
+          };
 
-    const testResult = {
-      date: now.toLocaleDateString('ru-RU'),
-      time: now.toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-      timestamp: now.getTime(),
-      spheres: resultSpheres.map(s => s.name).join(', '),
-      sphereIds: resultSpheres.map(s => s.id)
-    };
-
-    let existing = [];
-    try {
-      existing = JSON.parse(localStorage.getItem('careerTestResults') || '[]');
-      if (!Array.isArray(existing)) existing = [];
-    } catch {
-      existing = [];
-    }
-    existing.push(testResult);
-
-    localStorage.setItem('careerTestResults', JSON.stringify(existing));
-    localStorage.removeItem('careerTestResult');
-
-    setIsSaved(true);
-    alert('Результат теста сохранён в личном кабинете!');
+          setIsSaved(true);
+          alert('Результат сохранён в личном кабинете!');
+      } catch (err) {
+          console.error(err);
+          alert('Не удалось сохранить результат. Попробуйте ещё раз.');
+      }
   };
+
 
   const handleRestart = () => {
     setCurrentQuestion(0);
