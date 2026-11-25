@@ -46,7 +46,7 @@
 .rating-table__row {
   display: grid;
   /* место | вуз | место2025 | балл | условия | востребованность | наука */
-  grid-template-columns: 80px 1fr 100px 100px 100px 130px 100px;
+  grid-template-columns: 80px 1fr 100px 100px 100px 150px 100px;
 }
 
 /* Шапка */

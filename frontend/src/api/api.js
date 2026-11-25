@@ -202,6 +202,15 @@ export async function refreshMRate() {
   const res = await api.post('/ratings/mrate/refresh');
   return res.data;
 }
+export const getRatings = (vuzIds) =>
+    api.get('/vuz/ratings', { params: { vuzIds: vuzIds.join(',') } });
+
+export const getPassingScores = (vuzIds) =>
+    api.get('/vuz/passing-scores', { params: { vuzIds: vuzIds.join(',') } });
+
+
 
 export const saveTestResult = (payload) => api.post('/results', payload);
 export const getTestResults = (userId) => api.get(`/results/${userId}`);
+export const getVuzes = () => axios.get('http://localhost:8080/api/vuz/compare');
+
