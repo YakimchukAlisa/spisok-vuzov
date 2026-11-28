@@ -2,7 +2,8 @@ import { Table, Button, Typography, Space, Modal, Form, Input, Select, message, 
 import { ArrowLeftOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-
+const API = "http://localhost:8080/api";
+const TEST_ID = 1;
 const { Title } = Typography;
 
 export function TestOptions() {
@@ -16,15 +17,18 @@ export function TestOptions() {
   const [editingOption, setEditingOption] = useState(null); // null = создание, объект = редактирование
   const [form] = Form.useForm();
 
-  const fetchData = () => {
-    Promise.all([
-      fetch(`http://localhost:3001/testQuestions/${id}`).then(res => res.json()),
-      fetch(`http://localhost:3001/spheres`).then(res => res.json())
-    ]).then(([qData, sData]) => {
-      setQuestion(Array.isArray(qData) ? qData[0] : qData);
-      setSpheres(Array.isArray(sData) ? sData : []);
-    }).finally(() => setLoading(false));
-  };
+    const fetchData = () => {
+      Promise.all([
+        fetch(`${API}/test/questions/${id}/options`).then((res) => res.json()),
+        fetch(`${API}/spheres`).then((res) => res.json()),
+      ])
+        .then(([qData, sData]) => {
+          setQuestion(qData);
+          setSpheres(Array.isArray(sData) ? sData : []);
+        })
+        .catch((err) => console.error(">>> ошибка загрузки:", err))
+        .finally(() => setLoading(false));
+    };
 
   useEffect(() => {
     fetchData();
@@ -33,11 +37,11 @@ export function TestOptions() {
   const handleDelete = async (optionIndex) => {
     if (!window.confirm("Удалить этот ответ?")) return;
     try {
-      const updatedOptions = question.options.filter((_, i) => i !== optionIndex);
-      await fetch(`http://localhost:3001/testQuestions/${id}`, {
+      const updatedOptions = (question.options || []).filter((_, i) => i !== optionIndex);
+      await fetch(`${API}/test/questions/${id}/options`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...question, options: updatedOptions }),
+        body: JSON.stringify({ options: updatedOptions }),
       });
       message.success("Ответ удален");
       fetchData();
@@ -45,6 +49,33 @@ export function TestOptions() {
       message.error("Ошибка");
     }
   };
+
+  const handleModalOk = async () => {
+    try {
+      const values = await form.validateFields();
+      let updatedOptions = [...(question.options || [])];
+
+      if (editingOption) {
+        const index = updatedOptions.findIndex((o) => o.id === editingOption.id);
+        if (index !== -1) updatedOptions[index] = { ...updatedOptions[index], ...values };
+      } else {
+        updatedOptions.push(values);
+      }
+
+      await fetch(`${API}/test/questions/${id}/options`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ options: updatedOptions }),
+      });
+
+      message.success("Сохранено!");
+      setIsModalVisible(false);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   const openModal = (option = null) => {
     setEditingOption(option);
@@ -56,33 +87,6 @@ export function TestOptions() {
     setIsModalVisible(true);
   };
 
-  const handleModalOk = async () => {
-    try {
-      const values = await form.validateFields();
-      let updatedOptions = [...(question.options || [])];
-
-      if (editingOption) {
-        // Редактирование
-        const index = updatedOptions.findIndex(o => o.text === editingOption.text);
-        if (index !== -1) updatedOptions[index] = values;
-      } else {
-        // Создание
-        updatedOptions.push(values);
-      }
-
-      await fetch(`http://localhost:3001/testQuestions/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...question, options: updatedOptions }),
-      });
-      
-      message.success("Сохранено!");
-      setIsModalVisible(false);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   if (loading) return <div style={{ padding: 50, textAlign: 'center' }}><Spin size="large" /></div>;
   if (!question) return <div>Вопрос не найден</div>;

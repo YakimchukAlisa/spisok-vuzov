@@ -11,12 +11,10 @@ export function FacultyCreate() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [university, setUniversity] = useState(null);
-  
-  // Используем Form.useForm для управления формой
   const [form] = Form.useForm();
 
   useEffect(() => {
-    fetch(`http://localhost:3001/universities/${id}`)
+    fetch(`http://localhost:8080/api/vuz/admin-list/${id}`)
       .then((res) => res.json())
       .then((data) => {
         const uni = Array.isArray(data) ? data[0] : data;
@@ -25,14 +23,16 @@ export function FacultyCreate() {
       .catch((err) => console.error("Ошибка загрузки вуза:", err));
   }, [id]);
 
-    const handleUpload = (file, form) => {
+  // Параметр form убран: внутри доступен form из Form.useForm,
+  // а второй аргумент beforeUpload — это список файлов, не форма
+  const handleUpload = (file) => {
     let folderName = "";
 
     // 1. Пытаемся взять папку из пути картинки текущего вуза
     if (university?.imageUrl) {
       const parts = university.imageUrl.split('/');
       if (parts.length >= 3 && parts[1] === 'img') {
-        folderName = parts[2]; 
+        folderName = parts[2];
         // Убираем расширение файла, если оно там есть (например, "spbpu.jpg" -> "spbpu")
         folderName = folderName.split('.')[0];
       }
@@ -45,8 +45,8 @@ export function FacultyCreate() {
 
     // 3. Формируем правильный путь: /img/spbpu/spbpu.svg
     const path = `/img/${folderName}/${file.name}`;
-    
-    form.setFieldsValue({ imageUrl: path });
+
+    form.setFieldsValue({ logoUrl: path });
     message.success(`Путь сохранен: ${path}`);
     return false;
   };
@@ -54,26 +54,12 @@ export function FacultyCreate() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/universities/${id}`);
-      const data = await res.json();
-      const uni = Array.isArray(data) ? data[0] : data;
-
-      const newFaculty = {
-        id: Date.now(),
-        fullName: values.fullName,
-        shortName: values.shortName,
-        description: values.description,
-        imageUrl: values.imageUrl || "",
-        bachelor: { budgetPlaces: 0, paidPlaces: 0, directionsList: [] }
-      };
-
-      const updatedFaculties = [...(uni.faculties || []), newFaculty];
-      
-      await fetch(`http://localhost:3001/universities/${id}`, {
-        method: "PUT",
+      const res = await fetch(`http://localhost:8080/api/vuz/${id}/fakultety`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...uni, faculties: updatedFaculties }),
+        body: JSON.stringify(values),
       });
+      if (!res.ok) throw new Error(`Статус ${res.status}`);
 
       message.success("Факультет добавлен!");
       navigate(`/admin/universities/${id}/faculties`);
@@ -97,24 +83,23 @@ export function FacultyCreate() {
       </div>
 
       <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Form.Item label="Полное наименование" name="fullName" rules={[{ required: true, message: "Введите название" }]}>
-          <Input placeholder="Факультет Информационных технологий" />
+        <Form.Item label="Полное наименование" name="name" rules={[{ required: true, message: "Введите название" }]}>
+          <Input />
         </Form.Item>
-        
+
         <Form.Item label="Аббревиатура" name="shortName" rules={[{ required: true, message: "Введите аббревиатуру" }]}>
-          <Input placeholder="ФИТ" />
+          <Input />
         </Form.Item>
-        
+
         <Form.Item label="Описание" name="description">
-          <Input.TextArea rows={4} placeholder="Краткое описание..." />
+          <Input.TextArea rows={4} />
         </Form.Item>
 
         <Form.Item label="Логотип факультета">
           <Upload beforeUpload={handleUpload} showUploadList={false}>
             <Button icon={<UploadOutlined />}>Выбрать логотип</Button>
           </Upload>
-          {/* Поле для отображения пути */}
-          <Form.Item name="imageUrl" noStyle>
+          <Form.Item name="logoUrl" noStyle>
             <Input placeholder="/img/altgtu/fit.svg" readOnly style={{ marginTop: 8 }} />
           </Form.Item>
         </Form.Item>

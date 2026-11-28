@@ -11,6 +11,7 @@ const TABS = [
   { key: 'bachelor', label: 'Бакалавриат' },
   { key: 'master', label: 'Магистратура' },
   { key: 'specialist', label: 'Специалитет' },
+  { key: 'aspirantura', label: 'Аспирантура' },
 ];
 
 export default function SpherePage() {
@@ -62,7 +63,8 @@ export default function SpherePage() {
 
   const targetLevel = activeTab === 'bachelor' ? 'Бакалавриат'
     : activeTab === 'master' ? 'Магистратура'
-    : 'Специалитет';
+    : activeTab === 'specialist' ? 'Специалитет'
+    : 'Аспирантура';
 
   // Фильтрация: уровень + поиск + ЕГЭ
   const filteredItems = useMemo(() => {

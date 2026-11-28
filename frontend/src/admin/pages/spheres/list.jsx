@@ -21,9 +21,8 @@ export function SphereList() {
       }
     >
       <Table {...tableProps} rowKey="id" pagination={false}>
-        
+
         <Table.Column
-          title=""
           width={50}
           render={(_, record) => (
             <Link to={`/admin/spheres/edit/${record.id}`}>
@@ -34,24 +33,23 @@ export function SphereList() {
 
         <Table.Column dataIndex="id" title="ID" width={80} />
         <Table.Column dataIndex="name" title="Наименование сферы" />
-        
-        <Table.Column 
-          dataIndex="imageUrl" 
-          title="Ссылка на иконку" 
-          render={(text) => text || "—"} 
+
+        <Table.Column
+          dataIndex="logoUrl"
+          title="Ссылка на иконку"
+          render={(text) => text || "—"}
         />
 
         <Table.Column
-          title=""
           width={50}
           render={(_, record) => (
-            <DeleteButton 
-              hideText 
-              recordItemId={record.id} 
+            <DeleteButton
+              hideText
+              recordItemId={record.id}
               icon={<DeleteOutlined />}
               style={{ border: 'none', background: 'transparent', boxShadow: 'none' }}
-              confirmTitle="Удалить сферу?" 
-              confirmOkText="Удалить" 
+              confirmTitle="Удалить сферу?"
+              confirmOkText="Удалить"
               confirmCancelText="Отмена"
             />
           )}

@@ -2,6 +2,8 @@ import { Form, Input, Button, message, Typography, Space } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
+const API = "http://localhost:8080/api";
+const TEST_ID = 1;
 
 const { Title } = Typography;
 
@@ -13,10 +15,10 @@ export function TestQuestionCreate() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await fetch(`http://localhost:3001/testQuestions`, {
+      await fetch(`${API}/test/${TEST_ID}/questions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: Date.now(), question: values.question, options: [] }),
+        body: JSON.stringify({ question: values.question }),
       });
       message.success("Вопрос добавлен!");
       navigate("/admin/test");

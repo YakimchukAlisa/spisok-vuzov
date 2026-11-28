@@ -2,7 +2,8 @@ import { Form, Input, Button, message, Spin, Typography, Space } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-
+const API = "http://localhost:8080/api";
+const TEST_ID = 1;
 const { Title } = Typography;
 
 export function TestQuestionEdit() {
@@ -12,36 +13,33 @@ export function TestQuestionEdit() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  useEffect(() => {
-    fetch(`http://localhost:3001/testQuestions/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        const item = Array.isArray(data) ? data[0] : data;
-        if (item) form.setFieldsValue({ question: item.question });
-      })
-      .finally(() => setInitialLoading(false));
-  }, [id, form]);
+   useEffect(() => {
+     fetch(`${API}/test/questions/${id}`)
+       .then((res) => res.json())
+       .then((data) => {
+         const item = Array.isArray(data) ? data[0] : data;
+         if (item) form.setFieldsValue({ question: item.question });
+       })
+       .finally(() => setInitialLoading(false));
+   }, [id, form]);
 
-  const onFinish = async (values) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`http://localhost:3001/testQuestions/${id}`);
-      const item = await res.json();
-      const question = Array.isArray(item) ? item[0] : item;
-
-      await fetch(`http://localhost:3001/testQuestions/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...question, question: values.question }),
-      });
-      message.success("Вопрос обновлен!");
-      navigate("/admin/test");
-    } catch (error) {
-      message.error("Ошибка");
-    } finally {
-      setLoading(false);
-    }
-  };
+   const onFinish = async (values) => {
+     setLoading(true);
+     try {
+       const res = await fetch(`${API}/test/questions/${id}`, {
+         method: "PUT",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ question: values.question }),
+       });
+       if (!res.ok) throw new Error(`Статус ${res.status}`);
+       message.success("Вопрос обновлен!");
+       navigate("/admin/test");
+     } catch (error) {
+       message.error("Ошибка");
+     } finally {
+       setLoading(false);
+     }
+   };
 
   if (initialLoading) return <div style={{ padding: 50, textAlign: 'center' }}><Spin size="large" /></div>;
 

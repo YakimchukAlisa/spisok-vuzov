@@ -1,18 +1,17 @@
 import { Form, Input, Upload, Button, message, Typography, Space } from "antd";
 import { UploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 const { Title } = Typography;
 
 export function SphereCreate() {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
   const handleUpload = (file) => {
     const path = `/sphere/${file.name}`;
-    form.setFieldsValue({ imageUrl: path });
+    form.setFieldsValue({ logoUrl: path });
     message.success(`Путь сохранен: ${path}`);
     return false;
   };
@@ -20,14 +19,14 @@ export function SphereCreate() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      await fetch(`http://localhost:3001/spheres`, {
+      const response = await fetch("http://localhost:8080/api/spheres", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, id: Date.now() }), // Генерируем ID
+        body: JSON.stringify(values),
       });
+      if (!response.ok) throw new Error(`Статус ${response.status}`);
 
       message.success("Сфера добавлена!");
-      navigate("/admin/spheres");
     } catch (error) {
       message.error("Ошибка при добавлении");
     } finally {
@@ -55,7 +54,7 @@ export function SphereCreate() {
           <Upload beforeUpload={handleUpload} showUploadList={false}>
             <Button icon={<UploadOutlined />}>Выбрать иконку</Button>
           </Upload>
-          <Form.Item name="imageUrl" noStyle>
+          <Form.Item name="logoUrl" noStyle>
             <Input placeholder="/sphere/it.svg" readOnly style={{ marginTop: 8 }} />
           </Form.Item>
         </Form.Item>

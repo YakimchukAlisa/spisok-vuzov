@@ -1,72 +1,53 @@
 import { Form, Input, Button, message, Spin, Typography, Space, Select } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const { Title } = Typography;
+const API = "http://localhost:8080/api";
 
 export function DirectionEdit() {
   const { id, facultyId, directionId } = useParams();
-  const [searchParams] = useSearchParams();
-  const level = searchParams.get("level") || "bachelor"; 
-
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [university, setUniversity] = useState(null);
-  const [spheres, setSpheres] = useState([]); // <-- Храним сферы
+  const [spheres, setSpheres] = useState([]);
+  const [professions, setProfessions] = useState([]);
 
   useEffect(() => {
-    // Загружаем всё параллельно
     Promise.all([
-      fetch(`http://localhost:3001/universities/${id}`).then(res => res.json()),
-      fetch(`http://localhost:3001/spheres`).then(res => res.json())
-    ]).then(([uniData, spheresData]) => {
-      const uni = Array.isArray(uniData) ? uniData[0] : uniData;
-      setUniversity(uni);
-      setSpheres(Array.isArray(spheresData) ? spheresData : []);
-      
-      const faculty = uni.faculties?.find(f => String(f.id) === String(facultyId));
-      const direction = faculty?.[level]?.directionsList?.find(d => String(d.id) === String(directionId));
-      
-      if (direction) {
-        form.setFieldsValue({
-          code: direction.code,
-          code_name: direction.code_name || direction.name,
-          description: direction.description,
-          spheres: direction.spheres || [] // <-- Заполняем сферы
-        }); 
-      }
-    }).catch(err => console.error(err))
+      fetch(`${API}/napravleniya/${directionId}`),
+      fetch(`${API}/spheres`),
+      fetch(`${API}/professions`),
+    ])
+      .then(([dRes, sRes, pRes]) => Promise.all([dRes.json(), sRes.json(), pRes.json()]))
+      .then(([direction, spheresData, profData]) => {
+        setSpheres(Array.isArray(spheresData) ? spheresData : []);
+        setProfessions(Array.isArray(profData) ? profData : []);
+        if (direction) {
+          form.setFieldsValue({
+            kod: direction.kod,
+            name: direction.name,
+            opisanie: direction.opisanie,
+            sphereIds: direction.sphereIds || [],
+            professionIds: direction.professionIds || [],
+          });
+        }
+      })
+      .catch((err) => console.error(err))
       .finally(() => setInitialLoading(false));
-  }, [id, facultyId, directionId, level, form]);
+  }, [directionId, form]);
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const faculty = university.faculties.find(f => String(f.id) === String(facultyId));
-      
-      const updatedDirections = faculty[level].directionsList.map(d => 
-        String(d.id) === String(directionId) 
-          ? { ...d, ...values } 
-          : d
-      );
-
-      const updatedFaculty = {
-        ...faculty,
-        [level]: { ...faculty[level], directionsList: updatedDirections }
-      };
-
-      const updatedFaculties = university.faculties.map(f => 
-        String(f.id) === String(facultyId) ? updatedFaculty : f
-      );
-
-      await fetch(`http://localhost:3001/universities/${id}`, {
+      const res = await fetch(`${API}/napravleniya/${directionId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...university, faculties: updatedFaculties }),
+        body: JSON.stringify(values),
       });
+      if (!res.ok) throw new Error(`Статус ${res.status}`);
 
       message.success("Направление обновлено!");
       navigate(`/admin/universities/${id}/faculties/${facultyId}/directions`);
@@ -91,24 +72,33 @@ export function DirectionEdit() {
       </div>
 
       <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Form.Item label="Код направления" name="code" rules={[{ required: true }]}>
-          <Input />
+        <Form.Item label="Код направления" name="kod" rules={[{ required: true, message: "Введите код" }]}>
+          <Input placeholder="09.03.04" />
         </Form.Item>
-        
-        <Form.Item label="Наименование" name="code_name" rules={[{ required: true }]}>
+
+        <Form.Item label="Наименование" name="name" rules={[{ required: true, message: "Введите наименование" }]}>
           <Input />
         </Form.Item>
 
-        {/* 👇 ПОЛЕ ДЛЯ ВЫБОРА СФЕР (БЕЗ РЕЖИМА TAGS) */}
-        <Form.Item label="Сферы" name="spheres">
-          <Select 
-            mode="multiple" 
-            placeholder="Выберите сферы" 
-            options={spheres.map(s => ({ label: s.name, value: s.code }))} 
+        <Form.Item label="Сферы" name="sphereIds">
+          <Select
+            mode="multiple"
+            placeholder="Выберите сферы"
+            options={spheres.map((s) => ({ label: s.name, value: s.id }))}
           />
         </Form.Item>
-        
-        <Form.Item label="Описание" name="description">
+
+        <Form.Item label="Профессии" name="professionIds">
+          <Select
+            mode="multiple"
+            showSearch
+            optionFilterProp="label"
+            placeholder="Выберите профессии"
+            options={professions.map((p) => ({ label: p.name, value: p.id }))}
+          />
+        </Form.Item>
+
+        <Form.Item label="Описание" name="opisanie">
           <Input.TextArea rows={5} />
         </Form.Item>
 

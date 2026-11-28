@@ -1,130 +1,108 @@
-import { Form, Input, Button, message, Typography, Space, InputNumber, Divider, Checkbox, Select, Upload } from "antd";
-import { ArrowLeftOutlined, UploadOutlined } from "@ant-design/icons";
-import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
+import { Form, Input, Button, message, Spin, Typography, Space, InputNumber, Divider, Checkbox, Select, Upload } from "antd";
+import { ArrowLeftOutlined, UploadOutlined, PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const { Title } = Typography;
-const SUBJECTS = ["Русский язык", "Математика", "Информатика", "Физика", "Химия", "Биология", "История", "Обществознание", "Иностранный язык"];
+const API = "http://localhost:8080/api";
 
 export function ProfileCreate() {
   const { id, facultyId, directionId } = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const level = searchParams.get("level") || "bachelor";
-
   const [loading, setLoading] = useState(false);
-  const [university, setUniversity] = useState(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [direction, setDirection] = useState(null);
+  const [forms, setForms] = useState([]);
+  const [levels, setLevels] = useState([]);
+  const [examOptions, setExamOptions] = useState([]);
+  const [university, setUniversity] = useState(null);
+  const [fileList, setFileList] = useState([]);
+  const [formySdachi, setFormySdachi] = useState([]);
   const [form] = Form.useForm();
 
-  // Состояние для визуального списка файлов
-  const [fileList, setFileList] = useState([]);
-
   useEffect(() => {
-    fetch(`http://localhost:3001/universities/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const uni = Array.isArray(data) ? data[0] : data;
-        setUniversity(uni);
-        const fac = uni.faculties.find(f => String(f.id) === String(facultyId));
-        const dir = fac[level].directionsList.find(d => String(d.id) === String(directionId));
+    Promise.all([
+      fetch(`${API}/napravleniya/${directionId}`),
+      fetch(`${API}/form-obuch`),
+      fetch(`${API}/ur-obraz`),
+      fetch(`${API}/exams/ege`),
+      fetch(`${API}/vuz/admin-list/${id}`),
+      fetch(`${API}/exams/formy-sdachi`),
+    ])
+      .then(([d, f, u, e, v, fs]) => Promise.all([d.json(), f.json(), u.json(), e.json(), v.json(), fs.json()]))
+      .then(([dir, formsData, levelsData, examsData, uni, fsData]) => {
         setDirection(dir);
-      });
-  }, [id, facultyId, directionId, level]);
+        setForms(Array.isArray(formsData) ? formsData : []);
+        setLevels(Array.isArray(levelsData) ? levelsData : []);
+        setExamOptions((Array.isArray(examsData) ? examsData : []).map((s) => ({ label: s, value: s })));
+        setUniversity(uni);
+        setFormySdachi(Array.isArray(fsData) ? fsData : []);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setInitialLoading(false));
+  }, [id, directionId]);
 
   const handleNameMatch = (e) => {
-    if (e.target.checked && direction) {
-      form.setFieldsValue({ name: direction.code_name || direction.name });
-    } else {
-      form.setFieldsValue({ name: "" });
-    }
+    form.setFieldsValue({ name: e.target.checked && direction ? direction.name : "" });
   };
 
-  // 👇 Функция загрузки файлов (отображает путь вместо имени)
   const handleUploadChange = ({ fileList: newFileList }) => {
-    const updatedList = newFileList.map(file => {
+    const updatedList = newFileList.map((file) => {
       if (!file.url) {
         let folderName = "";
         if (university?.imageUrl) {
           const parts = university.imageUrl.split('/');
-          if (parts.length >= 3) folderName = parts[2].split('.')[0]; 
+          if (parts.length >= 3) folderName = parts[2].split('.')[0];
         }
         if (!folderName) folderName = "vuz";
-
         const path = `/img/${folderName}/${file.name}`;
-        
-        return { 
-          ...file, 
-          name: path, // Подменяем имя файла на путь
-          url: path 
-        };
+        return { ...file, name: path, url: path };
       }
       return file;
     });
 
     setFileList(updatedList);
-    
-    form.setFieldsValue({ 
-      files: updatedList.map(f => ({ name: f.name, url: f.url })) 
-    });
+    form.setFieldsValue({ files: updatedList.map((f) => ({ name: f.name, url: f.url })) });
   };
+
+  const formaOptions = formySdachi.map((f) => ({ label: f, value: f }));
 
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/universities/${id}`);
-      const data = await res.json();
-      const uni = Array.isArray(data) ? data[0] : data;
-      
-      const fac = uni.faculties.find(f => String(f.id) === String(facultyId));
-      const dir = fac[level].directionsList.find(d => String(d.id) === String(directionId));
-
-      const newProfile = {
-        id: Date.now(),
-        name: values.name,
-        description: values.description,
-        exams: values.exams || [],
-        files: values.files || [],
-        educationForms: {
-          fullTime: {
-            name: "Очно",
-            duration: values.fullTimeDuration || "",
-            budget: { places: values.fullTimeBudgetPlaces || 0, minScore: values.fullTimeBudgetScore || 0 },
-            paid: { places: values.fullTimePaidPlaces || 0, minScore: values.fullTimePaidScore || 0, price: values.fullTimePrice || 0 }
-          },
-          partTime: {
-            name: "Заочно",
-            duration: values.partTimeDuration || "",
-            budget: { places: values.partTimeBudgetPlaces || 0, minScore: values.partTimeBudgetScore || 0 },
-            paid: { places: values.partTimePaidPlaces || 0, minScore: values.partTimePaidScore || 0, price: values.partTimePrice || 0 }
-          }
-        }
-      };
-
-      const updatedDirection = { ...dir, profiles: [...(dir.profiles || []), newProfile] };
-      const updatedDirections = fac[level].directionsList.map(d => String(d.id) === String(directionId) ? updatedDirection : d);
-      const updatedFaculties = uni.faculties.map(f => String(f.id) === String(facultyId) ? { ...f, [level]: { ...f[level], directionsList: updatedDirections } } : f);
-
-      await fetch(`http://localhost:3001/universities/${id}`, {
-        method: "PUT",
+      const res = await fetch(`${API}/napravlenie/${directionId}/profili`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...uni, faculties: updatedFaculties }),
+        body: JSON.stringify({
+          name: values.name,
+          srokObuchMes: values.srokObuchMes,
+          formId: values.formId,
+          urId: values.urId,
+          exams: values.exams || [],
+          files: values.files || [],
+          budget: { places: values.budgetPlaces || 0, score: values.budgetScore || 0 },
+          paid: { places: values.paidPlaces || 0, score: values.paidScore || 0, price: values.paidPrice || 0 },
+        }),
       });
+      if (!res.ok) throw new Error(`Статус ${res.status}`);
 
       message.success("Профиль добавлен!");
-      navigate(`/admin/universities/${id}/faculties/${facultyId}/directions/${directionId}/profiles?level=${level}`);
+      navigate(`/admin/universities/${id}/faculties/${facultyId}/directions/${directionId}/profiles`);
     } catch (error) {
+      console.error(error);
       message.error("Ошибка при добавлении");
     } finally {
       setLoading(false);
     }
   };
 
+  if (initialLoading) return <div style={{ padding: 50, textAlign: 'center' }}><Spin size="large" /></div>;
+
   return (
     <div style={{ padding: '0 24px' }}>
       <div style={{ marginBottom: '24px', marginTop: '16px' }}>
         <Space size="middle" align="center">
-          <Link to={`/admin/universities/${id}/faculties/${facultyId}/directions/${directionId}/profiles?level=${level}`} style={{ color: '#000', fontSize: '20px' }}>
+          <Link to={`/admin/universities/${id}/faculties/${facultyId}/directions/${directionId}/profiles`} style={{ color: '#000', fontSize: '20px' }}>
             <ArrowLeftOutlined />
           </Link>
           <Title level={3} style={{ margin: 0 }}>Добавить профиль</Title>
@@ -135,47 +113,79 @@ export function ProfileCreate() {
         <Form.Item label="Название профиля" required style={{ marginBottom: 0 }}>
           <Space align="start" style={{ display: 'flex', marginBottom: 8 }}>
             <Form.Item name="name" rules={[{ required: true, message: "Введите название" }]} noStyle>
-              <Input placeholder="Разработка ПО" style={{ width: '400px' }} />
+              <Input placeholder="Разработка ПО" style={{ width: 400 }} />
             </Form.Item>
             <Checkbox onChange={handleNameMatch}>Совпадает с названием направления</Checkbox>
           </Space>
         </Form.Item>
-        
-        <Form.Item label="Описание" name="description">
-          <Input.TextArea rows={3} />
+
+        <Form.Item label="Срок обучения (месяцев)" name="srokObuchMes" rules={[{ required: true, message: "Введите срок" }]}>
+          <InputNumber min={1} max={72} style={{ width: 160 }} placeholder="48" />
         </Form.Item>
 
-        <Form.Item label="Предметы (ЕГЭ)" name="exams">
-          <Select mode="tags" placeholder="Выберите или введите предметы" options={SUBJECTS.map(s => ({ label: s, value: s }))} />
-        </Form.Item>
-
-        <Divider orientation="left">Очная форма обучения</Divider>
-        <Space style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-          <Form.Item label="Срок обучения" name="fullTimeDuration"><Input placeholder="4 года" /></Form.Item>
-          <Form.Item label="Бюджет: мест" name="fullTimeBudgetPlaces"><InputNumber min={0} /></Form.Item>
-          <Form.Item label="Бюджет: балл" name="fullTimeBudgetScore"><InputNumber min={0} /></Form.Item>
-          <Form.Item label="Платно: мест" name="fullTimePaidPlaces"><InputNumber min={0} /></Form.Item>
-          <Form.Item label="Платно: балл" name="fullTimePaidScore"><InputNumber min={0} /></Form.Item>
-          <Form.Item label="Платно: цена" name="fullTimePrice"><InputNumber min={0} /></Form.Item>
+        <Space style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+          <Form.Item label="Форма обучения" name="formId" rules={[{ required: true, message: "Выберите форму" }]}>
+            <Select placeholder="Выберите форму" style={{ width: 200 }} options={forms.map((f) => ({ label: f.name, value: f.id }))} />
+          </Form.Item>
+          <Form.Item label="Уровень образования" name="urId" rules={[{ required: true, message: "Выберите уровень" }]}>
+            <Select placeholder="Выберите уровень" style={{ width: 220 }} options={levels.map((l) => ({ label: l.name, value: l.id }))} />
+          </Form.Item>
         </Space>
 
-        <Divider orientation="left">Заочная форма обучения</Divider>
-        <Space style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-          <Form.Item label="Срок обучения" name="partTimeDuration"><Input placeholder="5 лет" /></Form.Item>
-          <Form.Item label="Бюджет: мест" name="partTimeBudgetPlaces"><InputNumber min={0} /></Form.Item>
-          <Form.Item label="Бюджет: балл" name="partTimeBudgetScore"><InputNumber min={0} /></Form.Item>
-          <Form.Item label="Платно: мест" name="partTimePaidPlaces"><InputNumber min={0} /></Form.Item>
-          <Form.Item label="Платно: балл" name="partTimePaidScore"><InputNumber min={0} /></Form.Item>
-          <Form.Item label="Платно: цена" name="partTimePrice"><InputNumber min={0} /></Form.Item>
+        <Divider orientation="left">Экзамены</Divider>
+        <Form.List name="exams">
+          {(fields, { add, remove }) => (
+            <>
+              {fields.map(({ key, name, ...restField }) => (
+                <Space key={key} style={{ display: 'flex', gap: 12 }} align="baseline" wrap>
+                  <Form.Item
+                    name={[name, "name"]}
+                    rules={[{ required: true, message: "Выберите предмет" }]}
+                    {...restField}
+                  >
+                    <Select showSearch placeholder="Предмет" style={{ width: 220 }} options={examOptions} />
+                  </Form.Item>
+                  <Form.Item name={[name, "formaSdachi"]} initialValue="ЕГЭ">
+                    <Select style={{ width: 200 }} options={formaOptions} />
+                  </Form.Item>
+                  <Form.Item name={[name, "minBall"]}>
+                    <InputNumber min={0} max={100} placeholder="Мин. балл" style={{ width: 120 }} />
+                  </Form.Item>
+                  <Form.Item name={[name, "priority"]}>
+                    <InputNumber min={1} placeholder="Приоритет" style={{ width: 110 }} />
+                  </Form.Item>
+                  <MinusCircleOutlined onClick={() => remove(name)} style={{ color: '#ff4d4f' }} />
+                </Space>
+              ))}
+              <Form.Item>
+                <Button
+                  type="dashed"
+                  icon={<PlusOutlined />}
+                  onClick={() => add({ formaSdachi: "ЕГЭ", priority: fields.length + 1 })}
+                >
+                  Добавить предмет
+                </Button>
+              </Form.Item>
+            </>
+          )}
+        </Form.List>
+
+        <Divider orientation="left">Бюджет</Divider>
+        <Space style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+          <Form.Item label="Мест" name="budgetPlaces"><InputNumber min={0} /></Form.Item>
+          <Form.Item label="Проходной балл" name="budgetScore"><InputNumber min={0} max={400} /></Form.Item>
+        </Space>
+
+        <Divider orientation="left">Платно</Divider>
+        <Space style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+          <Form.Item label="Мест" name="paidPlaces"><InputNumber min={0} /></Form.Item>
+          <Form.Item label="Проходной балл" name="paidScore"><InputNumber min={0} max={400} /></Form.Item>
+          <Form.Item label="Цена за год, руб." name="paidPrice"><InputNumber min={0} step={1000} /></Form.Item>
         </Space>
 
         <Divider orientation="left">Документы</Divider>
         <Form.Item label="Загрузить документы (учебный план и т.д.)">
-          <Upload 
-            fileList={fileList}
-            onChange={handleUploadChange}
-            beforeUpload={() => false} // Останавливаем реальную загрузку
-          >
+          <Upload fileList={fileList} onChange={handleUploadChange} beforeUpload={() => false}>
             <Button icon={<UploadOutlined />}>Выбрать файлы</Button>
           </Upload>
           <Form.Item name="files" noStyle />

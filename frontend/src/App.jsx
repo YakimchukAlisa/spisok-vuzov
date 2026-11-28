@@ -54,7 +54,12 @@ function App() {
           getExams()
         ]);
 
-        setVuzData(vuzList);
+                setVuzData(vuzList.map(v => ({
+                  ...v,
+                  napravleniya: v.napravleniya ? v.napravleniya.split('|').filter(Boolean) : [],
+                  exams: v.exams ? v.exams.split('|').filter(Boolean) : [],
+                })));
+
         setCitiesData(citiesList);
         setSpecialtiesData(specialtiesList);
         setExamsData(examsList);
@@ -81,22 +86,42 @@ function App() {
     }, {});
   }, [specialtiesData]);
 
-  // --- ЛОГИКА ФИЛЬТРАЦИИ ---
-  const filteredVuz = vuzData.filter(vuz => {
-    const matchSearch = vuz.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        (vuz.fullName && vuz.fullName.toLowerCase().includes(searchQuery.toLowerCase()));
+   // --- ЛОГИКА ФИЛЬТРАЦИИ ---
+   const filteredVuz = useMemo(() => vuzData.filter(vuz => {
+     // 1. Поиск по названию
+     const q = searchQuery.trim().toLowerCase();
+     const matchSearch = !q ||
+       vuz.name.toLowerCase().includes(q) ||
+       (vuz.fullName && vuz.fullName.toLowerCase().includes(q));
 
-    const vuzCity = vuz.gorod || vuz.adress || '';
-    const matchCity = selectedCities.length === 0 ||
-      selectedCities.some(city => vuzCity.includes(city));
+     // 2. Город
+     const vuzCity = vuz.gorod || vuz.adress || '';
+     const matchCity = selectedCities.length === 0 ||
+       selectedCities.some(city => vuzCity.includes(city));
 
-    let matchSpecialty = true;
-    let matchExam = true;
-    const matchDormitory = !hasDormitory || true;
-    const matchMilitary = !hasMilitary || true;
+     // 3. Специальность: вуз подходит, если у него есть направление с выбранным названием
+     //    (napravleniya может быть массивом строк или объектов — поддерживаем оба варианта)
+     const vuzSpecNames = (vuz.napravleniya || []).map(n =>
+       typeof n === 'string' ? n : n.name
+     );
+     const matchSpecialty = selectedSpecialties.length === 0 ||
+       selectedSpecialties.some(s => vuzSpecNames.includes(s));
 
-    return matchSearch && matchCity && matchSpecialty && matchExam && matchDormitory && matchMilitary;
-  });
+     // 4. ЕГЭ: «Все предметы» пропускает всё, иначе — совпадение хотя бы одного предмета
+     const vuzExams = vuz.exams || [];
+     const matchExam = selectedExams.length === 0 ||
+       selectedExams.includes('Все предметы') ||
+       selectedExams.some(e => vuzExams.includes(e));
+
+     // 5. Тумблеры: поле вуза из БД, поддерживаем и true, и строку "true"
+     const matchDormitory = !hasDormitory ||
+       vuz.obsheszhitye === true || vuz.obsheszhitye === 'true';
+     const matchMilitary = !hasMilitary ||
+       vuz.voennayaKafedra === true || vuz.voennayaKafedra === 'true';
+
+     return matchSearch && matchCity && matchSpecialty && matchExam && matchDormitory && matchMilitary;
+   }), [vuzData, searchQuery, selectedCities, selectedSpecialties, selectedExams, hasDormitory, hasMilitary]);
+
 
   // --- ЭКРАН ЗАГРУЗКИ ---
   if (isLoading) {
@@ -113,14 +138,15 @@ function App() {
         {/* ========================================== */}
         {/* 1. МАРШРУТЫ АДМИНКИ (БЕЗ ОСНОВНОГО ХЭДЭРА)  */}
         {/* ========================================== */}
-       <Route
-         path="/admin"
-         element={
-           localStorage.getItem('isAdmin') === 'true'
-             ? <AdminApp />
-             : <Navigate to="/auth" replace />
-         }
-       />
+<Route
+  path="/admin/*"
+  element={
+    localStorage.getItem('isAdmin') === 'true'
+      ? <AdminApp />
+      : <Navigate to="/auth" replace />
+  }
+/>
+
 
         {/* ========================================== */}
         {/* 2. МАРШРУТЫ ОСНОВНОГО САЙТА (С ХЭДЭРОМ)    */}

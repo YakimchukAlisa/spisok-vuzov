@@ -15,7 +15,7 @@
 .compare-table__row {
   display: grid;
   /* 1 колонка 250px (для названия) + 7 колонок поровну */
-  grid-template-columns: 250px repeat(7, 1fr);
+  grid-template-columns: 250px repeat(8, 1fr);
   min-width: 1200px; /* Чтобы таблица не сжималась */
 }
 

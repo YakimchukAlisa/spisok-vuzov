@@ -1,12 +1,17 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { useFavorites } from "../component/FavoritesContext.jsx";
 import "./css/adminLayout.css";
 
 export function AdminLayout() {
   const navigate = useNavigate();
+  const { logout } = useFavorites();
 
   const handleLogout = () => {
-    localStorage.removeItem("userProfile");
-    navigate("/");
+    logout();                                  // чистит authToken, userId и сбрасывает isAuth
+    localStorage.removeItem('isAdmin');        // снимаем админский доступ
+    localStorage.removeItem('currentPhone');   // старый ключ из админ-логина
+    localStorage.removeItem('userProfile');    // если где-то ещё пишется
+    navigate('/');
   };
 
   return (

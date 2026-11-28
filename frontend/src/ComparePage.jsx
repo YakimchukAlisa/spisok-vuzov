@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import ratingsData from './DATA/ratings.json'; // только для Минобрнауки
-import { getVuzes, getRatings, getPassingScores } from './api/api.js';
+import { getVuzes, getRatings, getPassingScores, getDirectionsCount } from './api/api.js';
 import './css/comparePage.css';
 
 const MEDIA_CATEGORIES = [
@@ -19,6 +19,8 @@ export default function ComparePage() {
     const [ratings, setRatings] = useState([]);
     const [isRatingsLoading, setIsRatingsLoading] = useState(true);
     const [passingScores, setPassingScores] = useState([]);
+    const [directionCounts, setDirectionCounts] = useState([]);
+
 
     // M-RATE: вкладка, поиск, пагинация — как на странице рейтингов
     const [activeMediaTab, setActiveMediaTab] = useState('consolidated');
@@ -39,11 +41,12 @@ export default function ComparePage() {
             setIsRatingsLoading(false);
             return;
         }
-        Promise.all([getVuzes(), getRatings(selectedIds), getPassingScores(selectedIds)])
-            .then(([vuzRes, ratingRes, passingRes]) => {
+        Promise.all([getVuzes(), getRatings(selectedIds), getPassingScores(selectedIds), getDirectionsCount(selectedIds)])
+            .then(([vuzRes, ratingRes, passingRes, directionsRes]) => {
                 setVuzData(vuzRes.data);
                 setRatings(ratingRes.data);
                 setPassingScores(passingRes.data);
+                setDirectionCounts(directionsRes.data);
             })
             .catch(err => console.error('Ошибка загрузки данных:', err))
             .finally(() => {
@@ -111,10 +114,17 @@ export default function ComparePage() {
         return item && item[key] != null ? Math.round(item[key]) : '—';
     };
 
+const getDirections = (vuzId) => {
+    const item = directionCounts.find(d => d.vuzId === vuzId);
+    return item && item.directionsCount != null ? item.directionsCount : '—';
+};
+
+
     const features = [
         { label: 'Название вуза', getValue: (v) => v.name },
         { label: 'Общежитие', getValue: (v) => v.features?.includes('Общежитие') ? 'Да' : 'Нет' },
         { label: 'Военная кафедра', getValue: (v) => v.features?.includes('Военный учебный центр') ? 'Да' : 'Нет' },
+        { label: 'Количество направлений', getValue: (v) => getDirections(v.id) },
         { label: 'Бюджетные места', getValue: (v) => v.budget?.places || '—' },
         { label: 'Платные места', getValue: (v) => v.paid?.places || '—' },
         { label: 'Средний проходной на бюджет', getValue: (v) => getPassing(v.id, 'avgBudget') },

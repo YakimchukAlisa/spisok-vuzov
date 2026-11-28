@@ -1,4 +1,3 @@
-import { Edit } from "@refinedev/antd";
 import { Form, Input, Button, message, Spin, Upload, Typography, Space } from "antd";
 import { UploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate, useParams, Link } from "react-router-dom";
@@ -15,28 +14,28 @@ export function FacultyEdit() {
   const [university, setUniversity] = useState(null);
 
   useEffect(() => {
-    fetch(`http://localhost:3001/universities/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const uni = Array.isArray(data) ? data[0] : data;
+    Promise.all([
+      fetch(`http://localhost:8080/api/fakultet/${facultyId}`),
+      fetch(`http://localhost:8080/api/vuz/admin-list/${id}`),
+    ])
+      .then(([fRes, uRes]) => Promise.all([fRes.json(), uRes.json()]))
+      .then(([faculty, uni]) => {
         setUniversity(uni);
-        
-        const faculty = uni.faculties?.find(f => String(f.id) === String(facultyId));
         if (faculty) {
-          form.setFieldsValue(faculty); 
+          form.setFieldsValue(faculty);
         }
       })
+      .catch((err) => console.error(err))
       .finally(() => setInitialLoading(false));
   }, [id, facultyId, form]);
 
-  // 👇 Исправленная функция (принимает только файл)
   const handleUpload = (file) => {
     let folderName = "";
 
     if (university?.imageUrl) {
       const parts = university.imageUrl.split('/');
       if (parts.length >= 3 && parts[1] === 'img') {
-        folderName = parts[2]; 
+        folderName = parts[2];
         folderName = folderName.split('.')[0];
       }
     }
@@ -46,8 +45,8 @@ export function FacultyEdit() {
     }
 
     const path = `/img/${folderName}/${file.name}`;
-    
-    form.setFieldsValue({ imageUrl: path });
+
+    form.setFieldsValue({ logoUrl: path });
     message.success(`Путь сохранен: ${path}`);
     return false;
   };
@@ -55,17 +54,12 @@ export function FacultyEdit() {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const updatedFaculties = university.faculties.map(f => 
-        String(f.id) === String(facultyId) 
-          ? { ...f, ...values } 
-          : f
-      );
-
-      await fetch(`http://localhost:3001/universities/${id}`, {
+      const res = await fetch(`http://localhost:8080/api/fakultet/${facultyId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...university, faculties: updatedFaculties }),
+        body: JSON.stringify(values),
       });
+      if (!res.ok) throw new Error(`Статус ${res.status}`);
 
       message.success("Факультет обновлен!");
       navigate(`/admin/universities/${id}/faculties`);
@@ -90,25 +84,24 @@ export function FacultyEdit() {
       </div>
 
       <Form form={form} layout="vertical" onFinish={onFinish}>
-        <Form.Item label="Полное наименование" name="fullName" rules={[{ required: true }]}>
+        <Form.Item label="Полное наименование" name="name" rules={[{ required: true, message: "Введите название" }]}>
           <Input />
         </Form.Item>
-        
-        <Form.Item label="Аббревиатура" name="shortName" rules={[{ required: true }]}>
+
+        <Form.Item label="Аббревиатура" name="shortName" rules={[{ required: true, message: "Введите аббревиатуру" }]}>
           <Input />
         </Form.Item>
-        
+
         <Form.Item label="Описание" name="description">
           <Input.TextArea rows={4} />
         </Form.Item>
 
-        {/* 👇 Убрали shouldUpdate и передачу setFieldsValue */}
         <Form.Item label="Логотип факультета">
           <Upload beforeUpload={handleUpload} showUploadList={false}>
             <Button icon={<UploadOutlined />}>Выбрать логотип</Button>
           </Upload>
-          <Form.Item name="imageUrl" noStyle>
-            <Input placeholder={`/img/${university?.name?.toLowerCase() || 'vuz'}/logo.svg`} readOnly style={{ marginTop: 8 }} />
+          <Form.Item name="logoUrl" noStyle>
+            <Input placeholder="/img/altgtu/fit.svg" readOnly style={{ marginTop: 8 }} />
           </Form.Item>
         </Form.Item>
 

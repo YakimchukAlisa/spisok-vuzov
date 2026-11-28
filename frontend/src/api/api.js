@@ -208,6 +208,9 @@ export const getRatings = (vuzIds) =>
 export const getPassingScores = (vuzIds) =>
     api.get('/vuz/passing-scores', { params: { vuzIds: vuzIds.join(',') } });
 
+export const getDirectionsCount = (vuzIds) =>
+    api.get('/vuz/directions-count', { params: { vuzIds: vuzIds } });
+
 
 
 export const saveTestResult = (payload) => api.post('/results', payload);

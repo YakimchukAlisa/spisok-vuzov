@@ -94,11 +94,15 @@ export default function AuthPage() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-
     try {
       await adminLogin(phone, password);
       localStorage.setItem('isAdmin', 'true');
       localStorage.setItem('currentPhone', phone);
+      // восстановим сессию и для основного сайта
+      const profile = await fetch(`http://localhost:8080/api/auth/profile?phone=${encodeURIComponent(phone)}`)
+        .then((r) => r.ok ? r.json() : null);
+      if (profile?.id) login(profile.id);
+      localStorage.setItem('userProfile', JSON.stringify({ id: profile?.id, phone, name: profile?.name, isAdmin: true }));
       navigate('/admin');
     } catch (err) {
       setError(err.response?.data?.error || 'Неверный пароль');

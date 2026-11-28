@@ -1,7 +1,7 @@
 import { List, useTable, EditButton, DeleteButton, CreateButton } from "@refinedev/antd";
 import { Table } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 
 export function UniversityList() {
   const { tableProps } = useTable({
@@ -15,10 +15,7 @@ export function UniversityList() {
       headerButtons={<CreateButton>Добавить вуз</CreateButton>}
     >
       <Table {...tableProps} rowKey="id" pagination={false} scroll={{ x: 1000 }}>
-        
-        {/* 1. Редактирование (Карандашик) */}
         <Table.Column
-          title=""
           width={50}
           render={(_, record) => (
             <EditButton
@@ -31,13 +28,12 @@ export function UniversityList() {
           )}
         />
 
-        {/* 2. Название (ссылка на факультеты) */}
-        <Table.Column 
-          dataIndex="name" 
-          title="Название вуза" 
+        <Table.Column
+          dataIndex="name"
+          title="Название вуза"
           render={(text, record) => (
-            <Link 
-              to={`/admin/universities/${record.id}/faculties`} 
+            <Link
+              to={`/admin/universities/${record.id}/faculties`}
               style={{ fontWeight: 'bold', color: '#1677ff' }}
             >
               {text}
@@ -46,45 +42,24 @@ export function UniversityList() {
           width={220}
         />
 
-        {/* 3. Город (берем из поля city) */}
-        <Table.Column 
-          title="Город" 
+        <Table.Column
+          title="Город"
           width={140}
-          render={(_, record) => record.city || "—"} 
+          render={(_, record) => record.gorod?.name || "—"}
         />
 
-        {/* 4. Адрес (показываем улицу, если нужно) */}
-        <Table.Column 
-          title="Адрес" 
+        <Table.Column
+          title="Адрес"
+          dataIndex="adress"
           width={200}
-          render={(_, record) => record.address || "—"} 
+          render={(text) => text || "—"}
           ellipsis
         />
 
-        {/* 5. Почта */}
-        <Table.Column 
-          title="Почта" 
-          width={180}
-          render={(_, record) => record.contacts?.email || "—"} 
-        />
+        <Table.Column dataIndex="email" title="Почта" width={180} render={(t) => t || "—"} />
+        <Table.Column dataIndex="phone" title="Телефон" width={160} render={(t) => t || "—"} />
 
-        {/* 6. Телефон (вместо бюджета) */}
-        <Table.Column 
-          title="Телефон" 
-          width={160}
-          render={(_, record) => record.contacts?.phone || "—"} 
-        />
-
-        {/* 7. Количество факультетов */}
-        <Table.Column 
-          title="Факультеты" 
-          width={120}
-          render={(_, record) => record.faculties ? record.faculties.length : 0} 
-        />
-
-        {/* 8. Удаление (Корзинка) */}
         <Table.Column
-          title=""
           width={50}
           render={(_, record) => (
             <DeleteButton
